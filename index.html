@@ -62,16 +62,17 @@
       
       <!-- 卡片网格 -->
       <div class="dashboard-grid">
-        <!-- 卡片 1: 系统状态 (模拟) -->
+        <!-- 卡片 1: 访问端连接节点 (真实数据) -->
         <div class="glass-card">
           <div class="stat-header">
-            <span class="stat-title">System Status</span>
-            <span class="material-symbols-outlined stat-icon">dns</span>
+            <span class="stat-title">Connection Node</span>
+            <span class="material-symbols-outlined stat-icon">wifi_tethering</span>
           </div>
-          <div class="stat-value" id="system-load">0.00</div>
-          <p class="form-label" style="margin-bottom: 8px;">CPU Load Average</p>
+          <div class="stat-value" id="network-ping">-- ms</div>
+          <p class="form-label" style="margin-bottom: 4px; font-family: var(--font-mono); font-size: 13px; color: #fff;" id="visitor-ip">Detecting IP...</p>
+          <p class="form-label" style="margin-bottom: 8px; font-size: 12px; color: var(--text-secondary);" id="visitor-location">Locating Grid...</p>
           <div class="stat-progress-bar">
-            <div class="stat-progress-fill" id="cpu-progress" style="width: 12%"></div>
+            <div class="stat-progress-fill" id="ping-progress" style="width: 0%"></div>
           </div>
         </div>
         

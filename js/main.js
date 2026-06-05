@@ -137,20 +137,67 @@ function initSettingsModal() {
 }
 
 /**
- * 仪表盘系统性能监视器 (模拟微动画)
+ * 仪表盘访客连接网络监测器 (真实数据)
  */
 function startSystemMetricsMonitor() {
-  const systemLoadText = document.getElementById('system-load');
-  const cpuProgress = document.getElementById('cpu-progress');
+  const pingText = document.getElementById('network-ping');
+  const pingProgress = document.getElementById('ping-progress');
+  const ipText = document.getElementById('visitor-ip');
+  const locationText = document.getElementById('visitor-location');
 
-  if (!systemLoadText) return;
+  if (!pingText) return;
 
-  // 模拟数值持续随机波动
-  setInterval(() => {
-    const randomLoad = (Math.random() * 2.5 + 0.1).toFixed(2);
-    const progressWidth = Math.min(100, Math.floor((randomLoad / 3.0) * 100));
+  // 1. 获取访客 IP 和地理位置
+  async function fetchVisitorGeo() {
+    try {
+      const response = await fetch('https://ipapi.co/json/');
+      if (response.ok) {
+        const data = await response.json();
+        ipText.textContent = `IP: ${data.ip}`;
+        locationText.textContent = `ISP: ${data.org} | ${data.city}, ${data.country_name}`;
+      } else {
+        throw new Error();
+      }
+    } catch (err) {
+      ipText.textContent = 'IP: 未知/内网节点';
+      locationText.textContent = '无法获取归属网格';
+    }
+  }
 
-    systemLoadText.textContent = randomLoad;
-    cpuProgress.style.width = `${progressWidth}%`;
-  }, 3000);
+  // 2. 测算实时网络延迟 (Ping)
+  function measurePing() {
+    const startTime = Date.now();
+    // 使用 HEAD 方法请求当前网页自身以测量延迟，防止缓存
+    fetch(window.location.href, { method: 'HEAD', cache: 'no-store' })
+      .then(() => {
+        const latency = Date.now() - startTime;
+        pingText.textContent = `${latency} ms`;
+        
+        // 渲染进度条：0ms ~ 300ms 对应 10% ~ 100% 进度
+        const progressWidth = Math.min(100, Math.max(10, Math.floor((latency / 300) * 100)));
+        pingProgress.style.width = `${progressWidth}%`;
+
+        // 动态根据延迟修改进度条颜色
+        if (latency < 100) {
+          pingProgress.style.background = 'linear-gradient(to right, var(--color-tertiary), var(--color-secondary))';
+        } else if (latency < 250) {
+          pingProgress.style.background = 'linear-gradient(to right, var(--color-primary), var(--color-secondary))';
+        } else {
+          pingProgress.style.background = 'var(--color-error)';
+        }
+      })
+      .catch(() => {
+        pingText.textContent = 'OFFLINE';
+        pingProgress.style.width = '0%';
+      });
+  }
+
+  // 初始化调用
+  fetchVisitorGeo();
+  measurePing();
+
+  // 每 5 秒重新测算一次 Ping 值
+  setInterval(measurePing, 5000);
 }
+
+
