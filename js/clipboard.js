@@ -1,7 +1,12 @@
 /**
  * 825412-portal - 匿名剪贴板服务逻辑 (Clipboard Controller)
+ * 使用 KVdb.io (CORS-friendly & Global Shared Key-Value Store)
  */
 const ClipboardController = {
+  // 我们专属的公共匿名 Bucket ID
+  BUCKET_ID: '8NDPDM74VJgDfqCMJkXjqQ',
+  API_BASE: 'https://kvdb.io',
+
   init() {
     this.renderHistory();
     this.initSaveAction();
@@ -43,11 +48,6 @@ const ClipboardController = {
 
   // 从云端读取并展示特定的剪贴板内容
   async showPaste(code) {
-    if (typeof puter === 'undefined') {
-      alert('Puter.js 尚未加载完成，请稍候再试。');
-      return;
-    }
-
     const modal = document.getElementById('read-paste-modal');
     const metaInfo = document.getElementById('paste-meta-info');
     const contentArea = document.getElementById('read-paste-content');
@@ -60,24 +60,29 @@ const ClipboardController = {
     modal.classList.add('active');
 
     try {
-      // 从 Puter KV 数据库中提取数据
-      const dataStr = await puter.kv.get('paste_' + code);
+      // 从 KVdb.io 提取数据 (标准跨域 GET)
+      const response = await fetch(`${this.API_BASE}/${this.BUCKET_ID}/paste_${code}`);
 
-      if (!dataStr) {
+      // 404 说明键不存在（已被销毁或从未创建）
+      if (response.status === 404) {
         contentArea.value = '该剪贴板已被自动销毁或从未创建。';
         metaInfo.textContent = `剪贴板 #${code}：已销毁`;
         return;
       }
 
-      const data = JSON.parse(dataStr);
+      if (!response.ok) {
+        throw new Error('网络请求错误');
+      }
+
+      const data = await response.json();
 
       // 验证是否已过期
       if (Date.now() > data.expiresAt) {
         contentArea.value = '该分享链接已超出设定的有效期，已被自动销毁。';
         metaInfo.textContent = `剪贴板 #${code}：已过期`;
         
-        // 自动在云端执行彻底销毁
-        puter.kv.delete('paste_' + code).catch(console.error);
+        // 自动在云端执行彻底销毁 (DELETE)
+        fetch(`${this.API_BASE}/${this.BUCKET_ID}/paste_${code}`, { method: 'DELETE' }).catch(console.error);
         return;
       }
 
@@ -145,11 +150,6 @@ const ClipboardController = {
     if (!saveBtn) return;
 
     saveBtn.addEventListener('click', async () => {
-      if (typeof puter === 'undefined') {
-        alert('Puter.js 尚未加载完成，请稍候再试。');
-        return;
-      }
-
       const text = contentText.value.trim();
       if (!text) {
         alert('请输入需要分享的内容！');
@@ -175,8 +175,18 @@ const ClipboardController = {
           expiresAt: Date.now() + (expiryHours * 60 * 60 * 1000)
         };
 
-        // 3. 写入 Puter 的免费 KV 储存空间
-        await puter.kv.set('paste_' + code, JSON.stringify(data));
+        // 3. 写入 KVdb.io 专属公共数据库 (标准跨域 POST)
+        const response = await fetch(`${this.API_BASE}/${this.BUCKET_ID}/paste_${code}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error('云端数据库写入失败');
+        }
 
         // 4. 组装本域名的 Hash 访问地址
         const shareUrl = `${window.location.origin}${window.location.pathname}#paste=${code}`;
