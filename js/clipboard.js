@@ -1,11 +1,9 @@
 /**
  * 825412-portal - 匿名剪贴板服务逻辑 (Clipboard Controller)
- * 使用 KVdb.io (CORS-friendly & Global Shared Key-Value Store)
+ * 使用公共免认证 RESTful API (CORS-friendly, Global Shared sandbox)
  */
 const ClipboardController = {
-  // 我们专属的公共匿名 Bucket ID
-  BUCKET_ID: '8NDPDM74VJgDfqCMJkXjqQ',
-  API_BASE: 'https://kvdb.io',
+  API_BASE: 'https://api.restful-api.dev/objects',
 
   init() {
     this.renderHistory();
@@ -27,7 +25,7 @@ const ClipboardController = {
     listContainer.innerHTML = history.map(item => `
       <div class="history-item" onclick="ClipboardController.showPaste('${item.code}')">
         <div class="history-info">
-          <span class="history-code">${item.code}</span>
+          <span class="history-code" style="font-size: 11px;">#${item.code.substring(0, 8)}...</span>
           <span class="history-time">${new Date(item.timestamp).toLocaleString()}</span>
         </div>
         <span class="material-symbols-outlined" style="color: var(--color-primary); font-size: 18px;">visibility</span>
@@ -39,8 +37,8 @@ const ClipboardController = {
     if (dashPreview && history.length > 0) {
       dashPreview.innerHTML = `
         <div style="color: var(--color-secondary); font-weight: 600; margin-bottom: 4px;">最近分享 (点击查看):</div>
-        <a href="javascript:void(0)" onclick="ClipboardController.showPaste('${history[0].code}')" style="color: #fff; text-decoration: underline;">
-          #paste=${history[0].code}
+        <a href="javascript:void(0)" onclick="ClipboardController.showPaste('${history[0].code}')" style="color: #fff; text-decoration: underline; font-size: 13px; font-family: var(--font-mono);">
+          #paste=${history[0].code.substring(0, 8)}...
         </a>
       `;
     }
@@ -56,17 +54,17 @@ const ClipboardController = {
 
     // 显示加载中状态
     contentArea.value = '正在建立安全神经连接，读取加密数据...';
-    metaInfo.textContent = `剪贴板 #${code}：读取中...`;
+    metaInfo.textContent = `剪贴板 #${code.substring(0, 8)}...：读取中...`;
     modal.classList.add('active');
 
     try {
-      // 从 KVdb.io 提取数据 (标准跨域 GET)
-      const response = await fetch(`${this.API_BASE}/${this.BUCKET_ID}/paste_${code}`);
+      // 从公共 REST API 获取数据
+      const response = await fetch(`${this.API_BASE}/${code}`);
 
       // 404 说明键不存在（已被销毁或从未创建）
-      if (response.status === 404) {
+      if (response.status === 404 || response.status === 400) {
         contentArea.value = '该剪贴板已被自动销毁或从未创建。';
-        metaInfo.textContent = `剪贴板 #${code}：已销毁`;
+        metaInfo.textContent = `剪贴板 #${code.substring(0, 8)}...：已销毁`;
         return;
       }
 
@@ -74,15 +72,24 @@ const ClipboardController = {
         throw new Error('网络请求错误');
       }
 
-      const data = await response.json();
+      const resData = await response.json();
+      
+      // 有些公共数据可能不包含我们的特定格式，做安全检查
+      if (!resData.data || !resData.data.expiresAt) {
+        contentArea.value = '该数据不属于本匿名剪贴板系统。';
+        metaInfo.textContent = `剪贴板 #${code.substring(0, 8)}...：无效数据`;
+        return;
+      }
+
+      const data = resData.data;
 
       // 验证是否已过期
       if (Date.now() > data.expiresAt) {
         contentArea.value = '该分享链接已超出设定的有效期，已被自动销毁。';
-        metaInfo.textContent = `剪贴板 #${code}：已过期`;
+        metaInfo.textContent = `剪贴板 #${code.substring(0, 8)}...：已过期`;
         
         // 自动在云端执行彻底销毁 (DELETE)
-        fetch(`${this.API_BASE}/${this.BUCKET_ID}/paste_${code}`, { method: 'DELETE' }).catch(console.error);
+        fetch(`${this.API_BASE}/${code}`, { method: 'DELETE' }).catch(console.error);
         return;
       }
 
@@ -97,12 +104,12 @@ const ClipboardController = {
         expiryText = `${timeRemaining} 分钟后自动销毁`;
       }
 
-      metaInfo.innerHTML = `剪贴板 <span style="color: var(--color-secondary); font-family: var(--font-mono); font-weight:600;">#${code}</span> (${expiryText})：`;
+      metaInfo.innerHTML = `剪贴板 <span style="color: var(--color-secondary); font-family: var(--font-mono); font-weight:600;">#${code.substring(0, 8)}...</span> (${expiryText})：`;
 
     } catch (err) {
       console.error(err);
       contentArea.value = '连接云端数据失败，请确认您的网络已连接。';
-      metaInfo.textContent = `剪贴板 #${code}：读取失败`;
+      metaInfo.textContent = `剪贴板 #${code.substring(0, 8)}...：读取失败`;
     }
   },
 
@@ -162,31 +169,32 @@ const ClipboardController = {
       try {
         const expiryHours = parseInt(expirySelect.value);
 
-        // 1. 生成 6 位随机短代码
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let code = '';
-        for (let i = 0; i < 6; i++) {
-          code += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-
-        // 2. 构造带过期时间戳的 JSON 数据
-        const data = {
-          content: text,
-          expiresAt: Date.now() + (expiryHours * 60 * 60 * 1000)
+        // 构造数据 payload
+        const payload = {
+          name: '825412_paste',
+          data: {
+            content: text,
+            expiresAt: Date.now() + (expiryHours * 60 * 60 * 1000)
+          }
         };
 
-        // 3. 写入 KVdb.io 专属公共数据库 (标准跨域 POST)
-        const response = await fetch(`${this.API_BASE}/${this.BUCKET_ID}/paste_${code}`, {
+        // 写入公共 REST API (标准跨域 POST)
+        const response = await fetch(this.API_BASE, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(data)
+          body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
-          throw new Error('云端数据库写入失败');
+          throw new Error('云端数据沙盒写入失败');
         }
+
+        const resData = await response.json();
+        
+        // 提取服务器自动生成的全局唯一 ID 作为我们的分享代码
+        const code = resData.id;
 
         // 4. 组装本域名的 Hash 访问地址
         const shareUrl = `${window.location.origin}${window.location.pathname}#paste=${code}`;
