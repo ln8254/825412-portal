@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4. 模拟 Dashboard 系统资源监控
   startSystemMetricsMonitor();
+
+  // 5. 自动检测 URL Hash 分享码并解析展示
+  checkUrlHashPaste();
 });
 
 /**
@@ -95,6 +98,24 @@ function triggerTabSwitch(viewId) {
   const navItem = document.querySelector(`.nav-item[data-target="${viewId}"]`);
   if (navItem) {
     navItem.click();
+  }
+}
+
+/**
+ * 自动检查并解析 URL Hash 中的剪贴板分享链接
+ */
+function checkUrlHashPaste() {
+  const hash = window.location.hash;
+  if (hash.startsWith('#paste=')) {
+    const code = hash.replace('#paste=', '').trim();
+    if (code) {
+      // 延迟一段时间执行，确保 Puter.js 已加载且环境就绪
+      setTimeout(() => {
+        if (typeof ClipboardController !== 'undefined') {
+          ClipboardController.showPaste(code);
+        }
+      }, 1200);
+    }
   }
 }
 

@@ -5,6 +5,7 @@ const ClipboardController = {
   init() {
     this.renderHistory();
     this.initSaveAction();
+    this.initReadModalEvents();
   },
 
   // 渲染本地分享历史列表
@@ -19,12 +20,12 @@ const ClipboardController = {
     }
 
     listContainer.innerHTML = history.map(item => `
-      <div class="history-item" onclick="window.open('${item.shareUrl}', '_blank')">
+      <div class="history-item" onclick="ClipboardController.showPaste('${item.code}')">
         <div class="history-info">
           <span class="history-code">${item.code}</span>
           <span class="history-time">${new Date(item.timestamp).toLocaleString()}</span>
         </div>
-        <span class="material-symbols-outlined" style="color: var(--text-secondary); font-size: 18px;">open_in_new</span>
+        <span class="material-symbols-outlined" style="color: var(--color-primary); font-size: 18px;">visibility</span>
       </div>
     `).join('');
 
@@ -32,12 +33,103 @@ const ClipboardController = {
     const dashPreview = document.getElementById('dashboard-paste-preview');
     if (dashPreview && history.length > 0) {
       dashPreview.innerHTML = `
-        <div style="color: var(--color-secondary); font-weight: 600; margin-bottom: 4px;">最近分享:</div>
-        <a href="${history[0].shareUrl}" target="_blank" style="color: #fff; text-decoration: underline;">
-          ${history[0].code} (${new Date(history[0].timestamp).toLocaleDateString()})
+        <div style="color: var(--color-secondary); font-weight: 600; margin-bottom: 4px;">最近分享 (点击查看):</div>
+        <a href="javascript:void(0)" onclick="ClipboardController.showPaste('${history[0].code}')" style="color: #fff; text-decoration: underline;">
+          #paste=${history[0].code}
         </a>
       `;
     }
+  },
+
+  // 从云端读取并展示特定的剪贴板内容
+  async showPaste(code) {
+    if (typeof puter === 'undefined') {
+      alert('Puter.js 尚未加载完成，请稍候再试。');
+      return;
+    }
+
+    const modal = document.getElementById('read-paste-modal');
+    const metaInfo = document.getElementById('paste-meta-info');
+    const contentArea = document.getElementById('read-paste-content');
+
+    if (!modal) return;
+
+    // 显示加载中状态
+    contentArea.value = '正在建立安全神经连接，读取加密数据...';
+    metaInfo.textContent = `剪贴板 #${code}：读取中...`;
+    modal.classList.add('active');
+
+    try {
+      // 从 Puter KV 数据库中提取数据
+      const dataStr = await puter.kv.get('paste_' + code);
+
+      if (!dataStr) {
+        contentArea.value = '该剪贴板已被自动销毁或从未创建。';
+        metaInfo.textContent = `剪贴板 #${code}：已销毁`;
+        return;
+      }
+
+      const data = JSON.parse(dataStr);
+
+      // 验证是否已过期
+      if (Date.now() > data.expiresAt) {
+        contentArea.value = '该分享链接已超出设定的有效期，已被自动销毁。';
+        metaInfo.textContent = `剪贴板 #${code}：已过期`;
+        
+        // 自动在云端执行彻底销毁
+        puter.kv.delete('paste_' + code).catch(console.error);
+        return;
+      }
+
+      // 正常显示
+      contentArea.value = data.content;
+      
+      const timeRemaining = Math.max(0, Math.floor((data.expiresAt - Date.now()) / (60 * 1000)));
+      let expiryText = '';
+      if (timeRemaining > 60) {
+        expiryText = `${Math.ceil(timeRemaining / 60)} 小时后自动销毁`;
+      } else {
+        expiryText = `${timeRemaining} 分钟后自动销毁`;
+      }
+
+      metaInfo.innerHTML = `剪贴板 <span style="color: var(--color-secondary); font-family: var(--font-mono); font-weight:600;">#${code}</span> (${expiryText})：`;
+
+    } catch (err) {
+      console.error(err);
+      contentArea.value = '连接云端数据失败，请确认您的网络已连接。';
+      metaInfo.textContent = `剪贴板 #${code}：读取失败`;
+    }
+  },
+
+  // 初始化查看弹窗的事件绑定
+  initReadModalEvents() {
+    const modal = document.getElementById('read-paste-modal');
+    const closeBtn = document.getElementById('close-read-paste');
+    const dismissBtn = document.getElementById('dismiss-read-paste');
+    const copyBtn = document.getElementById('copy-read-paste-btn');
+    const contentArea = document.getElementById('read-paste-content');
+
+    if (!modal) return;
+
+    const hideModal = () => {
+      modal.classList.remove('active');
+      // 清空 URL 中的 Hash，避免重复触发
+      if (window.location.hash.startsWith('#paste=')) {
+        window.history.pushState("", document.title, window.location.pathname + window.location.search);
+      }
+    };
+
+    closeBtn.addEventListener('click', hideModal);
+    dismissBtn.addEventListener('click', hideModal);
+
+    copyBtn.addEventListener('click', () => {
+      const text = contentArea.value;
+      if (text && !text.startsWith('正在') && !text.startsWith('该剪贴板')) {
+        navigator.clipboard.writeText(text).then(() => {
+          alert('文本内容已成功复制！');
+        });
+      }
+    });
   },
 
   // 初始化上传逻辑
@@ -53,6 +145,11 @@ const ClipboardController = {
     if (!saveBtn) return;
 
     saveBtn.addEventListener('click', async () => {
+      if (typeof puter === 'undefined') {
+        alert('Puter.js 尚未加载完成，请稍候再试。');
+        return;
+      }
+
       const text = contentText.value.trim();
       if (!text) {
         alert('请输入需要分享的内容！');
@@ -64,39 +161,31 @@ const ClipboardController = {
 
       try {
         const expiryHours = parseInt(expirySelect.value);
-        // dpaste 接受 expiry_days (1 to 365)
-        // 为了简便，我们将其转换为天数，至少为 1 天。
-        const expiryDays = Math.ceil(expiryHours / 24);
 
-        // 使用 dpaste.org 的公共免认证 API 端点进行 POST 请求
-        const response = await fetch('https://dpaste.org/api/v2/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            content: text,
-            expiry_days: expiryDays.toString(),
-            syntax: 'text'
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error('网络请求失败，请稍后重试。');
+        // 1. 生成 6 位随机短代码
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let code = '';
+        for (let i = 0; i < 6; i++) {
+          code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
 
-        // 返回的结果直接就是剪贴板分享链接（例如 https://dpaste.org/ABCD）
-        let shareUrl = await response.text();
-        shareUrl = shareUrl.trim();
+        // 2. 构造带过期时间戳的 JSON 数据
+        const data = {
+          content: text,
+          expiresAt: Date.now() + (expiryHours * 60 * 60 * 1000)
+        };
 
-        // 提取一个简短的代码（比如末尾的4位/6位字符）用于本地历史展示
-        const code = shareUrl.substring(shareUrl.lastIndexOf('/') + 1);
+        // 3. 写入 Puter 的免费 KV 储存空间
+        await puter.kv.set('paste_' + code, JSON.stringify(data));
 
-        // 保存到本地存储并刷新渲染
+        // 4. 组装本域名的 Hash 访问地址
+        const shareUrl = `${window.location.origin}${window.location.pathname}#paste=${code}`;
+
+        // 5. 保存到本地历史记录并重新渲染
         StorageController.addPasteHistory(code, text, shareUrl);
         this.renderHistory();
 
-        // 展示分享链接
+        // 6. 展示分享结果
         shareUrlDiv.textContent = shareUrl;
         shareBox.style.display = 'block';
         
@@ -120,7 +209,7 @@ const ClipboardController = {
       const url = shareUrlDiv.textContent;
       if (url) {
         navigator.clipboard.writeText(url).then(() => {
-          alert('分享链接已复制到剪贴板！');
+          alert('站内分享链接已复制到剪贴板！');
         });
       }
     });
