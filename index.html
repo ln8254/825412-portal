@@ -339,14 +339,14 @@
 
   <!-- 读取剪贴板展示模态框 -->
   <div class="modal-overlay" id="read-paste-modal">
-    <div class="modal-content glass-panel" style="width: 650px; max-width: 95%;">
+    <div class="modal-content glass-panel" style="width: 850px; max-width: 95%;">
       <div class="modal-header">
         <h2 class="modal-title" style="color: var(--color-primary);">收到分享的剪贴板内容</h2>
         <span class="material-symbols-outlined modal-close" id="close-read-paste">close</span>
       </div>
       <div class="form-group" style="margin-bottom: 20px;">
         <label class="form-label" id="paste-meta-info">分享内容：</label>
-        <div class="text-area-wrapper" style="min-height: 250px;">
+        <div class="text-area-wrapper" style="height: 50vh; min-height: 350px; max-height: 600px;">
           <textarea class="custom-textarea" id="read-paste-content" readonly style="background-color: var(--surface-lowest);"></textarea>
         </div>
       </div>
