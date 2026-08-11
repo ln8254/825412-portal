@@ -7,8 +7,8 @@ const AiChatController = {
     this.initChatAction();
   },
 
-  // 检查 API Key 配置状态并启用/禁用输入
-  checkApiStatus() {
+  // 检查 API Key 配置状态并启用/禁用输入，同时拉取可用模型
+  async checkApiStatus() {
     const key = StorageController.getGeminiKey();
     const chatInput = document.getElementById('chat-user-input');
     const sendBtn = document.getElementById('chat-send-btn');
@@ -18,7 +18,10 @@ const AiChatController = {
       if (chatInput) chatInput.disabled = false;
       if (sendBtn) sendBtn.disabled = false;
       if (chatInput) chatInput.placeholder = '输入您的问题，按回车发送...';
-      if (statusText) statusText.innerHTML = '<span style="color: var(--color-tertiary); font-weight: 600;">神经网络连接就绪。</span> 已连接至 Gemini 2.5 Flash。';
+      if (statusText) statusText.innerHTML = '<span style="color: var(--color-tertiary); font-weight: 600;">神经网络连接就绪。</span> 已连接至 Gemini API 核心。';
+      
+      // 动态拉取当前 API Key 支持的全部模型列表
+      await this.fetchAvailableModels(key);
     } else {
       if (chatInput) chatInput.disabled = true;
       if (sendBtn) sendBtn.disabled = true;
@@ -27,11 +30,51 @@ const AiChatController = {
     }
   },
 
+  // 动态获取当前 API Key 支持的模型列表
+  async fetchAvailableModels(key) {
+    const modelSelect = document.getElementById('ai-model-select');
+    if (!modelSelect) return;
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+      if (!res.ok) return;
+
+      const data = await res.json();
+      if (data.models && Array.isArray(data.models)) {
+        // 筛选支持 generateContent 的对话模型
+        const chatModels = data.models.filter(m => 
+          m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent')
+        );
+
+        if (chatModels.length > 0) {
+          const savedModel = StorageController.getSelectedModel();
+          modelSelect.innerHTML = chatModels.map(m => {
+            const rawName = m.name.replace('models/', '');
+            const isSelected = (m.name === savedModel || rawName === savedModel.replace('models/', '')) ? 'selected' : '';
+            return `<option value="${m.name}" ${isSelected}>${rawName}</option>`;
+          }).join('');
+
+          // 如果有被设为选中的，进行保存
+          StorageController.saveSelectedModel(modelSelect.value);
+        }
+      }
+    } catch (err) {
+      console.warn('动态拉取 Gemini 模型列表失败，使用默认列表:', err);
+    }
+  },
+
   // 初始化发送与接收逻辑
   initChatAction() {
     const input = document.getElementById('chat-user-input');
     const sendBtn = document.getElementById('chat-send-btn');
     const container = document.getElementById('chat-messages-container');
+    const modelSelect = document.getElementById('ai-model-select');
+
+    if (modelSelect) {
+      modelSelect.addEventListener('change', (e) => {
+        StorageController.saveSelectedModel(e.target.value);
+      });
+    }
 
     if (!input) return;
 
@@ -49,9 +92,11 @@ const AiChatController = {
 
       try {
         const apiKey = StorageController.getGeminiKey();
+        const selectedModelFull = modelSelect ? modelSelect.value : StorageController.getSelectedModel();
+        const modelName = selectedModelFull.replace('models/', '');
         
-        // 发送 API 请求 (使用最新的 Gemini 2.5 Flash 模型)
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        // 发送 API 请求 (使用用户选定的模型)
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

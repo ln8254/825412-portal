@@ -16,6 +16,18 @@ const StorageController = {
     }
   },
 
+  // 获取用户选择的 AI 模型
+  getSelectedModel() {
+    return localStorage.getItem('gemini_selected_model') || 'models/gemini-2.5-flash';
+  },
+
+  // 保存用户选择的 AI 模型
+  saveSelectedModel(model) {
+    if (model) {
+      localStorage.setItem('gemini_selected_model', model);
+    }
+  },
+
   // 获取本地剪贴板历史
   getPasteHistory() {
     const history = localStorage.getItem('paste_history');

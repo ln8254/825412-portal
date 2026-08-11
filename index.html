@@ -368,9 +368,20 @@
 
     <!-- 4. AI 智能对话 View -->
     <section id="ai-view" class="view-panel">
-      <div class="view-header">
-        <h1 class="view-title">AI 智能助手</h1>
-        <p class="view-subtitle">与 Gemini 智能核心进行深度实时对话。所有交互皆在本地建立连接。</p>
+      <div class="view-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h1 class="view-title">AI 智能助手</h1>
+          <p class="view-subtitle">与 Gemini 智能核心进行深度实时对话。所有交互皆在本地建立连接。</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">AI 模型:</span>
+          <select class="dropdown-select" id="ai-model-select" style="min-width: 200px; font-size: 13px; padding: 8px 12px;">
+            <option value="models/gemini-2.5-flash">Gemini 2.5 Flash (推荐)</option>
+            <option value="models/gemini-2.5-pro">Gemini 2.5 Pro (深度推理)</option>
+            <option value="models/gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (极速)</option>
+            <option value="models/gemini-flash-latest">Gemini Flash Latest</option>
+          </select>
+        </div>
       </div>
       
       <div class="chat-container">
