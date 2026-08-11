@@ -109,10 +109,13 @@ const AiChatController = {
     sendBtn.addEventListener('click', sendMessage);
   },
 
+  msgSeq: 0,
+
   // 往聊天窗口插入一条消息
   appendMessage(role, text) {
     const container = document.getElementById('chat-messages-container');
-    const messageId = `msg-${Date.now()}`;
+    this.msgSeq = (this.msgSeq || 0) + 1;
+    const messageId = `msg-${Date.now()}-${this.msgSeq}-${Math.floor(Math.random() * 1000)}`;
     const avatar = role === 'user' ? 'ME' : 'AI';
 
     const msgHtml = `
