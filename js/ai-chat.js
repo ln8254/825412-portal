@@ -66,10 +66,23 @@ const AiChatController = {
         });
 
         if (!response.ok) {
-          throw new Error('API 请求失败，请检查密钥是否正确或网络是否畅通。');
+          let errorMsg = `HTTP ${response.status}`;
+          try {
+            const errData = await response.json();
+            if (errData.error && errData.error.message) {
+              errorMsg += `: ${errData.error.message}`;
+            }
+          } catch (e) {
+            errorMsg += ` ${response.statusText}`;
+          }
+          throw new Error(errorMsg);
         }
 
         const data = await response.json();
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+          throw new Error('API 返回的数据结构异常，可能遭到了网络拦截。');
+        }
+
         const aiResponse = data.candidates[0].content.parts[0].text;
 
         // 3. 将等待状态替换为真实回复
@@ -79,7 +92,7 @@ const AiChatController = {
       } catch (err) {
         console.error(err);
         const contentDiv = thinkingElement.querySelector('.message-content');
-        contentDiv.innerHTML = `<span style="color: var(--color-error);">连接中断：${err.message}</span>`;
+        contentDiv.innerHTML = `<span style="color: var(--color-error);">连接中断：${this.escapeHtml(err.message)}</span><br><span style="font-size:12px; color:var(--text-muted);">提示：Google API Key 通常为以 "AIzaSy" 开头的39位字符。此外国内直接请求 Google 服务器需保持网络畅通。</span>`;
       } finally {
         container.scrollTop = container.scrollHeight;
       }
