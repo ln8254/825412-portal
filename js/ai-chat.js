@@ -18,7 +18,7 @@ const AiChatController = {
       if (chatInput) chatInput.disabled = false;
       if (sendBtn) sendBtn.disabled = false;
       if (chatInput) chatInput.placeholder = '输入您的问题，按回车发送...';
-      if (statusText) statusText.innerHTML = '<span style="color: var(--color-tertiary); font-weight: 600;">神经网络连接就绪。</span> 已连接至 Gemini-1.5-Flash。';
+      if (statusText) statusText.innerHTML = '<span style="color: var(--color-tertiary); font-weight: 600;">神经网络连接就绪。</span> 已连接至 Gemini 2.5 Flash。';
     } else {
       if (chatInput) chatInput.disabled = true;
       if (sendBtn) sendBtn.disabled = true;
@@ -50,8 +50,8 @@ const AiChatController = {
       try {
         const apiKey = StorageController.getGeminiKey();
         
-        // 发送 API 请求
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        // 发送 API 请求 (使用最新的 Gemini 2.5 Flash 模型)
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
