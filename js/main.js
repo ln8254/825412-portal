@@ -1,6 +1,7 @@
 /**
  * 825412-portal - 主逻辑控制器 (Main App Controller)
  */
+document.addEventListener('DOMContentLoaded', () => {
   // 0. 初始化国际化多语言
   if (typeof I18nController !== 'undefined') {
     I18nController.init();
