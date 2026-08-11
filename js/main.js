@@ -1,7 +1,15 @@
 /**
  * 825412-portal - 主逻辑控制器 (Main App Controller)
  */
-document.addEventListener('DOMContentLoaded', () => {
+  // 0. 初始化国际化多语言
+  if (typeof I18nController !== 'undefined') {
+    I18nController.init();
+    const langBtn = document.getElementById('lang-switch-btn');
+    if (langBtn) {
+      langBtn.addEventListener('click', () => I18nController.toggleLanguage());
+    }
+  }
+
   // 1. 初始化各子模块
   ToolboxController.init();
   ClipboardController.init();

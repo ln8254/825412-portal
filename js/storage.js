@@ -28,6 +28,21 @@ const StorageController = {
     }
   },
 
+  // 获取语言设置 (默认根据浏览器自动判定 zh-CN 或 en-US)
+  getLanguage() {
+    const saved = localStorage.getItem('app_language');
+    if (saved) return saved;
+    const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+    return browserLang.startsWith('zh') ? 'zh-CN' : 'en-US';
+  },
+
+  // 保存语言设置
+  saveLanguage(lang) {
+    if (lang) {
+      localStorage.setItem('app_language', lang);
+    }
+  },
+
   // 获取本地剪贴板历史
   getPasteHistory() {
     const history = localStorage.getItem('paste_history');
