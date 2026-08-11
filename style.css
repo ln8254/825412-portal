@@ -804,3 +804,112 @@ input, button, textarea, select {
   color: var(--color-secondary);
   margin-right: 8px;
 }
+
+/* 侧边栏及底部合规导航链接 */
+.sidebar-footer-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-link-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.footer-link-item:hover {
+  color: var(--color-secondary);
+}
+
+.site-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.site-footer-links {
+  display: flex;
+  gap: 16px;
+}
+
+.site-footer-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+
+.site-footer-links a:hover {
+  color: var(--color-secondary);
+}
+
+/* 法律合规文章排版样式 */
+.legal-article {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 12px;
+  line-height: 1.7;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.legal-article h3 {
+  font-size: 16px;
+  color: var(--color-secondary);
+  margin: 18px 0 8px 0;
+}
+
+.legal-article p {
+  margin-bottom: 12px;
+  color: #cbd5e1;
+}
+
+.legal-article ul {
+  margin: 8px 0 12px 20px;
+  color: #cbd5e1;
+}
+
+.legal-article li {
+  margin-bottom: 6px;
+}
+
+.faq-container {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faq-item {
+  background-color: var(--surface-low);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+}
+
+.faq-question {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-secondary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.faq-answer {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}

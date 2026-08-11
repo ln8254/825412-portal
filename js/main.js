@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 5. 自动检测 URL Hash 分享码并解析展示
   checkUrlHashPaste();
+
+  // 6. 初始化隐私政策、关于本站及联系我们模态框
+  initLegalModals();
 });
 
 /**
@@ -155,6 +158,39 @@ function initSettingsModal() {
     alert('配置已成功保存！');
     closeModal();
   });
+}
+
+/**
+ * 隐私政策、关于本站与联系我们模态框逻辑
+ */
+function initLegalModals() {
+  const bindModalEvents = (openIds, modalId, closeIds) => {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+
+    openIds.forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.addEventListener('click', () => modal.classList.add('active'));
+      }
+    });
+
+    closeIds.forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.addEventListener('click', () => modal.classList.remove('active'));
+      }
+    });
+  };
+
+  // 1. 绑定隐私政策模态框
+  bindModalEvents(['open-privacy', 'footer-link-privacy'], 'privacy-modal', ['close-privacy', 'dismiss-privacy']);
+
+  // 2. 绑定关于本站模态框
+  bindModalEvents(['open-about', 'footer-link-about'], 'about-modal', ['close-about', 'dismiss-about']);
+
+  // 3. 绑定联系我们模态框
+  bindModalEvents(['open-contact', 'footer-link-contact'], 'contact-modal', ['close-contact', 'dismiss-contact']);
 }
 
 /**
