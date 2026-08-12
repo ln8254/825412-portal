@@ -1,8 +1,19 @@
 /**
  * 825412-portal - 国际化组件 (i18n Controller)
+ * 预留全量多语言架构，支持无限扩充语种 (CN, EN, JP, ES, FR, DE...)
  */
 const I18nController = {
   currentLang: 'zh-CN',
+
+  // 1. 预留全量语言注册表（添加新语种只需在字典补充词条，系统会自动在菜单中渲染选项）
+  supportedLanguages: [
+    { code: 'zh-CN', name: '简体中文', flag: '🇨🇳' },
+    { code: 'en-US', name: 'English', flag: '🇺🇸' },
+    { code: 'ja-JP', name: '日本語 (Japanese)', flag: '🇯🇵' },
+    { code: 'es-ES', name: 'Español (Spanish)', flag: '🇪🇸' },
+    { code: 'fr-FR', name: 'Français (French)', flag: '🇫🇷' },
+    { code: 'de-DE', name: 'Deutsch (German)', flag: '🇩🇪' }
+  ],
 
   translations: {
     'zh-CN': {
@@ -111,16 +122,7 @@ const I18nController = {
       'read_close_btn': '关闭',
 
       // 页脚
-      'footer_rights': '© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利',
-
-      // 动态提示文本
-      'msg_enter_paste': '请先输入要分享的文本内容！',
-      'msg_link_copied': '分享链接已复制到剪贴板！',
-      'msg_pwd_copied': '强密码已成功复制到剪贴板！',
-      'msg_ts_copied': '时间戳已成功复制！',
-      'msg_input_text_first': '请先在输入框中填入需要转换的文本！',
-      'msg_word_count': '计算完成！字数：',
-      'msg_settings_saved': '配置已成功保存！'
+      'footer_rights': '© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利'
     },
     'en-US': {
       // Navigation
@@ -228,22 +230,30 @@ const I18nController = {
       'read_close_btn': 'Close',
 
       // Footer
-      'footer_rights': '© 2026 825412.xyz Geek Toolbox | All Rights Reserved.',
-
-      // Dynamic Messages
-      'msg_enter_paste': 'Please enter text to share first!',
-      'msg_link_copied': 'Share link copied to clipboard!',
-      'msg_pwd_copied': 'Password copied to clipboard!',
-      'msg_ts_copied': 'Timestamp copied!',
-      'msg_input_text_first': 'Please enter text in the box first!',
-      'msg_word_count': 'Calculated! Word count: ',
-      'msg_settings_saved': 'Settings saved successfully!'
+      'footer_rights': '© 2026 825412.xyz Geek Toolbox | All Rights Reserved.'
     }
   },
 
   init() {
     this.currentLang = StorageController.getLanguage();
+    this.renderLangSelectors();
     this.applyLanguage(this.currentLang);
+  },
+
+  renderLangSelectors() {
+    const selectors = document.querySelectorAll('.lang-selector');
+    selectors.forEach(select => {
+      select.innerHTML = this.supportedLanguages.map(lang => {
+        const selected = lang.code === this.currentLang ? 'selected' : '';
+        return `<option value="${lang.code}" ${selected}>${lang.flag} ${lang.name}</option>`;
+      }).join('');
+
+      select.value = this.currentLang;
+
+      select.onchange = (e) => {
+        this.setLanguage(e.target.value);
+      };
+    });
   },
 
   toggleLanguage() {
@@ -254,16 +264,18 @@ const I18nController = {
   setLanguage(lang) {
     this.currentLang = lang;
     StorageController.saveLanguage(lang);
+    this.renderLangSelectors();
     this.applyLanguage(lang);
   },
 
   t(key) {
-    const dict = this.translations[this.currentLang] || this.translations['zh-CN'];
-    return dict[key] || key;
+    const dict = this.translations[this.currentLang] || this.translations['en-US'] || this.translations['zh-CN'];
+    return dict[key] || (this.translations['en-US'] && this.translations['en-US'][key]) || key;
   },
 
   applyLanguage(lang) {
-    const dict = this.translations[lang] || this.translations['zh-CN'];
+    // 智能兜底：未完全翻译的语种优先降级使用 en-US，再降级使用 zh-CN
+    const dict = this.translations[lang] || this.translations['en-US'] || this.translations['zh-CN'];
     
     // 渲染带有 data-i18n 的 DOM 元素
     document.querySelectorAll('[data-i18n]').forEach(el => {

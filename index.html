@@ -437,6 +437,13 @@
         <input type="password" class="text-input" id="gemini-key-input" style="width: 100%;" data-i18n-ph="set_key_ph" placeholder="输入你的 Gemini API 密钥">
       </div>
       
+      <div class="form-group" style="margin-top: 20px;">
+        <label class="form-label">界面语言 / System Language</label>
+        <select class="dropdown-select lang-selector" id="settings-lang-select" style="width: 100%; font-size: 14px; padding: 10px 14px;">
+          <!-- 动态渲染全量语言 -->
+        </select>
+      </div>
+      
       <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;">
         <button class="btn" id="cancel-settings" style="background-color: var(--surface-high);" data-i18n="set_cancel">取消</button>
         <button class="btn btn-primary" id="save-settings" data-i18n="set_save">保存配置</button>
