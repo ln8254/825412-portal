@@ -16,9 +16,11 @@ const ClipboardController = {
     const listContainer = document.getElementById('local-history-list');
     if (!listContainer) return;
 
+    const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
     const history = StorageController.getPasteHistory();
     if (history.length === 0) {
-      listContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 13px;">暂无本地历史...</div>';
+      const emptyText = isEn ? 'No local history yet...' : '暂无本地历史...';
+      listContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px;">${emptyText}</div>`;
       return;
     }
 
@@ -35,8 +37,9 @@ const ClipboardController = {
     // 同时更新 Dashboard 上的最近分享预览
     const dashPreview = document.getElementById('dashboard-paste-preview');
     if (dashPreview && history.length > 0) {
+      const recentLabel = isEn ? 'Recent Share (Click to view):' : '最近分享 (点击查看):';
       dashPreview.innerHTML = `
-        <div style="color: var(--color-secondary); font-weight: 600; margin-bottom: 4px;">最近分享 (点击查看):</div>
+        <div style="color: var(--color-secondary); font-weight: 600; margin-bottom: 4px;">${recentLabel}</div>
         <a href="javascript:void(0)" onclick="ClipboardController.showPaste('${history[0].code}')" style="color: #fff; text-decoration: underline; font-size: 13px; font-family: var(--font-mono);">
           #paste=${history[0].code.substring(0, 8)}...
         </a>

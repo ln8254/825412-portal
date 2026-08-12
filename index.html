@@ -222,16 +222,16 @@
         
         <!-- 右侧：历史与链接面板 -->
         <div class="history-panel glass-card">
-          <h3 style="margin-bottom: 16px; font-weight: 700; color: var(--color-secondary);">分享结果</h3>
+          <h3 style="margin-bottom: 16px; font-weight: 700; color: var(--color-secondary);" data-i18n="clip_share_result">分享结果</h3>
           <div id="share-link-box" style="display: none; margin-bottom: 24px;">
-            <p class="form-label">你的分享链接 (点击复制):</p>
+            <p class="form-label" data-i18n="clip_share_url_label">你的分享链接 (点击复制):</p>
             <div class="pwd-result-box" style="padding: 12px; margin-bottom: 12px;">
               <div class="pwd-display" id="share-url" style="font-size: 15px;"></div>
               <button class="material-symbols-outlined" id="copy-share-btn" style="cursor: pointer; color: var(--color-secondary);">content_copy</button>
             </div>
           </div>
           
-          <h3 style="margin-bottom: 12px; font-weight: 700; color: var(--color-primary);">本地历史记录</h3>
+          <h3 style="margin-bottom: 12px; font-weight: 700; color: var(--color-primary);" data-i18n="clip_local_history">本地历史记录</h3>
           <div class="history-list" id="local-history-list">
             <!-- 历史项目将动态渲染 -->
           </div>
@@ -239,14 +239,14 @@
       </div>
       <!-- 匿名剪贴板说明与 FAQ -->
       <div class="faq-container" style="margin-top: 32px;">
-        <h3 style="font-weight: 700; color: var(--color-secondary); font-size: 18px;">匿名剪贴板使用指南与常见问题 (FAQ)</h3>
+        <h3 style="font-weight: 700; color: var(--color-secondary); font-size: 18px;" data-i18n="clip_faq_title">匿名剪贴板使用指南与常见问题 (FAQ)</h3>
         <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">help</span>匿名剪贴板是如何工作的？</div>
-          <div class="faq-answer">您可以在输入框中粘贴任何代码片段、文本说明或临时笔记，选择到期时间后点击“创建分享链接”。系统将生成唯一的 Hash 分享地址（如 #paste=xxxx）。收到链接的接收者直接打开网页即可在弹窗中一键阅读与复制。</div>
+          <div class="faq-question"><span class="material-symbols-outlined">help</span><span data-i18n="clip_faq_q1">匿名剪贴板是如何工作的？</span></div>
+          <div class="faq-answer" data-i18n="clip_faq_a1">您可以在输入框中粘贴任何代码片段、文本说明或临时笔记，选择到期时间后点击“创建分享链接”。系统将生成唯一的 Hash 分享地址（如 #paste=xxxx）。收到链接的接收者直接打开网页即可在弹窗中一键阅读与复制。</div>
         </div>
         <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">shield</span>内容安全与过期销毁机制</div>
-          <div class="faq-answer">系统支持 1小时、24小时和 7天三种自毁期限。一旦超出设定时间，云端数据将被彻底清除并无法恢复。我们不强制要求用户注册或提交任何个人身份信息，保障匿名与隐私。</div>
+          <div class="faq-question"><span class="material-symbols-outlined">shield</span><span data-i18n="clip_faq_q2">内容安全与过期销毁机制</span></div>
+          <div class="faq-answer" data-i18n="clip_faq_a2">系统支持 1小时、24小时和 7天三种自毁期限。一旦超出设定时间，云端数据将被彻底清除并无法恢复。我们不强制要求用户注册或提交任何个人身份信息，保障匿名与隐私。</div>
         </div>
       </div>
     </section>
@@ -343,7 +343,7 @@
           </div>
           
           <div id="text-result-box" style="display: none; margin-top: 10px;">
-            <p class="form-label">结果展示:</p>
+            <p class="form-label" data-i18n="tool_text_res_label">结果展示:</p>
             <div class="text-area-wrapper" style="min-height: 120px;">
               <textarea class="custom-textarea" id="toolbox-text-output" readonly></textarea>
             </div>
@@ -353,18 +353,18 @@
 
       <!-- 工具箱指南与知识库 -->
       <div class="faq-container" style="margin-top: 32px;">
-        <h3 style="font-weight: 700; color: var(--color-secondary); font-size: 18px;">极客工具箱知识库与安全性说明</h3>
+        <h3 style="font-weight: 700; color: var(--color-secondary); font-size: 18px;" data-i18n="tool_faq_title">极客工具箱知识库与安全性说明</h3>
         <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">lock</span>随机高强度密码生成器的安全性</div>
-          <div class="faq-answer">本密码生成器完全基于客户端浏览器的密码学随机数算法（Web Crypto API）生成，包含大小写字母、数字与特殊符号。生成的密码绝不上传至任何服务器，保障您的账号资产安全。</div>
+          <div class="faq-question"><span class="material-symbols-outlined">lock</span><span data-i18n="tool_faq_q1">随机高强度密码生成器的安全性</span></div>
+          <div class="faq-answer" data-i18n="tool_faq_a1">本密码生成器完全基于客户端浏览器的密码学随机数算法（Web Crypto API）生成，包含大小写字母、数字与特殊符号。生成的密码绝不上传至任何服务器，保障您的账号资产安全。</div>
         </div>
         <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">schedule</span>什么是 Unix 时间戳（Timestamp）？</div>
-          <div class="faq-answer">Unix 时间戳是指格林威治时间 1970年01月01日00时00分00秒起至现在的总秒数（或毫秒数）。开发者常用时间戳在不同时区和系统中传递标准时间。</div>
+          <div class="faq-question"><span class="material-symbols-outlined">schedule</span><span data-i18n="tool_faq_q2">什么是 Unix 时间戳（Timestamp）？</span></div>
+          <div class="faq-answer" data-i18n="tool_faq_a2">Unix 时间戳是指格林威治时间 1970年01月01日00时00分00秒起至现在的总秒数（或毫秒数）。开发者常用时间戳在不同时区和系统中传递标准时间。</div>
         </div>
         <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">code</span>Base64 编码与解码原理</div>
-          <div class="faq-answer">Base64 是一种基于 64 个可打印字符来表示二进制数据的方法。常用于在 HTTP 环境下传输简单的文本数据、图片或密文。</div>
+          <div class="faq-question"><span class="material-symbols-outlined">code</span><span data-i18n="tool_faq_q3">Base64 编码与解码原理</span></div>
+          <div class="faq-answer" data-i18n="tool_faq_a3">Base64 是一种基于 64 个可打印字符来表示二进制数据的方法。常用于在 HTTP 环境下传输简单的文本数据、图片或密文。</div>
         </div>
       </div>
     </section>
@@ -423,23 +423,23 @@
   <div class="modal-overlay" id="settings-modal">
     <div class="modal-content glass-panel">
       <div class="modal-header">
-        <h2 class="modal-title">设置中心</h2>
+        <h2 class="modal-title" data-i18n="set_title">设置中心</h2>
         <span class="material-symbols-outlined modal-close" id="close-settings">close</span>
       </div>
       
       <div class="alert-box">
         <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">shield</span>
-        密钥安全提示：所有 API Key 均以加密形式仅储存在您的浏览器本地 (LocalStorage) 中，绝不会上传给任何第三方。
+        <span data-i18n="set_alert">密钥安全提示：所有 API Key 均以加密形式仅储存在您的浏览器本地 (LocalStorage) 中，绝不会上传给任何第三方。</span>
       </div>
       
       <div class="form-group">
-        <label class="form-label" for="gemini-key-input">Gemini API Key</label>
-        <input type="password" class="text-input" id="gemini-key-input" style="width: 100%;" placeholder="输入你的 Gemini API 密钥">
+        <label class="form-label" for="gemini-key-input" data-i18n="set_key_label">Gemini API Key</label>
+        <input type="password" class="text-input" id="gemini-key-input" style="width: 100%;" data-i18n-ph="set_key_ph" placeholder="输入你的 Gemini API 密钥">
       </div>
       
       <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px;">
-        <button class="btn" id="cancel-settings" style="background-color: var(--surface-high);">取消</button>
-        <button class="btn btn-primary" id="save-settings">保存配置</button>
+        <button class="btn" id="cancel-settings" style="background-color: var(--surface-high);" data-i18n="set_cancel">取消</button>
+        <button class="btn btn-primary" id="save-settings" data-i18n="set_save">保存配置</button>
       </div>
     </div>
   </div>
@@ -448,20 +448,20 @@
   <div class="modal-overlay" id="read-paste-modal">
     <div class="modal-content glass-panel" style="width: 850px; max-width: 95%;">
       <div class="modal-header">
-        <h2 class="modal-title" style="color: var(--color-primary);">收到分享的剪贴板内容</h2>
+        <h2 class="modal-title" style="color: var(--color-primary);" data-i18n="read_modal_title">收到分享的剪贴板内容</h2>
         <span class="material-symbols-outlined modal-close" id="close-read-paste">close</span>
       </div>
       <div class="form-group" style="margin-bottom: 20px;">
-        <label class="form-label" id="paste-meta-info">分享内容：</label>
+        <label class="form-label" id="paste-meta-info" data-i18n="read_meta_label">分享内容：</label>
         <div class="text-area-wrapper" style="height: 50vh; min-height: 350px; max-height: 600px;">
           <textarea class="custom-textarea" id="read-paste-content" readonly style="background-color: var(--surface-lowest);"></textarea>
         </div>
       </div>
       <div style="display: flex; justify-content: flex-end; gap: 12px;">
         <button class="btn btn-primary" id="copy-read-paste-btn">
-          <span class="material-symbols-outlined">content_copy</span>一键复制
+          <span class="material-symbols-outlined">content_copy</span><span data-i18n="read_copy_btn">一键复制</span>
         </button>
-        <button class="btn" id="dismiss-read-paste" style="background-color: var(--surface-high);">关闭</button>
+        <button class="btn" id="dismiss-read-paste" style="background-color: var(--surface-high);" data-i18n="read_close_btn">关闭</button>
       </div>
     </div>
   </div>
