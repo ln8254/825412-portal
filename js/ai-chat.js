@@ -14,19 +14,29 @@ const AiChatController = {
     const sendBtn = document.getElementById('chat-send-btn');
     const statusText = document.getElementById('ai-status-text');
 
+    const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+
     if (key) {
       if (chatInput) chatInput.disabled = false;
       if (sendBtn) sendBtn.disabled = false;
-      if (chatInput) chatInput.placeholder = '输入您的问题，按回车发送...';
-      if (statusText) statusText.innerHTML = '<span style="color: var(--color-tertiary); font-weight: 600;">神经网络连接就绪。</span> 已连接至 Gemini API 核心。';
+      if (chatInput) chatInput.placeholder = isEn ? 'Type your question and press Enter...' : '输入您的问题，按回车发送...';
+      if (statusText) {
+        statusText.innerHTML = isEn 
+          ? '<span style="color: var(--color-tertiary); font-weight: 600;">Neural Link Active.</span> Connected to Gemini API Core.' 
+          : '<span style="color: var(--color-tertiary); font-weight: 600;">神经网络连接就绪。</span> 已连接至 Gemini API 核心。';
+      }
       
       // 动态拉取当前 API Key 支持的全部模型列表
       await this.fetchAvailableModels(key);
     } else {
       if (chatInput) chatInput.disabled = true;
       if (sendBtn) sendBtn.disabled = true;
-      if (chatInput) chatInput.placeholder = '请先在左下角设置中心配置您的 Gemini API Key...';
-      if (statusText) statusText.innerHTML = '未配置 API Key。请输入你的密钥以启用高级人工智能对话链路。';
+      if (chatInput) chatInput.placeholder = isEn ? 'Please configure your Gemini API Key in Settings first...' : '请先在左下角设置中心配置您的 Gemini API Key...';
+      if (statusText) {
+        statusText.innerHTML = isEn 
+          ? 'API Key missing. Enter key in Settings to activate AI Chat link.' 
+          : '未配置 API Key。请输入你的密钥以启用高级人工智能对话链路。';
+      }
     }
   },
 
@@ -87,7 +97,9 @@ const AiChatController = {
       input.value = '';
 
       // 2. 添加等待状态
-      const thinkingId = this.appendMessage('ai', 'AI 正在分析指令，建立神经连接...');
+      const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+      const thinkingText = isEn ? 'AI is analyzing instructions, establishing neural link...' : 'AI 正在分析指令，建立神经连接...';
+      const thinkingId = this.appendMessage('ai', thinkingText);
       const thinkingElement = document.getElementById(thinkingId);
 
       try {

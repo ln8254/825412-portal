@@ -287,9 +287,12 @@ const I18nController = {
       langSwitchBtn.innerHTML = lang === 'zh-CN' ? '🌐 English' : '🌐 中文';
     }
 
-    // 重新渲染剪贴板历史列表的文案
+    // 重新渲染剪贴板历史列表与 AI 连接状态的文案
     if (typeof ClipboardController !== 'undefined' && ClipboardController.renderHistory) {
       ClipboardController.renderHistory();
+    }
+    if (typeof AiChatController !== 'undefined' && AiChatController.checkApiStatus) {
+      AiChatController.checkApiStatus();
     }
   }
 };
