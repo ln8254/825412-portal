@@ -25,6 +25,7 @@ const I18nController = {
       'nav_settings': '设置中心',
       'nav_about': '关于本站',
       'nav_privacy': '隐私政策',
+      'nav_terms': '服务条款',
       'nav_contact': '联系我们',
 
       // 控制台
@@ -121,6 +122,15 @@ const I18nController = {
       'read_copy_btn': '一键复制',
       'read_close_btn': '关闭',
 
+      // 服务条款模态框
+      'terms_modal_title': '服务条款 (Terms of Service)',
+      'terms_dismiss': '我已阅读并同意',
+
+      // Cookie 同意横幅
+      'cookie_text': '本站使用 Cookie 及本地存储以提升极客工具体验、分析流量并展示个性化广告。继续使用即表示您同意我们的《隐私政策》与《服务条款》。',
+      'cookie_accept': '同意并继续',
+      'cookie_learn': '查看详情',
+
       // 页脚
       'footer_rights': '© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利'
     },
@@ -133,6 +143,7 @@ const I18nController = {
       'nav_settings': 'Settings',
       'nav_about': 'About Us',
       'nav_privacy': 'Privacy Policy',
+      'nav_terms': 'Terms of Service',
       'nav_contact': 'Contact Us',
 
       // Dashboard
@@ -228,6 +239,15 @@ const I18nController = {
       'read_meta_label': 'Shared Content:',
       'read_copy_btn': 'Copy All',
       'read_close_btn': 'Close',
+
+      // Terms of Service Modal
+      'terms_modal_title': 'Terms of Service (ToS)',
+      'terms_dismiss': 'I Have Read & Agree',
+
+      // Cookie Consent Banner
+      'cookie_text': 'We use cookies and local storage to provide developer tools, analyze traffic, and display personalized ads. By continuing, you agree to our Privacy Policy and Terms of Service.',
+      'cookie_accept': 'Accept & Continue',
+      'cookie_learn': 'Learn More',
 
       // Footer
       'footer_rights': '© 2026 825412.xyz Geek Toolbox | All Rights Reserved.'

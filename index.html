@@ -103,6 +103,10 @@
           <span class="material-symbols-outlined" style="font-size: 18px;">policy</span>
           <span data-i18n="nav_privacy">隐私政策</span>
         </div>
+        <div class="footer-link-item" id="open-terms">
+          <span class="material-symbols-outlined" style="font-size: 18px;">gavel</span>
+          <span data-i18n="nav_terms">服务条款</span>
+        </div>
         <div class="footer-link-item" id="open-contact">
           <span class="material-symbols-outlined" style="font-size: 18px;">mail</span>
           <span data-i18n="nav_contact">联系我们</span>
@@ -414,6 +418,7 @@
       <div class="site-footer-links">
         <a href="javascript:void(0)" id="footer-link-about" data-i18n="nav_about">关于本站</a>
         <a href="javascript:void(0)" id="footer-link-privacy" data-i18n="nav_privacy">隐私政策</a>
+        <a href="javascript:void(0)" id="footer-link-terms" data-i18n="nav_terms">服务条款</a>
         <a href="javascript:void(0)" id="footer-link-contact" data-i18n="nav_contact">联系我们</a>
       </div>
     </footer>
@@ -557,6 +562,58 @@
       <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
         <button class="btn btn-primary" id="dismiss-contact">确定</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 服务条款模态框 -->
+  <div class="modal-overlay" id="terms-modal">
+    <div class="modal-content glass-panel" style="width: 750px; max-width: 95%;">
+      <div class="modal-header">
+        <h2 class="modal-title" style="color: var(--color-primary);" data-i18n="terms_modal_title">服务条款 (Terms of Service)</h2>
+        <span class="material-symbols-outlined modal-close" id="close-terms">close</span>
+      </div>
+      <div class="legal-article">
+        <p><strong>生效日期 / Effective Date：2026年6月5日</strong></p>
+        <p>欢迎访问并使用 <strong>825412.xyz</strong>（以下简称“本平台”或“本站”）。在使用本站提供的极客开发工具与相关服务前，请仔细阅读以下服务条款。</p>
+        
+        <h3>1. 协议接受 (Acceptance of Terms)</h3>
+        <p>当您访问、浏览或使用本站提供的任何在线工具（包括匿名剪贴板、密码生成器、时间戳转换、文本工具与 AI 助手等），即表示您已阅读、理解并无条件接受本协议及我们的《隐私政策》。</p>
+
+        <h3>2. 用户行为规范与合法使用 (Acceptable Use)</h3>
+        <p>您同意仅将本站工具用于合法且合规的目的：</p>
+        <ul>
+          <li><strong>严禁有害内容：</strong>严禁在匿名剪贴板或 AI 对话中发布或传播包含木马病毒、恶意代码、侵犯他人知识产权或隐私的数据、以及违反法律法规的信息。</li>
+          <li><strong>网络安全准则：</strong>严禁针对本站发起任何自动化暴力请求、DDOS 拒绝服务攻击或恶意刷量。</li>
+          <li><strong>数据自毁提醒：</strong>匿名剪贴板具备定时自毁特性，请自行妥善留存重要数据副本。</li>
+        </ul>
+
+        <h3>3. 免责声明 (Disclaimer of Warranties)</h3>
+        <ul>
+          <li>本站所有工具与计算结果均按“现状 (AS IS)”提供，不提供任何明示或默示的适用性保证。</li>
+          <li>用户使用密码生成器生成的密码资产、AI 智能助手的对话建议等，均需由用户自行评估判断并承担使用风险。</li>
+        </ul>
+
+        <h3>4. 第三方广告与外链免责 (Third-Party Ads)</h3>
+        <p>本站接入了 Google AdSense 等合规广告投放网络。广告展示均由服务商算法动态匹配，本站不对任何第三方广告主提供的商品、服务或外部网站内容承担连带法律责任。</p>
+
+        <h3>5. 条款更新 (Modifications)</h3>
+        <p>我们保留在适当时机修订本条款的权利。修订版本一旦在网站发布即刻生效。</p>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+        <button class="btn btn-primary" id="dismiss-terms" data-i18n="terms_dismiss">我已阅读并同意</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cookie 同意横幅 (Cookie Consent Banner) -->
+  <div class="cookie-banner" id="cookie-banner">
+    <div class="cookie-text">
+      <span class="material-symbols-outlined" style="vertical-align: middle; color: var(--color-secondary); font-size: 20px; margin-right: 6px;">cookie</span>
+      <span data-i18n="cookie_text">本站使用 Cookie 及本地存储以提升极客工具体验、分析流量并展示个性化广告。继续使用即表示您同意我们的《隐私政策》与《服务条款》。</span>
+    </div>
+    <div class="cookie-actions">
+      <button class="btn" id="cookie-learn-btn" style="background: var(--surface-high); font-size: 13px; padding: 7px 14px;" data-i18n="cookie_learn">查看详情</button>
+      <button class="btn btn-primary" id="cookie-accept-btn" style="font-size: 13px; padding: 7px 16px;" data-i18n="cookie_accept">同意并继续</button>
     </div>
   </div>
 

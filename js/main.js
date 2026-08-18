@@ -28,8 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. 自动检测 URL Hash 分享码并解析展示
   checkUrlHashPaste();
 
-  // 6. 初始化隐私政策、关于本站及联系我们模态框
+  // 6. 初始化隐私政策、服务条款、关于本站及联系我们模态框
   initLegalModals();
+
+  // 7. 初始化 Cookie 同意横幅
+  initCookieConsentBanner();
 });
 
 /**
@@ -200,6 +203,42 @@ function initLegalModals() {
 
   // 3. 绑定联系我们模态框
   bindModalEvents(['open-contact', 'footer-link-contact'], 'contact-modal', ['close-contact', 'dismiss-contact']);
+
+  // 4. 绑定服务条款模态框
+  bindModalEvents(['open-terms', 'footer-link-terms'], 'terms-modal', ['close-terms', 'dismiss-terms']);
+}
+
+/**
+ * Cookie 同意横幅 (Cookie Consent Banner) 交互逻辑
+ */
+function initCookieConsentBanner() {
+  const banner = document.getElementById('cookie-banner');
+  const acceptBtn = document.getElementById('cookie-accept-btn');
+  const learnBtn = document.getElementById('cookie-learn-btn');
+  const privacyModal = document.getElementById('privacy-modal');
+
+  if (!banner) return;
+
+  // 检查是否已同意
+  const isAccepted = localStorage.getItem('cookie_consent_accepted');
+  if (!isAccepted) {
+    setTimeout(() => {
+      banner.classList.add('active');
+    }, 800);
+  }
+
+  if (acceptBtn) {
+    acceptBtn.addEventListener('click', () => {
+      localStorage.setItem('cookie_consent_accepted', 'true');
+      banner.classList.remove('active');
+    });
+  }
+
+  if (learnBtn) {
+    learnBtn.addEventListener('click', () => {
+      if (privacyModal) privacyModal.classList.add('active');
+    });
+  }
 }
 
 /**
