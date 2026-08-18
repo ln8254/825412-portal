@@ -1,0 +1,6 @@
+# Robots.txt for 825412.xyz
+User-agent: *
+Allow: /
+
+# 搜索引擎站点地图 (Sitemap)
+Sitemap: https://825412.xyz/sitemap.xml
