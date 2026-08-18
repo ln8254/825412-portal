@@ -234,7 +234,7 @@ const WebhookController = {
           <div style="font-size: 12px; color: var(--text-secondary);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
               <span style="font-weight: 600; color: #38bdf8;">JSON Payload Body:</span>
-              <button class="btn" style="padding: 2px 8px; font-size: 11px; background: var(--surface-high);" onclick="navigator.clipboard.writeText('${bodyJson.replace(/'/g, "\\'").replace(/\n/g, '\\n')}').then(() => alert('已复制 Payload JSON！'))">
+              <button class="btn copy-webhook-json-btn" data-json-idx="${idx}" style="padding: 2px 8px; font-size: 11px; background: var(--surface-high);">
                 <span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle;">content_copy</span> 复制 JSON
               </button>
             </div>
@@ -243,6 +243,20 @@ const WebhookController = {
         </div>
       `;
     }).join('');
+
+    // 绑定所有复制 JSON 按钮事件
+    listEl.querySelectorAll('.copy-webhook-json-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.getAttribute('data-json-idx'));
+        const item = this.capturedRequests[idx];
+        if (item && item.body) {
+          const text = typeof item.body === 'object' ? JSON.stringify(item.body, null, 2) : item.body;
+          navigator.clipboard.writeText(text).then(() => {
+            alert('已成功复制 Payload JSON 数据！');
+          });
+        }
+      });
+    });
   }
 };
 
