@@ -171,6 +171,14 @@ function checkUrlHashPaste() {
     }
   } else if (hash.startsWith('#drop=')) {
     triggerTabSwitch('airdrop-view');
+  } else if (hash.startsWith('#webhook')) {
+    triggerTabSwitch('webhook-view');
+    if (hash === '#webhook-test') {
+      setTimeout(() => {
+        const btn = document.getElementById('webhook-send-mock-btn');
+        if (btn) btn.click();
+      }, 500);
+    }
   }
 }
 
