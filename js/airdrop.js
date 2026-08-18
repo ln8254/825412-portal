@@ -1,28 +1,40 @@
 /**
- * 825412-portal - 极客隔空快传 (Geek AirDrop / Local Peer Drop Controller)
- * 支持：局域网/跨设备免登录即时快传、房间码配对、文本/文件/图片直传、进度监听
+ * 825412-portal - 极客隔空快传 (Geek AirDrop / Peer Drop Controller)
+ * 支持：实时心跳探测、在线设备可视化雷达、双向文件/文本传输、对端一键呼叫
  */
 const AirDropController = {
   roomId: '',
   deviceId: '',
   deviceName: '',
+  platform: 'desktop',
   channel: null,
   pollTimer: null,
+  heartbeatTimer: null,
+  peers: {}, // 记录当前房间内活跃的设备 { [id]: { name, platform, lastSeen } }
   API_BASE: 'https://api.restful-api.dev/objects',
+  lastReceivedTime: Date.now() - 5000,
 
   init() {
     this.initDeviceIdentity();
     this.initRoomConnection();
     this.initSendActions();
     this.initFileDrop();
+    this.renderPeersList();
   },
 
   // 1. 初始化设备标识与昵称
   initDeviceIdentity() {
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const platform = isMobile ? '📱 Mobile Device' : '💻 Desktop Workstation';
-    this.deviceId = 'dev_' + Math.random().toString(36).substring(2, 8);
-    this.deviceName = `${platform} (${navigator.language || 'zh-CN'})`;
+    this.platform = isMobile ? 'mobile' : 'desktop';
+    const platformLabel = isMobile ? '📱 Mobile Device' : '💻 Desktop Workstation';
+    
+    let savedDevId = sessionStorage.getItem('airdrop_device_id');
+    if (!savedDevId) {
+      savedDevId = 'dev_' + Math.random().toString(36).substring(2, 8);
+      sessionStorage.setItem('airdrop_device_id', savedDevId);
+    }
+    this.deviceId = savedDevId;
+    this.deviceName = `${platformLabel} (${(navigator.language || 'zh-CN').toUpperCase()})`;
 
     const nameEl = document.getElementById('airdrop-my-name');
     if (nameEl) nameEl.textContent = this.deviceName;
@@ -33,12 +45,11 @@ const AirDropController = {
     const roomInput = document.getElementById('airdrop-room-input');
     const joinBtn = document.getElementById('airdrop-join-btn');
     const copyLinkBtn = document.getElementById('airdrop-copy-link-btn');
-    const roomBadge = document.getElementById('airdrop-current-room');
 
     // 检查 URL 中是否有房间 Hash (#drop=XXXX)
     let initialRoom = '';
     if (window.location.hash.startsWith('#drop=')) {
-      initialRoom = window.location.hash.replace('#drop=', '').trim();
+      initialRoom = window.location.hash.replace('#drop=', '').trim().toUpperCase();
     }
     if (!initialRoom) {
       initialRoom = Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -59,7 +70,9 @@ const AirDropController = {
       copyLinkBtn.addEventListener('click', () => {
         const url = `${window.location.origin}${window.location.pathname}#drop=${this.roomId}`;
         navigator.clipboard.writeText(url).then(() => {
-          alert(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'AirDrop invite link copied! Open on your phone to connect.' : '隔空快传邀请链接已复制！在手机端打开即可秒连。');
+          alert(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' 
+            ? 'AirDrop invite link copied! Open it on your mobile phone to connect instantly.' 
+            : '隔空快传邀请链接已复制！在手机浏览器中打开此链接即可秒连。');
         });
       });
     }
@@ -67,31 +80,193 @@ const AirDropController = {
 
   joinRoom(roomId) {
     this.roomId = roomId;
+    this.peers = {}; // 重置对端列表
+    this.lastReceivedTime = Date.now() - 3000;
+
     const roomBadge = document.getElementById('airdrop-current-room');
     const roomInput = document.getElementById('airdrop-room-input');
     if (roomBadge) roomBadge.textContent = `#${roomId}`;
     if (roomInput) roomInput.value = roomId;
 
-    // 使用 BroadcastChannel 进行同浏览器多标签页秒通
+    // 1. 同机跨 Tab 通道
     if (window.BroadcastChannel) {
       if (this.channel) this.channel.close();
       this.channel = new BroadcastChannel(`airdrop_room_${roomId}`);
       this.channel.onmessage = (e) => {
         if (e.data && e.data.sender !== this.deviceId) {
-          this.receivePayload(e.data);
+          this.handleIncomingPayload(e.data);
         }
       };
     }
 
-    // 开启轮询云端中继（跨局域网与手机配对）
+    // 2. 广播自身在线心跳
+    this.broadcastPresence();
+
+    // 3. 启动心跳定时器 (每 2.5 秒广播一次在线状态)
+    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+    this.heartbeatTimer = setInterval(() => {
+      this.broadcastPresence();
+      this.pruneOfflinePeers();
+    }, 2500);
+
+    // 4. 开启云端中继拉取 (跨网络与手机传输)
     if (this.pollTimer) clearInterval(this.pollTimer);
     this.pollCloudRelay();
-    this.pollTimer = setInterval(() => this.pollCloudRelay(), 3500);
+    this.pollTimer = setInterval(() => this.pollCloudRelay(), 2500);
 
-    this.appendSystemNotice(`已加入隔空投送频道 #${roomId}。正在扫描附近对等设备...`);
+    this.renderPeersList();
+    this.appendSystemNotice(`已接入隔空投送频道 #${roomId}。正在探测同频道设备...`);
   },
 
-  // 3. 发送文本与文件逻辑
+  // 3. 广播心跳与状态感知
+  broadcastPresence() {
+    const presencePayload = {
+      type: 'presence',
+      sender: this.deviceId,
+      senderName: this.deviceName,
+      platform: this.platform,
+      timestamp: Date.now()
+    };
+    this.sendPayload(presencePayload, false);
+  },
+
+  pruneOfflinePeers() {
+    const now = Date.now();
+    let changed = false;
+    Object.keys(this.peers).forEach(peerId => {
+      if (now - this.peers[peerId].lastSeen > 8000) {
+        delete this.peers[peerId];
+        changed = true;
+      }
+    });
+    if (changed) {
+      this.renderPeersList();
+    }
+  },
+
+  renderPeersList() {
+    const container = document.getElementById('airdrop-peers-container');
+    const countBadge = document.getElementById('airdrop-peer-count');
+    if (!container) return;
+
+    const peerIds = Object.keys(this.peers);
+    const totalCount = peerIds.length + 1; // 加上本机
+
+    if (countBadge) {
+      countBadge.textContent = `${totalCount} 台设备在线`;
+    }
+
+    let html = `
+      <!-- 本机卡片 -->
+      <div style="display: flex; align-items: center; gap: 10px; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.4); padding: 10px 14px; border-radius: var(--radius-sm);">
+        <div style="font-size: 22px;">${this.platform === 'mobile' ? '📱' : '💻'}</div>
+        <div>
+          <div style="font-size: 13px; font-weight: 700; color: #fff;">${this.deviceName} <span style="font-size: 11px; color: var(--color-secondary);">(本机)</span></div>
+          <div style="font-size: 11px; color: #10b981; display: flex; align-items: center; gap: 4px;">
+            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span>
+            正在监听频道...
+          </div>
+        </div>
+      </div>
+    `;
+
+    if (peerIds.length === 0) {
+      html += `
+        <!-- 等待对端加入状态 -->
+        <div style="display: flex; align-items: center; gap: 8px; background: var(--surface-low); border: 1px dashed var(--border-light); padding: 10px 14px; border-radius: var(--radius-sm); color: var(--text-muted); font-size: 12px;">
+          <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-secondary);">qr_code_scanner</span>
+          <span>等待手机或电脑对端连接... (可点击上方复制链接发给手机)</span>
+        </div>
+      `;
+    } else {
+      peerIds.forEach(id => {
+        const peer = this.peers[id];
+        const icon = peer.platform === 'mobile' ? '📱' : '💻';
+        html += `
+          <!-- 发现的对端设备卡片 -->
+          <div style="display: flex; align-items: center; gap: 10px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); padding: 10px 14px; border-radius: var(--radius-sm); animation: fadeIn 0.3s ease;">
+            <div style="font-size: 22px;">${icon}</div>
+            <div>
+              <div style="font-size: 13px; font-weight: 700; color: #fff;">${peer.name}</div>
+              <div style="font-size: 11px; color: #10b981; display: flex; align-items: center; gap: 4px;">
+                <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span>
+                已就绪，可随时投送
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    container.innerHTML = html;
+  },
+
+  // 4. 发送与广播 Payload
+  async sendPayload(payload, showLocal = true) {
+    if (this.channel) {
+      this.channel.postMessage(payload);
+    }
+
+    try {
+      await fetch(this.API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `825412_drop_${this.roomId}`,
+          data: payload
+        })
+      });
+    } catch (err) {
+      // 容错处理
+    }
+
+    if (showLocal && payload.type !== 'presence') {
+      this.renderSentItem(payload);
+    }
+  },
+
+  async pollCloudRelay() {
+    try {
+      const res = await fetch(this.API_BASE);
+      if (!res.ok) return;
+      const list = await res.json();
+      if (!Array.isArray(list)) return;
+
+      const roomItems = list.filter(item => item.name === `825412_drop_${this.roomId}` && item.data);
+      roomItems.forEach(item => {
+        const payload = item.data;
+        if (payload.sender !== this.deviceId && payload.timestamp > this.lastReceivedTime) {
+          this.lastReceivedTime = payload.timestamp;
+          this.handleIncomingPayload(payload);
+        }
+      });
+    } catch (e) {
+      // 静默轮询
+    }
+  },
+
+  handleIncomingPayload(payload) {
+    // 1. 心跳/对端上线报文
+    if (payload.type === 'presence') {
+      const isNew = !this.peers[payload.sender];
+      this.peers[payload.sender] = {
+        name: payload.senderName || '未知设备',
+        platform: payload.platform || 'device',
+        lastSeen: Date.now()
+      };
+      this.renderPeersList();
+
+      if (isNew) {
+        this.appendSystemNotice(`🎉 发现新设备 [${payload.senderName}] 已上线！现在可以互传文件和文本了。`);
+      }
+      return;
+    }
+
+    // 2. 文本或文件报文
+    this.receivePayload(payload);
+  },
+
+  // 5. 文本与文件发送绑定
   initSendActions() {
     const sendTextBtn = document.getElementById('airdrop-send-text-btn');
     const textInput = document.getElementById('airdrop-text-input');
@@ -110,13 +285,11 @@ const AirDropController = {
         };
 
         this.sendPayload(payload);
-        this.renderSentItem(payload);
         textInput.value = '';
       });
     }
   },
 
-  // 4. 文件拖拽上传
   initFileDrop() {
     const dropZone = document.getElementById('airdrop-dropzone');
     const fileInput = document.getElementById('airdrop-file-input');
@@ -155,7 +328,7 @@ const AirDropController = {
 
   processFileSend(file) {
     if (file.size > 10 * 1024 * 1024) {
-      alert('单次投送文件请限制在 10MB 以内，以确保浏览器秒级传输体验。');
+      alert('单次投送文件请限制在 10MB 以内，以确保传输速度。');
       return;
     }
 
@@ -173,54 +346,8 @@ const AirDropController = {
       };
 
       this.sendPayload(payload);
-      this.renderSentItem(payload);
     };
     reader.readAsDataURL(file);
-  },
-
-  // 广播传输数据
-  async sendPayload(payload) {
-    // 1. 本地广播通道 (同机多端)
-    if (this.channel) {
-      this.channel.postMessage(payload);
-    }
-
-    // 2. 云端安全沙盒写入 (跨网络设备推送)
-    try {
-      await fetch(this.API_BASE, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: `825412_drop_${this.roomId}`,
-          data: payload
-        })
-      });
-    } catch (err) {
-      console.error('Relay error:', err);
-    }
-  },
-
-  lastReceivedTime: Date.now(),
-
-  async pollCloudRelay() {
-    try {
-      // 检查房间最近消息
-      const res = await fetch(this.API_BASE);
-      if (!res.ok) return;
-      const list = await res.json();
-      if (!Array.isArray(list)) return;
-
-      const roomItems = list.filter(item => item.name === `825412_drop_${this.roomId}` && item.data);
-      roomItems.forEach(item => {
-        const payload = item.data;
-        if (payload.sender !== this.deviceId && payload.timestamp > this.lastReceivedTime) {
-          this.lastReceivedTime = payload.timestamp;
-          this.receivePayload(payload);
-        }
-      });
-    } catch (e) {
-      // 静默处理轮询异常
-    }
   },
 
   receivePayload(payload) {
@@ -244,7 +371,7 @@ const AirDropController = {
             <span style="font-size: 11px; color: var(--text-muted);">${new Date(payload.timestamp).toLocaleTimeString()}</span>
           </div>
           <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 6px;">📄 ${payload.fileName} (${payload.fileSize})</div>
-          ${isImage ? `<img src="${payload.dataUrl}" style="max-height: 120px; border-radius: 6px; margin-bottom: 8px; display: block;" />` : ''}
+          ${isImage ? `<img src="${payload.dataUrl}" style="max-height: 140px; border-radius: 6px; margin-bottom: 8px; display: block;" />` : ''}
           <a href="${payload.dataUrl}" download="${payload.fileName}" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
             <span class="material-symbols-outlined" style="font-size: 16px;">download</span> 下载接收文件
           </a>
