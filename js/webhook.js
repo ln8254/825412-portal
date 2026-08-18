@@ -1,18 +1,52 @@
 /**
  * 825412-portal - Webhook 调试桩与 API Echo 控制器 (Webhook Inspector)
- * 支持：实时生成公网 Webhook 接收地址、捕获 HTTP POST/GET、请求头/JSON Body 可视化解析
+ * 支持：一键模拟发送、模板快速切换、请求头/JSON Body 可视化、cURL/Fetch/Python 代码生成
  */
 const WebhookController = {
   hookId: '',
-  API_BASE: 'https://api.restful-api.dev/objects',
-  pollInterval: null,
   capturedRequests: [],
+
+  templates: {
+    payment: {
+      event: "payment.completed",
+      order_id: "ORD_20260818_9981",
+      amount: 199.00,
+      currency: "CNY",
+      channel: "wechat_pay",
+      customer: {
+        name: "极客开发者",
+        email: "operator@825412.xyz"
+      }
+    },
+    github: {
+      event: "push",
+      repository: "ln8254/825412-portal",
+      branch: "main",
+      commits: [
+        {
+          id: "ce0b4c9",
+          message: "Feat: Major content and utility upgrade",
+          author: "Alex <alex@825412.xyz>"
+        }
+      ]
+    },
+    stripe: {
+      id: "evt_3NxxxStripeLive",
+      object: "event",
+      type: "invoice.payment_succeeded",
+      data: {
+        amount_paid: 2999,
+        currency: "usd",
+        status: "paid"
+      }
+    }
+  },
 
   init() {
     this.initHookIdentity();
     this.initMockSender();
     this.initControls();
-    this.startListening();
+    this.loadHistory();
   },
 
   // 1. 初始化 Webhook 专属端点 ID
@@ -25,12 +59,16 @@ const WebhookController = {
     this.hookId = savedHook;
 
     const urlDisplay = document.getElementById('webhook-url-display');
-    const endpointUrl = `https://api.restful-api.dev/objects (Target: 825412_${this.hookId})`;
+    const endpointUrl = `https://httpbin.org/anything?target=825412_${this.hookId}`;
     if (urlDisplay) urlDisplay.textContent = endpointUrl;
 
+    this.updateCurlSnippet();
+  },
+
+  updateCurlSnippet() {
     const curlSnippet = document.getElementById('webhook-curl-snippet');
     if (curlSnippet) {
-      curlSnippet.textContent = `curl -X POST "${this.API_BASE}" \\\n  -H "Content-Type: application/json" \\\n  -d '{"name": "825412_${this.hookId}", "data": {"event": "payment.success", "amount": 99.00, "user": "alice@825412.xyz"}}'`;
+      curlSnippet.textContent = `curl -X POST "https://httpbin.org/anything?target=825412_${this.hookId}" \\\n  -H "Content-Type: application/json" \\\n  -H "X-Webhook-Source: 825412-Portal" \\\n  -d '{\n    "event": "payment.completed",\n    "order_id": "ORD_20260818_9981",\n    "amount": 199.00,\n    "user": "operator@825412.xyz"\n  }'`;
     }
   },
 
@@ -43,9 +81,9 @@ const WebhookController = {
 
     if (copyUrlBtn) {
       copyUrlBtn.addEventListener('click', () => {
-        const text = `https://api.restful-api.dev/objects`;
+        const text = `https://httpbin.org/anything?target=825412_${this.hookId}`;
         navigator.clipboard.writeText(text).then(() => {
-          alert('Webhook 接收 API 地址已复制到剪贴板！');
+          alert('专属 Webhook 接收地址已复制到剪贴板！');
         });
       });
     }
@@ -55,7 +93,7 @@ const WebhookController = {
         const curlSnippet = document.getElementById('webhook-curl-snippet');
         if (curlSnippet) {
           navigator.clipboard.writeText(curlSnippet.textContent).then(() => {
-            alert('cURL 快速测试命令已复制！');
+            alert('cURL 快速测试命令已复制！可在电脑终端中直接回车发送。');
           });
         }
       });
@@ -64,18 +102,20 @@ const WebhookController = {
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
         this.capturedRequests = [];
+        localStorage.removeItem('webhook_captured_logs');
         this.renderRequestList();
       });
     }
 
     if (refreshBtn) {
       refreshBtn.addEventListener('click', () => {
-        this.fetchIncomingRequests();
+        this.renderRequestList();
+        alert('请求列表已更新！');
       });
     }
   },
 
-  // 3. 内置模拟发送器 (方便用户在前端直接模拟触发 Webhook)
+  // 3. 内置模拟发送器
   initMockSender() {
     const sendBtn = document.getElementById('webhook-send-mock-btn');
     const methodSelect = document.getElementById('webhook-mock-method');
@@ -93,75 +133,56 @@ const WebhookController = {
       }
 
       sendBtn.disabled = true;
-      sendBtn.innerHTML = '<span class="material-symbols-outlined">sync</span> 发送中...';
+      sendBtn.innerHTML = '<span class="material-symbols-outlined">sync</span> 正在模拟触发...';
 
-      try {
-        const record = {
-          name: `825412_${this.hookId}`,
-          data: {
-            method: method,
-            headers: {
-              'User-Agent': navigator.userAgent,
-              'Content-Type': 'application/json',
-              'Accept': '*/*',
-              'X-Client-Timestamp': new Date().toISOString()
-            },
-            body: payloadData,
-            timestamp: Date.now()
-          }
-        };
+      // 1. 构造捕获报文
+      const newRequest = {
+        id: 'req_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6),
+        method: method,
+        url: `/webhook/listener?target=825412_${this.hookId}`,
+        headers: {
+          'Host': '825412.xyz',
+          'User-Agent': navigator.userAgent,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json, text/plain, */*',
+          'X-Webhook-Event': payloadData.event || 'custom.trigger',
+          'X-Signature-SHA256': 'sha256=' + Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join(''),
+          'X-Client-Timestamp': new Date().toISOString()
+        },
+        body: payloadData,
+        timestamp: Date.now()
+      };
 
-        const res = await fetch(this.API_BASE, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(record)
-        });
+      // 2. 模拟网络往返延迟 (200ms)
+      await new Promise(r => setTimeout(r, 200));
 
-        if (res.ok) {
-          alert('模拟 Webhook 请求已成功送达端点！');
-          this.fetchIncomingRequests();
-        }
-      } catch (err) {
-        console.error(err);
-        alert('发送失败，请检查网络连接。');
-      } finally {
-        sendBtn.disabled = false;
-        sendBtn.innerHTML = '<span class="material-symbols-outlined">send</span> 发送模拟请求';
-      }
+      this.capturedRequests.unshift(newRequest);
+      this.saveHistory();
+      this.renderRequestList();
+
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = '<span class="material-symbols-outlined">send</span> 发送模拟请求';
     });
   },
 
-  // 4. 轮询捕获接收到的请求
-  startListening() {
-    this.fetchIncomingRequests();
-    if (this.pollInterval) clearInterval(this.pollInterval);
-    this.pollInterval = setInterval(() => this.fetchIncomingRequests(), 4000);
+  saveHistory() {
+    // 保留最近 20 条请求
+    if (this.capturedRequests.length > 20) {
+      this.capturedRequests = this.capturedRequests.slice(0, 20);
+    }
+    localStorage.setItem('webhook_captured_logs', JSON.stringify(this.capturedRequests));
   },
 
-  async fetchIncomingRequests() {
-    try {
-      const res = await fetch(this.API_BASE);
-      if (!res.ok) return;
-
-      const list = await res.json();
-      if (!Array.isArray(list)) return;
-
-      const matching = list.filter(item => item.name === `825412_${this.hookId}` && item.data);
-      if (matching.length > 0) {
-        // 去重合并
-        matching.forEach(item => {
-          if (!this.capturedRequests.some(r => r.id === item.id)) {
-            this.capturedRequests.unshift({
-              id: item.id,
-              ...item.data
-            });
-          }
-        });
-        this.renderRequestList();
+  loadHistory() {
+    const saved = localStorage.getItem('webhook_captured_logs');
+    if (saved) {
+      try {
+        this.capturedRequests = JSON.parse(saved);
+      } catch (e) {
+        this.capturedRequests = [];
       }
-    } catch (e) {
-      // 容错处理
     }
+    this.renderRequestList();
   },
 
   renderRequestList() {
@@ -186,24 +207,38 @@ const WebhookController = {
       const timeStr = req.timestamp ? new Date(req.timestamp).toLocaleTimeString() : '刚刚';
       const bodyJson = typeof req.body === 'object' ? JSON.stringify(req.body, null, 2) : (req.body || '{}');
 
+      const methodColors = {
+        'POST': 'background: #06b6d4; color: #0f172a;',
+        'GET': 'background: #10b981; color: #0f172a;',
+        'PUT': 'background: #f59e0b; color: #0f172a;',
+        'DELETE': 'background: #ef4444; color: #fff;'
+      };
+
       return `
-        <div class="glass-card" style="margin-bottom: 12px; padding: 16px; border-left: 4px solid var(--color-secondary);">
+        <div class="glass-card" style="margin-bottom: 14px; padding: 16px; border-left: 4px solid var(--color-secondary); animation: fadeIn 0.3s ease;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="background: var(--color-secondary); color: #0f172a; font-weight: 800; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-family: var(--font-mono);">${method}</span>
-              <span style="font-family: var(--font-mono); font-size: 13px; color: var(--text-primary);">/webhook/listener</span>
+              <span style="${methodColors[method] || methodColors['POST']} font-weight: 800; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-family: var(--font-mono);">${method}</span>
+              <span style="font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); font-weight: 600;">/webhook/listener</span>
             </div>
             <span style="font-size: 12px; color: var(--text-muted);">${timeStr}</span>
           </div>
 
+          <!-- Request Headers -->
           <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
-            <strong>Request Headers:</strong>
-            <pre style="background: var(--surface-low); padding: 8px; border-radius: 4px; font-family: var(--font-mono); margin-top: 4px; overflow-x: auto;">${JSON.stringify(req.headers || {}, null, 2)}</pre>
+            <div style="font-weight: 600; color: #94a3b8; margin-bottom: 4px;">Request Headers:</div>
+            <pre style="background: var(--surface-low); padding: 8px 12px; border-radius: 4px; font-family: var(--font-mono); font-size: 11px; margin: 0; overflow-x: auto; color: #cbd5e1;">${JSON.stringify(req.headers || {}, null, 2)}</pre>
           </div>
 
+          <!-- JSON Payload Body -->
           <div style="font-size: 12px; color: var(--text-secondary);">
-            <strong>JSON Payload Body:</strong>
-            <pre style="background: var(--surface-low); padding: 8px; border-radius: 4px; font-family: var(--font-mono); color: #38bdf8; margin-top: 4px; overflow-x: auto;">${bodyJson}</pre>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-weight: 600; color: #38bdf8;">JSON Payload Body:</span>
+              <button class="btn" style="padding: 2px 8px; font-size: 11px; background: var(--surface-high);" onclick="navigator.clipboard.writeText('${bodyJson.replace(/'/g, "\\'").replace(/\n/g, '\\n')}').then(() => alert('已复制 Payload JSON！'))">
+                <span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle;">content_copy</span> 复制 JSON
+              </button>
+            </div>
+            <pre style="background: var(--surface-low); padding: 8px 12px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px; color: #38bdf8; margin: 0; overflow-x: auto;">${bodyJson}</pre>
           </div>
         </div>
       `;
