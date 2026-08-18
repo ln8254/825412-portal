@@ -84,6 +84,14 @@
         <span class="material-symbols-outlined">smart_toy</span>
         <span data-i18n="nav_ai">AI 智能助手</span>
       </li>
+      <li class="nav-item" data-target="airdrop-view">
+        <span class="material-symbols-outlined">wifi_tethering</span>
+        <span data-i18n="nav_airdrop">极客隔空快传</span>
+      </li>
+      <li class="nav-item" data-target="webhook-view">
+        <span class="material-symbols-outlined">webhook</span>
+        <span data-i18n="nav_webhook">Webhook 调试桩</span>
+      </li>
     </ul>
     
     <div class="sidebar-footer">
@@ -578,6 +586,155 @@
         </div>
       </div>
     </section>
+
+    <!-- 4. 极客隔空快传 View -->
+    <section id="airdrop-view" class="view-panel">
+      <div class="view-header">
+        <h1 class="view-title" data-i18n="airdrop_title">极客隔空快传 (AirDrop 网页版)</h1>
+        <p class="view-subtitle" data-i18n="airdrop_subtitle">无需登录、跨局域网与设备秒级互传文件、文本与剪贴板，彻底告别微信文件传输助手。</p>
+      </div>
+
+      <div class="glass-card" style="margin-bottom: 24px; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;" data-i18n="airdrop_my_device">当前设备标识:</div>
+            <div id="airdrop-my-name" style="font-size: 16px; font-weight: 700; color: var(--color-secondary);">💻 Desktop Workstation</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <span style="font-size: 13px; color: var(--text-secondary);" data-i18n="airdrop_room_label">当前互传频道:</span>
+            <span id="airdrop-current-room" style="font-family: var(--font-mono); font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: 4px;">#ROOM</span>
+            <button class="btn btn-primary" id="airdrop-copy-link-btn" style="padding: 8px 14px; font-size: 13px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">qr_code_2</span>
+              <span data-i18n="airdrop_copy_invite">手机扫码/复制直连链接</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; gap: 10px;">
+          <input type="text" class="text-input" id="airdrop-room-input" style="max-width: 260px;" placeholder="输入或切换自定义频道码...">
+          <button class="btn" id="airdrop-join-btn" style="background: var(--surface-high);" data-i18n="airdrop_join_btn">切换频道</button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- 发送面板 -->
+        <div class="glass-card">
+          <h3 style="font-weight: 700; color: var(--color-primary); margin-bottom: 16px;" data-i18n="airdrop_send_title">📤 投送文件与文本</h3>
+          
+          <!-- 拖拽上传区域 -->
+          <div id="airdrop-dropzone" style="border: 2px dashed var(--border-light); border-radius: var(--radius-md); padding: 32px 20px; text-align: center; cursor: pointer; transition: var(--transition-smooth); background: var(--surface-low); margin-bottom: 16px;">
+            <span class="material-symbols-outlined" style="font-size: 48px; color: var(--color-secondary); margin-bottom: 8px;">cloud_upload</span>
+            <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);" data-i18n="airdrop_drop_hint">拖拽文件至此 或 点击选择文件</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" data-i18n="airdrop_drop_sub">支持图片、压缩包、代码文件、文档 (最大 10MB)</div>
+            <input type="file" id="airdrop-file-input" style="display: none;">
+          </div>
+
+          <!-- 文本快传 -->
+          <div class="text-area-wrapper" style="min-height: 100px; margin-bottom: 12px;">
+            <textarea class="custom-textarea" id="airdrop-text-input" data-i18n-ph="airdrop_text_ph" placeholder="输入你想秒传给手机或其他电脑的文本或代码..."></textarea>
+          </div>
+          <button class="btn btn-primary" id="airdrop-send-text-btn" style="width: 100%;">
+            <span class="material-symbols-outlined">send</span>
+            <span data-i18n="airdrop_send_text_btn">投送文本至对端</span>
+          </button>
+        </div>
+
+        <!-- 接收动态面板 -->
+        <div class="glass-card" style="display: flex; flex-direction: column;">
+          <h3 style="font-weight: 700; color: #10b981; margin-bottom: 16px;" data-i18n="airdrop_recv_title">📥 实时接收传输流</h3>
+          <div id="airdrop-messages-list" style="flex-grow: 1; max-height: 480px; overflow-y: auto;">
+            <!-- 动态消息流将在此渲染 -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Webhook 调试桩 View -->
+    <section id="webhook-view" class="view-panel">
+      <div class="view-header">
+        <h1 class="view-title" data-i18n="webhook_title">Webhook 调试桩 & API 测试中继</h1>
+        <p class="view-subtitle" data-i18n="webhook_subtitle">一键生成专属公网 HTTP 回调端点，实时捕获、格式化并分析第三方 Webhook (GitHub, Stripe, 微信支付等) 请求报文。</p>
+      </div>
+
+      <!-- 端点信息卡片 -->
+      <div class="glass-card" style="margin-bottom: 20px; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
+          <div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;" data-i18n="webhook_endpoint_label">你的专属 Webhook 接收端点 (URL):</div>
+            <div id="webhook-url-display" style="font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: #38bdf8;">https://api.restful-api.dev/objects</div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-primary" id="webhook-copy-url-btn" style="font-size: 13px; padding: 8px 14px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+              <span data-i18n="webhook_btn_copy_url">复制 URL</span>
+            </button>
+            <button class="btn" id="webhook-copy-curl-btn" style="background: var(--surface-high); font-size: 13px; padding: 8px 14px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">terminal</span>
+              <span data-i18n="webhook_btn_copy_curl">复制 cURL 命令</span>
+            </button>
+            <button class="btn" id="webhook-refresh-btn" style="background: var(--surface-high); font-size: 13px; padding: 8px 14px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">refresh</span>
+            </button>
+            <button class="btn" id="webhook-clear-btn" style="background: var(--surface-high); font-size: 13px; padding: 8px 14px;" data-i18n="tool_text_clear">清空列表</button>
+          </div>
+        </div>
+
+        <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px 16px;">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;" data-i18n="webhook_curl_hint">终端一键发送测试请求示例:</div>
+          <pre id="webhook-curl-snippet" style="font-family: var(--font-mono); font-size: 12px; color: #a5b4fc; margin: 0; overflow-x: auto; white-space: pre-wrap;"></pre>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 360px 1fr; gap: 20px;">
+        <!-- 左侧：在线模拟发送器 -->
+        <div class="glass-card">
+          <h3 style="font-weight: 700; color: var(--color-secondary); margin-bottom: 16px;" data-i18n="webhook_mock_title">🧪 模拟发送 Webhook</h3>
+          <div class="form-group">
+            <label class="form-label" data-i18n="webhook_method_label">HTTP Method</label>
+            <select class="dropdown-select" id="webhook-mock-method" style="width: 100%;">
+              <option value="POST">POST (默认 JSON)</option>
+              <option value="GET">GET</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="webhook_body_label">Payload (JSON Body)</label>
+            <div class="text-area-wrapper" style="min-height: 180px;">
+              <textarea class="custom-textarea" id="webhook-mock-body" style="font-family: var(--font-mono); font-size: 12px;">{
+  "event": "payment.completed",
+  "order_id": "ORD_20260818_9981",
+  "amount": 199.00,
+  "currency": "USD",
+  "customer": {
+    "name": "Alex Geek",
+    "email": "alex@825412.xyz"
+  }
+}</textarea>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="webhook-send-mock-btn" style="width: 100%; margin-top: 12px;">
+            <span class="material-symbols-outlined">send</span>
+            <span data-i18n="webhook_btn_send_mock">发送模拟请求</span>
+          </button>
+        </div>
+
+        <!-- 右侧：实时捕获的请求流列表 -->
+        <div class="glass-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-weight: 700; color: var(--color-primary);" data-i18n="webhook_logs_title">📡 捕获到的请求报文</h3>
+            <span id="webhook-count-badge" style="font-size: 12px; color: var(--text-muted); background: var(--surface-high); padding: 4px 8px; border-radius: 12px;">0 条请求</span>
+          </div>
+
+          <div id="webhook-empty-state" style="text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px;">
+            <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5; margin-bottom: 8px;">hourglass_empty</span>
+            <div data-i18n="webhook_empty_hint">正在监听端点... 发送请求后将自动在此实时显示 Headers 与 Body 报文。</div>
+          </div>
+
+          <div id="webhook-requests-list" style="max-height: 550px; overflow-y: auto;"></div>
+        </div>
+      </div>
+    </section>
     
     <!-- 站点全局通用页脚 -->
     <footer class="site-footer">
@@ -790,6 +947,8 @@
   <script src="js/toolbox.js"></script>
   <script src="js/clipboard.js"></script>
   <script src="js/ai-chat.js"></script>
+  <script src="js/airdrop.js"></script>
+  <script src="js/webhook.js"></script>
   <script src="js/main.js"></script>
 
 </body>

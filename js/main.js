@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
   ToolboxController.init();
   ClipboardController.init();
   AiChatController.init();
+  if (typeof AirDropController !== 'undefined') AirDropController.init();
+  if (typeof WebhookController !== 'undefined') WebhookController.init();
 
   // 2. 初始化单页路由 (Tab 切换)
   initRouting();
