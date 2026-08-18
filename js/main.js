@@ -54,14 +54,51 @@ function initRouting() {
 
       // 切换视图面板显示
       viewPanels.forEach(panel => panel.classList.remove('active'));
-      document.getElementById(targetViewId).classList.add('active');
+      const targetPanel = document.getElementById(targetViewId);
+      if (targetPanel) targetPanel.classList.add('active');
+
+      // 移动端点击导航项后自动关闭抽屉
+      closeMobileSidebar();
     });
   });
 
-  // 控制台快捷方式映射到各自的 Tab
-  document.getElementById('go-to-clipboard').addEventListener('click', () => {
-    triggerTabSwitch('clipboard-view');
+  // 移动端菜单按钮与遮罩事件
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileLangBtn = document.getElementById('mobile-lang-btn');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+  const sidebar = document.getElementById('main-sidebar');
+
+  if (mobileMenuBtn && sidebar) {
+    mobileMenuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      if (sidebarBackdrop) sidebarBackdrop.classList.toggle('active');
+    });
+  }
+
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener('click', () => {
+      closeMobileSidebar();
+    });
+  }
+
+  if (mobileLangBtn && typeof I18nController !== 'undefined') {
+    mobileLangBtn.addEventListener('click', () => {
+      I18nController.toggleLanguage();
+    });
+  }
+
+  // 点击侧边栏底部法律条款等链接时，在手机端也自动收起抽屉
+  document.querySelectorAll('.footer-link-item').forEach(item => {
+    item.addEventListener('click', () => closeMobileSidebar());
   });
+
+  // 控制台快捷方式映射到各自的 Tab
+  const goToClip = document.getElementById('go-to-clipboard');
+  if (goToClip) {
+    goToClip.addEventListener('click', () => {
+      triggerTabSwitch('clipboard-view');
+    });
+  }
 
   document.getElementById('go-to-ai').addEventListener('click', () => {
     triggerTabSwitch('ai-view');
@@ -304,6 +341,14 @@ function startSystemMetricsMonitor() {
 
   // 每 5 秒重新测算一次 Ping 值
   setInterval(measurePing, 5000);
+}
+
+// 辅助函数：收起移动端侧边抽屉
+function closeMobileSidebar() {
+  const sidebar = document.getElementById('main-sidebar');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+  if (sidebar) sidebar.classList.remove('open');
+  if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
 }
 
 

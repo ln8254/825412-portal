@@ -60,8 +60,25 @@
 </head>
 <body>
 
+  <!-- 移动端顶部导航栏 (Mobile Top Bar) -->
+  <header class="mobile-header">
+    <div class="mobile-header-logo">
+      <div class="logo-icon" style="width: 32px; height: 32px; font-size: 14px;">82</div>
+      <span class="logo-text" style="font-size: 18px;">825412.xyz</span>
+    </div>
+    <div class="mobile-header-actions">
+      <button class="mobile-icon-btn" id="mobile-lang-btn" title="Toggle Language">🌐</button>
+      <button class="mobile-icon-btn" id="mobile-menu-btn" aria-label="Toggle Menu">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 移动端侧边栏遮罩层 -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
   <!-- 左侧边栏导航 -->
-  <nav class="sidebar">
+  <nav class="sidebar" id="main-sidebar">
     <div class="logo-container">
       <div class="logo-icon">82</div>
       <span class="logo-text">825412.xyz</span>
