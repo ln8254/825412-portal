@@ -59,7 +59,7 @@ const WebhookController = {
     this.hookId = savedHook;
 
     const urlDisplay = document.getElementById('webhook-url-display');
-    const endpointUrl = `https://httpbin.org/anything?target=825412_${this.hookId}`;
+    const endpointUrl = `${window.location.origin}/api/webhook?target=825412_${this.hookId}`;
     if (urlDisplay) urlDisplay.textContent = endpointUrl;
 
     this.updateCurlSnippet();
@@ -67,8 +67,9 @@ const WebhookController = {
 
   updateCurlSnippet() {
     const curlSnippet = document.getElementById('webhook-curl-snippet');
+    const origin = window.location.origin || 'https://825412.xyz';
     if (curlSnippet) {
-      curlSnippet.textContent = `curl -X POST "https://httpbin.org/anything?target=825412_${this.hookId}" \\\n  -H "Content-Type: application/json" \\\n  -H "X-Webhook-Source: 825412-Portal" \\\n  -d '{\n    "event": "payment.completed",\n    "order_id": "ORD_20260818_9981",\n    "amount": 199.00,\n    "user": "operator@825412.xyz"\n  }'`;
+      curlSnippet.textContent = `curl -X POST "${origin}/api/webhook?target=825412_${this.hookId}" \\\n  -H "Content-Type: application/json" \\\n  -H "X-Webhook-Source: 825412-Portal" \\\n  -d '{\n    "event": "payment.completed",\n    "order_id": "ORD_20260818_9981",\n    "amount": 199.00,\n    "user": "operator@825412.xyz"\n  }'`;
     }
   },
 
@@ -81,7 +82,8 @@ const WebhookController = {
 
     if (copyUrlBtn) {
       copyUrlBtn.addEventListener('click', () => {
-        const text = `https://httpbin.org/anything?target=825412_${this.hookId}`;
+        const origin = window.location.origin || 'https://825412.xyz';
+        const text = `${origin}/api/webhook?target=825412_${this.hookId}`;
         navigator.clipboard.writeText(text).then(() => {
           alert('专属 Webhook 接收地址已复制到剪贴板！');
         });
