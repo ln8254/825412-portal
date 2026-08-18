@@ -47,6 +47,7 @@ const I18nController = {
       'dash_shortcut_text': '文本处理',
       'dash_no_pastes': '暂无最近分享的贴纸...',
       'dash_go_clip': '进入剪贴板',
+      'dash_go_airdrop': '进入隔空快传',
 
       // 剪贴板
       'clip_title': '匿名剪贴板',
@@ -236,6 +237,7 @@ const I18nController = {
       'dash_shortcut_text': 'Text Processor',
       'dash_no_pastes': 'No recent paste shares...',
       'dash_go_clip': 'Go to Pastebin',
+      'dash_go_airdrop': 'Open AirDrop',
 
       // Clipboard
       'clip_title': 'Anonymous Pastebin',

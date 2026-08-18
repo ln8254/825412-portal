@@ -80,7 +80,7 @@
         <span class="material-symbols-outlined">build</span>
         <span data-i18n="nav_toolbox">极客工具箱</span>
       </li>
-      <li class="nav-item" data-target="ai-view">
+      <li class="nav-item" data-target="ai-view" style="display: none;">
         <span class="material-symbols-outlined">smart_toy</span>
         <span data-i18n="nav_ai">AI 智能助手</span>
       </li>
@@ -163,8 +163,23 @@
           </button>
         </div>
         
-        <!-- 卡片 3: AI 对话连接状态 -->
+        <!-- 卡片 3: 极客隔空快传快捷状态 -->
         <div class="glass-card">
+          <div class="stat-header">
+            <span class="stat-title" data-i18n="airdrop_title">极客隔空快传</span>
+            <span class="material-symbols-outlined stat-icon">wifi_tethering</span>
+          </div>
+          <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; min-height: 50px;">
+            免登录跨设备局域网文件与文本传输
+          </div>
+          <button class="btn btn-primary" style="padding: 6px 14px; font-size: 13px;" onclick="triggerTabSwitch('airdrop-view')">
+            <span class="material-symbols-outlined" style="font-size: 16px;">send_to_mobile</span>
+            <span data-i18n="dash_go_airdrop">进入隔空快传</span>
+          </button>
+        </div>
+
+        <!-- 卡片 4 (隐藏预留): AI 对话连接状态 -->
+        <div class="glass-card" style="display: none;">
           <div class="stat-header">
             <span class="stat-title" data-i18n="dash_ai_title">AI Neural Link</span>
             <span class="material-symbols-outlined stat-icon">hub</span>
@@ -756,17 +771,17 @@
         <span class="material-symbols-outlined modal-close" id="close-settings">close</span>
       </div>
       
-      <div class="alert-box">
+      <div class="alert-box" style="display: none;">
         <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px;">shield</span>
         <span data-i18n="set_alert">密钥安全提示：所有 API Key 均以加密形式仅储存在您的浏览器本地 (LocalStorage) 中，绝不会上传给任何第三方。</span>
       </div>
       
-      <div class="form-group">
+      <div class="form-group" style="display: none;">
         <label class="form-label" for="gemini-key-input" data-i18n="set_key_label">Gemini API Key</label>
         <input type="password" class="text-input" id="gemini-key-input" style="width: 100%;" data-i18n-ph="set_key_ph" placeholder="输入你的 Gemini API 密钥">
       </div>
       
-      <div class="form-group" style="margin-top: 20px;">
+      <div class="form-group" style="margin-top: 10px;">
         <label class="form-label">界面语言 / System Language</label>
         <select class="dropdown-select lang-selector" id="settings-lang-select" style="width: 100%; font-size: 14px; padding: 10px 14px;">
           <!-- 动态渲染全量语言 -->
