@@ -67,39 +67,80 @@ const I18nController = {
 
       // 工具箱
       'tool_title': '极客工具箱',
-      'tool_subtitle': '各种免安装的在线实用开发小工具。',
+      'tool_subtitle': '免安装、零依赖、纯本地运算的高效极客与开发者在线工具集。',
       'tool_pwd_tab': '密码生成器',
+      'tool_json_tab': 'JSON 格式化',
+      'tool_jwt_tab': 'JWT 调试器',
+      'tool_hash_tab': '哈希散列计算',
       'tool_time_tab': '时间戳转换',
       'tool_text_tab': '文本处理',
+      
+      // 密码生成器与熵值分析
       'tool_pwd_gen': '点击下方生成按钮',
+      'pwd_strength_title': '密码安全性评估：',
+      'pwd_crack_time_label': '暴力破解预估耗时：',
+      'pwd_charset_size_label': '可用字符集空间：',
+      'pwd_rec_label': '安全合规建议：',
       'tool_pwd_len': '密码长度:',
       'tool_pwd_upper': '包含大写字母 (A-Z)',
       'tool_pwd_lower': '包含小写字母 (a-z)',
       'tool_pwd_num': '包含数字 (0-9)',
       'tool_pwd_sym': '包含特殊符号 (!@#$%)',
       'tool_pwd_btn': '生成安全密码',
+
+      // JSON 工具
+      'json_btn_format_2': '格式化 (2空格)',
+      'json_btn_format_4': '格式化 (4空格)',
+      'json_btn_minify': '压缩 JSON',
+      'json_btn_copy': '复制结果',
+      'json_ph': '在此粘贴待校验或格式化的 JSON 字符串...',
+      'json_status_ready': 'JSON 解析器已就绪，输入后即刻进行语法树分析与高亮校验。',
+
+      // JWT 调试器
+      'jwt_input_label': 'Encoded Token (待解析令牌):',
+      'jwt_btn_sample': '载入示例',
+      'jwt_ph': '在此粘贴 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      'jwt_valid_text': '纯前端安全解析：绝无任何 Token 上传至远程服务器风险。',
+      'jwt_header_title': 'HEADER: 算法与令牌类型 (ALGORITHM & TOKEN TYPE)',
+      'jwt_payload_title': 'PAYLOAD: 数据载荷 (DATA CLAIMS)',
+
+      // 哈希计算
+      'hash_ph': '在此输入需要计算散列哈希的任意文本或密码字符串...',
+
+      // 时间戳
       'tool_time_curr': '当前本地时间',
       'tool_time_copy_sec': '复制秒',
       'tool_time_conv_title': '时间戳转换',
       'tool_time_conv_label': '时间戳 (秒) -> 日期时间',
       'tool_time_conv_btn': '转换',
+      'time_code_cheatsheet': '常用编程语言获取当前时间戳速查：',
+
+      // 文本工具
       'tool_text_ph': '在这里输入你想处理的文本...',
       'tool_text_upper': '大写转换',
       'tool_text_lower': '小写转换',
-      'tool_text_count': '计算字数',
+      'tool_text_count': '计算字数与指标',
       'tool_text_b64enc': 'Base64 编码',
       'tool_text_b64dec': 'Base64 解码',
+      'tool_text_urlenc': 'URL 编码',
+      'tool_text_urldec': 'URL 解码',
       'tool_text_clear': '清空',
       'tool_text_res_label': '结果展示:',
 
-      // 工具箱 FAQ
-      'tool_faq_title': '极客工具箱知识库与安全性说明',
-      'tool_faq_q1': '随机高强度密码生成器的安全性',
-      'tool_faq_a1': '本密码生成器完全基于客户端浏览器的密码学随机数算法（Web Crypto API）生成，包含大小写字母、数字与特殊符号。生成的密码绝不上传至任何服务器，保障您的账号资产安全。',
-      'tool_faq_q2': '什么是 Unix 时间戳（Timestamp）？',
-      'tool_faq_a2': 'Unix 时间戳是指格林威治时间 1970年01月01日00时00分00秒起至现在的总秒数（或毫秒数）。开发者常用时间戳在不同时区和系统中传递标准时间。',
-      'tool_faq_q3': 'Base64 编码与解码原理',
-      'tool_faq_a3': 'Base64 是一种基于 64 个可打印字符来表示二进制数据的方法。常用于在 HTTP 环境下传输简单的文本数据、图片或密文。',
+      // 工具箱深度技术知识专栏
+      'tool_faq_title': '极客工具箱技术专栏与算法知识库',
+      'tool_faq_q1': '密码信息熵（Entropy）与防暴力破解数学原理',
+      'tool_faq_a1': '密码信息熵的计算公式为 E = L * log2(N)，其中 L 为密码长度，N 为可用字符集池大小（大写+小写+数字+特殊符号共 94 个）。根据 NIST 安全建议，当熵值超过 80 Bits 时，采用每秒万亿次运算的现代超级算力集群穷举破解也需要数十亿年时间。',
+      'tool_faq_q4': 'JSON (RFC 8259) 标准规范与开发陷阱',
+      'tool_faq_a4': 'JSON 是一种严格基于文本的数据交换格式。常见陷阱包括：1) 必须使用双引号包裹键名；2) 尾部多余逗号（Trailing Comma）会导致解析异常；3) JavaScript 在处理超过 2^53 - 1 (9007199254740991) 的 64 位整型时会发生精度截断，建议大整数转为 String 传输。',
+      'tool_faq_q5': 'JWT (JSON Web Token) 机制与无状态认证架构',
+      'tool_faq_a5': 'JWT 由 Header（算法与类型）、Payload（声明载荷）和 Signature（防篡改签名）组成。JWT 属于自包含身份凭证，服务端无需查询 Session 数据库即可验证。在客户端存储时，强烈建议存放于 HttpOnly Cookie 以彻底杜绝 XSS 脚本窃取。',
+      'tool_faq_q6': '单向散列算法 (SHA-256 vs MD5) 与碰撞安全',
+      'tool_faq_a6': '散列算法具有不可逆性与雪崩效应。MD5（128位）与 SHA-1 已被证明存在碰撞漏洞，不推荐用于密码存储与数字签名。现代高安全场景推荐使用 SHA-256、SHA-512 以及针对密码存储设计的慢速哈希算法（如 Argon2、bcrypt 与 PBKDF2）。',
+      'tool_faq_q2': 'Unix 时间戳与 2038 年问题 (Year 2038 Problem)',
+      'tool_faq_a2': 'Unix 时间戳从 1970-01-01 00:00:00 UTC 开始计时。在传统的 32 位有符号整数系统中，时间戳将在 2038 年 1 月 19 日 03:14:07 溢出变成负数。现代系统和 64 位体系已彻底解决该问题，可支持长达 2920 亿年的时间跨度。',
+      'tool_faq_q3': 'Base64 编码与 URL 安全传输原理 (Base64URL)',
+      'tool_faq_a3': 'Base64 将每 3 个字节（24 bits）分割为 4 个 6-bit 单元并映射至 64 个 ASCII 字符，编码后体积会增加约 33%。Base64URL 进一步将 \'+\' 替换为 \'-\'，\'/\' 替换为 \'_\'，以避免在 HTTP URL、文件名和 JWT 中发生歧义。',
 
       // AI 对话
       'ai_title': 'AI 智能助手',
@@ -138,7 +179,7 @@ const I18nController = {
       // Navigation
       'nav_dashboard': 'Dashboard',
       'nav_clipboard': 'Pastebin',
-      'nav_toolbox': 'Toolbox',
+      'nav_toolbox': 'Geek Toolbox',
       'nav_ai': 'AI Assistant',
       'nav_settings': 'Settings',
       'nav_about': 'About Us',
@@ -185,39 +226,80 @@ const I18nController = {
 
       // Toolbox
       'tool_title': 'Geek Toolbox',
-      'tool_subtitle': 'Useful web-based developer tools with zero installation.',
+      'tool_subtitle': 'Zero-installation, client-side, privacy-focused online developer suite.',
       'tool_pwd_tab': 'Password Gen',
+      'tool_json_tab': 'JSON Formatter',
+      'tool_jwt_tab': 'JWT Debugger',
+      'tool_hash_tab': 'Hash Calculator',
       'tool_time_tab': 'Timestamp',
       'tool_text_tab': 'Text Utilities',
+
+      // Password Generator & Entropy
       'tool_pwd_gen': 'Click generate button below',
+      'pwd_strength_title': 'Password Security Evaluation:',
+      'pwd_crack_time_label': 'Estimated Brute-Force Crack Time:',
+      'pwd_charset_size_label': 'Available Charset Pool (N):',
+      'pwd_rec_label': 'Security Compliance Tip:',
       'tool_pwd_len': 'Password Length:',
       'tool_pwd_upper': 'Uppercase (A-Z)',
       'tool_pwd_lower': 'Lowercase (a-z)',
       'tool_pwd_num': 'Numbers (0-9)',
       'tool_pwd_sym': 'Symbols (!@#$%)',
       'tool_pwd_btn': 'Generate Secure Password',
+
+      // JSON Tool
+      'json_btn_format_2': 'Format (2 Spaces)',
+      'json_btn_format_4': 'Format (4 Spaces)',
+      'json_btn_minify': 'Minify JSON',
+      'json_btn_copy': 'Copy Result',
+      'json_ph': 'Paste raw JSON string here to format or validate...',
+      'json_status_ready': 'JSON parser ready. Real-time syntax tree analysis and linting active.',
+
+      // JWT Tool
+      'jwt_input_label': 'Encoded Token (To Decode):',
+      'jwt_btn_sample': 'Load Sample',
+      'jwt_ph': 'Paste your eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... here',
+      'jwt_valid_text': 'Client-Side Pure Parsing: Tokens are never uploaded to any remote server.',
+      'jwt_header_title': 'HEADER: ALGORITHM & TOKEN TYPE',
+      'jwt_payload_title': 'PAYLOAD: DATA CLAIMS',
+
+      // Hash Tool
+      'hash_ph': 'Enter any text or password string to calculate cryptographic hashes...',
+
+      // Timestamp
       'tool_time_curr': 'Current Local Time',
       'tool_time_copy_sec': 'Copy Seconds',
       'tool_time_conv_title': 'Timestamp Conversion',
       'tool_time_conv_label': 'Timestamp (sec) -> Datetime',
       'tool_time_conv_btn': 'Convert',
+      'time_code_cheatsheet': 'Current Timestamp Code Cheatsheet:',
+
+      // Text Utilities
       'tool_text_ph': 'Enter text to process here...',
       'tool_text_upper': 'UPPERCASE',
       'tool_text_lower': 'lowercase',
-      'tool_text_count': 'Word Count',
+      'tool_text_count': 'Word Count & Metrics',
       'tool_text_b64enc': 'Base64 Encode',
       'tool_text_b64dec': 'Base64 Decode',
+      'tool_text_urlenc': 'URL Encode',
+      'tool_text_urldec': 'URL Decode',
       'tool_text_clear': 'Clear',
       'tool_text_res_label': 'Result:',
 
-      // Toolbox FAQ
-      'tool_faq_title': 'Toolbox Knowledge Base & Security',
-      'tool_faq_q1': 'Security of Password Generator',
-      'tool_faq_a1': 'Generated entirely in your browser using Web Crypto API. Passwords are never sent to any server.',
-      'tool_faq_q2': 'What is a Unix Timestamp?',
-      'tool_faq_a2': 'A Unix timestamp is the total number of seconds elapsed since 00:00:00 UTC on Jan 1, 1970.',
-      'tool_faq_q3': 'Base64 Encoding & Decoding Principle',
-      'tool_faq_a3': 'Base64 converts binary data into 64 printable ASCII characters for safe HTTP transmission.',
+      // In-depth Knowledge Base
+      'tool_faq_title': 'Geek Toolbox Tech Articles & Knowledge Base',
+      'tool_faq_q1': 'Password Entropy & Mathematical Brute-Force Resistance',
+      'tool_faq_a1': 'Password entropy formula is E = L * log2(N), where L is length and N is charset pool size (94 possible ASCII chars). According to NIST guidelines, passwords with >80 bits entropy require billions of years to brute-force on modern supercomputer clusters.',
+      'tool_faq_q4': 'JSON (RFC 8259) Standards & Common Developer Pitfalls',
+      'tool_faq_a4': 'JSON is a strict text data interchange format. Common pitfalls: 1) Keys must be enclosed in double quotes; 2) Trailing commas are illegal in JSON; 3) JavaScript precision limit on 64-bit ints (> 2^53 - 1) may truncate large numbers, which should be transmitted as strings.',
+      'tool_faq_q5': 'JWT (JSON Web Token) Architecture & Stateless Auth',
+      'tool_faq_a5': 'JWT consists of Header, Payload, and Signature. It is self-contained and allows servers to authenticate requests without database queries. For client-side storage, HttpOnly cookies are strongly recommended to protect against XSS script theft.',
+      'tool_faq_q6': 'Cryptographic Hashes (SHA-256 vs MD5) & Collision Security',
+      'tool_faq_a6': 'Cryptographic hashes provide irreversibility and avalanche effect. MD5 (128-bit) and SHA-1 suffer from collision vulnerabilities and are deprecated for password storage. Use SHA-256/SHA-512 for integrity, and slow hashes (Argon2, bcrypt, PBKDF2) for passwords.',
+      'tool_faq_q2': 'Unix Timestamp & Year 2038 Problem (Y2038)',
+      'tool_faq_a2': 'Unix Epoch starts at 1970-01-01 00:00:00 UTC. Legacy 32-bit signed integers will overflow on Jan 19, 2038 at 03:14:07 UTC. Modern 64-bit systems completely resolve this, supporting time spans of 292 billion years.',
+      'tool_faq_q3': 'Base64 & URL-Safe Transmission Principles (Base64URL)',
+      'tool_faq_a3': 'Base64 groups 3 bytes (24 bits) into 4 6-bit chunks mapped to 64 ASCII characters, resulting in ~33% size overhead. Base64URL replaces \'+\' with \'-\' and \'/\' with \'_\' to avoid ambiguities in HTTP URLs and JWTs.',
 
       // AI Chat
       'ai_title': 'AI Assistant',

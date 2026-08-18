@@ -79,15 +79,14 @@ function initRouting() {
       toolTabs.forEach(tab => tab.classList.remove('active'));
       toolViews.forEach(view => view.classList.remove('active'));
 
-      if (toolType === 'password') {
+      const targetTabBtn = document.querySelector(`[data-tab="${toolType}-tab"]`);
+      const targetTabView = document.getElementById(`${toolType}-tab`);
+      if (targetTabBtn && targetTabView) {
+        targetTabBtn.classList.add('active');
+        targetTabView.classList.add('active');
+      } else {
         document.querySelector('[data-tab="password-tab"]').classList.add('active');
         document.getElementById('password-tab').classList.add('active');
-      } else if (toolType === 'time') {
-        document.querySelector('[data-tab="time-tab"]').classList.add('active');
-        document.getElementById('time-tab').classList.add('active');
-      } else if (toolType === 'text') {
-        document.querySelector('[data-tab="text-tab"]').classList.add('active');
-        document.getElementById('text-tab').classList.add('active');
       }
     });
   });

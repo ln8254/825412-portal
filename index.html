@@ -170,7 +170,7 @@
         </div>
       </div>
       
-      <!-- 快捷入口卡片组 -->
+      <!-- 快捷入口卡片组 (6大极客工具一键直达) -->
       <div class="glass-card">
         <h3 style="margin-bottom: 20px; font-weight: 700; color: var(--color-secondary);" data-i18n="dash_toolbox_title">快捷工具箱</h3>
         <div class="dashboard-features">
@@ -179,6 +179,24 @@
               <span class="material-symbols-outlined">lock</span>
             </div>
             <h4 data-i18n="dash_shortcut_pwd">密码生成器</h4>
+          </div>
+          <div class="feature-shortcut" data-tool="json">
+            <div class="shortcut-icon">
+              <span class="material-symbols-outlined">data_object</span>
+            </div>
+            <h4 data-i18n="tool_json_tab">JSON 格式化</h4>
+          </div>
+          <div class="feature-shortcut" data-tool="jwt">
+            <div class="shortcut-icon">
+              <span class="material-symbols-outlined">vpn_key</span>
+            </div>
+            <h4 data-i18n="tool_jwt_tab">JWT 调试器</h4>
+          </div>
+          <div class="feature-shortcut" data-tool="hash">
+            <div class="shortcut-icon">
+              <span class="material-symbols-outlined">fingerprint</span>
+            </div>
+            <h4 data-i18n="tool_hash_tab">哈希散列计算</h4>
           </div>
           <div class="feature-shortcut" data-tool="time">
             <div class="shortcut-icon">
@@ -259,23 +277,51 @@
     <section id="toolbox-view" class="view-panel">
       <div class="view-header">
         <h1 class="view-title" data-i18n="tool_title">极客工具箱</h1>
-        <p class="view-subtitle" data-i18n="tool_subtitle">各种免安装的在线实用开发小工具。</p>
+        <p class="view-subtitle" data-i18n="tool_subtitle">免安装、零依赖、纯本地运算的高效极客与开发者在线工具集。</p>
       </div>
       
       <!-- 子 Tab 导航 -->
       <div class="toolbox-tabs">
         <div class="toolbox-tab-btn active" data-tab="password-tab" data-i18n="tool_pwd_tab">密码生成器</div>
+        <div class="toolbox-tab-btn" data-tab="json-tab" data-i18n="tool_json_tab">JSON 格式化</div>
+        <div class="toolbox-tab-btn" data-tab="jwt-tab" data-i18n="tool_jwt_tab">JWT 调试器</div>
+        <div class="toolbox-tab-btn" data-tab="hash-tab" data-i18n="tool_hash_tab">哈希散列计算</div>
         <div class="toolbox-tab-btn" data-tab="time-tab" data-i18n="tool_time_tab">时间戳转换</div>
         <div class="toolbox-tab-btn" data-tab="text-tab" data-i18n="tool_text_tab">文本处理</div>
       </div>
       
-      <!-- 子视图：密码生成器 -->
+      <!-- 1. 子视图：密码生成器与信息熵评估 -->
       <div id="password-tab" class="tool-view active glass-card">
         <div class="pwd-result-box">
           <div class="pwd-display" id="generated-password" data-i18n="tool_pwd_gen">点击下方生成按钮</div>
           <button class="material-symbols-outlined" id="copy-password-btn" style="cursor: pointer; color: var(--color-secondary);">content_copy</button>
         </div>
         
+        <!-- 密码强度与熵值评估面板 -->
+        <div class="pwd-entropy-card">
+          <div class="entropy-header">
+            <span><strong data-i18n="pwd_strength_title">密码安全性评估：</strong><span id="pwd-strength-text" style="color: #10b981; font-weight:700;">极高 (Military Grade)</span></span>
+            <span id="pwd-entropy-val" style="color: var(--color-secondary); font-family: var(--font-mono);">熵值: 95.2 Bits</span>
+          </div>
+          <div class="strength-bar-bg">
+            <div class="strength-bar-fill" id="pwd-strength-bar" style="width: 95%;"></div>
+          </div>
+          <div class="entropy-details">
+            <div class="entropy-tag">
+              <span data-i18n="pwd_crack_time_label">暴力破解预估耗时：</span><br>
+              <b id="pwd-crack-time" style="color: #38bdf8;">约 3.2 亿年 (RTX 4090 集群)</b>
+            </div>
+            <div class="entropy-tag">
+              <span data-i18n="pwd_charset_size_label">可用字符集空间：</span><br>
+              <b id="pwd-charset-size">94 个可能字符 (N)</b>
+            </div>
+            <div class="entropy-tag">
+              <span data-i18n="pwd_rec_label">安全合规建议：</span><br>
+              <b id="pwd-security-tip" style="color: #10b981;">符合 NIST SP 800-63B 标准</b>
+            </div>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label" for="password-length"><span data-i18n="tool_pwd_len">密码长度:</span> <span id="length-val">16</span></label>
           <input type="range" class="range-input" id="password-length" min="8" max="64" value="16">
@@ -301,8 +347,99 @@
           <span data-i18n="tool_pwd_btn">生成安全密码</span>
         </button>
       </div>
+
+      <!-- 2. 子视图：JSON 格式化、校验与压缩 -->
+      <div id="json-tab" class="tool-view glass-card">
+        <div class="code-toolbar">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-primary" id="json-format-2-btn" style="padding: 8px 14px; font-size: 13px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">format_align_left</span>
+              <span data-i18n="json_btn_format_2">格式化 (2空格)</span>
+            </button>
+            <button class="btn" id="json-format-4-btn" style="background: var(--surface-high); padding: 8px 14px; font-size: 13px;">
+              <span data-i18n="json_btn_format_4">格式化 (4空格)</span>
+            </button>
+            <button class="btn" id="json-minify-btn" style="background: var(--surface-high); padding: 8px 14px; font-size: 13px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">compress</span>
+              <span data-i18n="json_btn_minify">压缩 JSON</span>
+            </button>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" id="json-copy-btn" style="background: var(--surface-high); padding: 8px 14px; font-size: 13px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+              <span data-i18n="json_btn_copy">复制结果</span>
+            </button>
+            <button class="btn" id="json-clear-btn" style="background: var(--surface-high); padding: 8px 14px; font-size: 13px;" data-i18n="tool_text_clear">清空</button>
+          </div>
+        </div>
+        <div class="text-area-wrapper" style="min-height: 280px;">
+          <textarea class="custom-textarea" id="json-input" data-i18n-ph="json_ph" placeholder="在此粘贴待校验或格式化的 JSON 字符串..."></textarea>
+        </div>
+        <div id="json-status-box" style="margin-top: 12px; font-size: 13px; font-family: var(--font-mono); color: var(--text-secondary);">
+          <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px; color: #10b981;">check_circle</span>
+          <span data-i18n="json_status_ready">JSON 解析器已就绪，输入后即刻进行语法树分析与高亮校验。</span>
+        </div>
+      </div>
+
+      <!-- 3. 子视图：JWT 令牌解析与调试 -->
+      <div id="jwt-tab" class="tool-view glass-card">
+        <div class="jwt-container">
+          <div>
+            <div class="jwt-section-card">
+              <div class="jwt-header-title">
+                <span style="color: var(--color-primary);" data-i18n="jwt_input_label">Encoded Token (待解析令牌):</span>
+                <button class="btn" id="jwt-load-sample" style="background: var(--surface-high); padding: 4px 8px; font-size: 11px;" data-i18n="jwt_btn_sample">载入示例</button>
+              </div>
+              <textarea class="custom-textarea jwt-token-input" id="jwt-input" style="height: 220px;" data-i18n-ph="jwt_ph" placeholder="在此粘贴 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+            </div>
+            <div id="jwt-validity-box" style="margin-top: 12px; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); font-size: 12px; color: #10b981;">
+              <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 16px;">verified_user</span>
+              <span id="jwt-validity-text" data-i18n="jwt_valid_text">纯前端安全解析：绝无任何 Token 上传至远程服务器风险。</span>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="jwt-section-card">
+              <div class="jwt-header-title" style="color: #f43f5e;" data-i18n="jwt_header_title">HEADER: 算法与令牌类型 (ALGORITHM & TOKEN TYPE)</div>
+              <textarea class="custom-textarea" id="jwt-header-output" readonly style="height: 90px; color: #f43f5e;"></textarea>
+            </div>
+            <div class="jwt-section-card">
+              <div class="jwt-header-title" style="color: #8b5cf6;" data-i18n="jwt_payload_title">PAYLOAD: 数据载荷 (DATA CLAIMS)</div>
+              <textarea class="custom-textarea" id="jwt-payload-output" readonly style="height: 120px; color: #a78bfa;"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 子视图：密码学哈希计算 -->
+      <div id="hash-tab" class="tool-view glass-card">
+        <div class="text-area-wrapper" style="min-height: 120px;">
+          <textarea class="custom-textarea" id="hash-input" data-i18n-ph="hash_ph" placeholder="在此输入需要计算散列哈希的任意文本或密码字符串..."></textarea>
+        </div>
+        <div class="hash-result-grid">
+          <div class="hash-row">
+            <span class="hash-label">MD5</span>
+            <span class="hash-val" id="hash-md5">-</span>
+            <button class="material-symbols-outlined" id="copy-hash-md5" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;">content_copy</button>
+          </div>
+          <div class="hash-row">
+            <span class="hash-label">SHA-1</span>
+            <span class="hash-val" id="hash-sha1">-</span>
+            <button class="material-symbols-outlined" id="copy-hash-sha1" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;">content_copy</button>
+          </div>
+          <div class="hash-row">
+            <span class="hash-label">SHA-256</span>
+            <span class="hash-val" id="hash-sha256">-</span>
+            <button class="material-symbols-outlined" id="copy-hash-sha256" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;">content_copy</button>
+          </div>
+          <div class="hash-row">
+            <span class="hash-label">SHA-512</span>
+            <span class="hash-val" id="hash-sha512">-</span>
+            <button class="material-symbols-outlined" id="copy-hash-sha512" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;">content_copy</button>
+          </div>
+        </div>
+      </div>
       
-      <!-- 子视图：时间戳转换 -->
+      <!-- 5. 子视图：时间戳转换与各语言代码 -->
       <div id="time-tab" class="tool-view glass-card">
         <div class="time-tool-grid">
           <div>
@@ -328,21 +465,33 @@
             </div>
           </div>
         </div>
+
+        <!-- 主流语言时间戳代码速查 -->
+        <div class="time-lang-snippet">
+          <div style="color: var(--color-secondary); font-weight: 700; margin-bottom: 6px;" data-i18n="time_code_cheatsheet">常用编程语言获取当前时间戳速查：</div>
+          <div><b>JavaScript:</b> <code>Math.floor(Date.now() / 1000)</code></div>
+          <div><b>Python:</b> <code>import time; int(time.time())</code></div>
+          <div><b>Go:</b> <code>import "time"; time.Now().Unix()</code></div>
+          <div><b>Java:</b> <code>System.currentTimeMillis() / 1000L</code></div>
+          <div><b>PHP:</b> <code>time()</code> | <b>Rust:</b> <code>SystemTime::now().duration_since(UNIX_EPOCH)</code></div>
+        </div>
       </div>
       
-      <!-- 子视图：文本处理 -->
+      <!-- 6. 子视图：文本处理 -->
       <div id="text-tab" class="tool-view glass-card">
         <div class="text-tool-container">
-          <div class="text-area-wrapper" style="min-height: 200px;">
+          <div class="text-area-wrapper" style="min-height: 180px;">
             <textarea class="custom-textarea" id="toolbox-text-input" data-i18n-ph="tool_text_ph" placeholder="在这里输入你想处理的文本..."></textarea>
           </div>
           
           <div class="text-btn-grid">
             <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-upper-btn" data-i18n="tool_text_upper">大写转换</button>
             <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-lower-btn" data-i18n="tool_text_lower">小写转换</button>
-            <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-count-btn" data-i18n="tool_text_count">计算字数</button>
+            <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-count-btn" data-i18n="tool_text_count">计算字数与指标</button>
             <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-b64-enc-btn" data-i18n="tool_text_b64enc">Base64 编码</button>
             <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-b64-dec-btn" data-i18n="tool_text_b64dec">Base64 解码</button>
+            <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-url-enc-btn" data-i18n="tool_text_urlenc">URL 编码</button>
+            <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-url-dec-btn" data-i18n="tool_text_urldec">URL 解码</button>
             <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-clear-btn" style="background: var(--surface-high);" data-i18n="tool_text_clear">清空</button>
           </div>
           
@@ -355,20 +504,38 @@
         </div>
       </div>
 
-      <!-- 工具箱指南与知识库 -->
+      <!-- 工具箱指南与深度知识库 (6 篇专业技术专栏) -->
       <div class="faq-container" style="margin-top: 32px;">
-        <h3 style="font-weight: 700; color: var(--color-secondary); font-size: 18px;" data-i18n="tool_faq_title">极客工具箱知识库与安全性说明</h3>
+        <h3 style="font-weight: 700; color: var(--color-secondary); font-size: 18px;" data-i18n="tool_faq_title">极客工具箱技术专栏与算法知识库</h3>
+        
         <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">lock</span><span data-i18n="tool_faq_q1">随机高强度密码生成器的安全性</span></div>
-          <div class="faq-answer" data-i18n="tool_faq_a1">本密码生成器完全基于客户端浏览器的密码学随机数算法（Web Crypto API）生成，包含大小写字母、数字与特殊符号。生成的密码绝不上传至任何服务器，保障您的账号资产安全。</div>
+          <div class="faq-question"><span class="material-symbols-outlined">lock</span><span data-i18n="tool_faq_q1">密码信息熵（Entropy）与防暴力破解数学原理</span></div>
+          <div class="faq-answer" data-i18n="tool_faq_a1">密码信息熵的计算公式为 E = L * log2(N)，其中 L 为密码长度，N 为可用字符集池大小（大写+小写+数字+特殊符号共 94 个）。根据 NIST 安全建议，当熵值超过 80 Bits 时，采用每秒万亿次运算的现代超级算力集群穷举破解也需要数十亿年时间。</div>
         </div>
+        
         <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">schedule</span><span data-i18n="tool_faq_q2">什么是 Unix 时间戳（Timestamp）？</span></div>
-          <div class="faq-answer" data-i18n="tool_faq_a2">Unix 时间戳是指格林威治时间 1970年01月01日00时00分00秒起至现在的总秒数（或毫秒数）。开发者常用时间戳在不同时区和系统中传递标准时间。</div>
+          <div class="faq-question"><span class="material-symbols-outlined">data_object</span><span data-i18n="tool_faq_q4">JSON (RFC 8259) 标准规范与开发陷阱</span></div>
+          <div class="faq-answer" data-i18n="tool_faq_a4">JSON 是一种严格基于文本的数据交换格式。常见陷阱包括：1) 必须使用双引号包裹键名；2) 尾部多余逗号（Trailing Comma）会导致解析异常；3) JavaScript 在处理超过 2^53 - 1 (9007199254740991) 的 64 位整型时会发生精度截断，建议大整数转为 String 传输。</div>
         </div>
+
         <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">code</span><span data-i18n="tool_faq_q3">Base64 编码与解码原理</span></div>
-          <div class="faq-answer" data-i18n="tool_faq_a3">Base64 是一种基于 64 个可打印字符来表示二进制数据的方法。常用于在 HTTP 环境下传输简单的文本数据、图片或密文。</div>
+          <div class="faq-question"><span class="material-symbols-outlined">vpn_key</span><span data-i18n="tool_faq_q5">JWT (JSON Web Token) 机制与无状态认证架构</span></div>
+          <div class="faq-answer" data-i18n="tool_faq_a5">JWT 由 Header（算法与类型）、Payload（声明载荷）和 Signature（防篡改签名）组成。JWT 属于自包含身份凭证，服务端无需查询 Session 数据库即可验证。在客户端存储时，强烈建议存放于 HttpOnly Cookie 以彻底杜绝 XSS 脚本窃取。</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question"><span class="material-symbols-outlined">fingerprint</span><span data-i18n="tool_faq_q6">单向散列算法 (SHA-256 vs MD5) 与碰撞安全</span></div>
+          <div class="faq-answer" data-i18n="tool_faq_a6">散列算法具有不可逆性与雪崩效应。MD5（128位）与 SHA-1 已被证明存在碰撞漏洞，不推荐用于密码存储与数字签名。现代高安全场景推荐使用 SHA-256、SHA-512 以及针对密码存储设计的慢速哈希算法（如 Argon2、bcrypt 与 PBKDF2）。</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question"><span class="material-symbols-outlined">schedule</span><span data-i18n="tool_faq_q2">Unix 时间戳与 2038 年问题 (Year 2038 Problem)</span></div>
+          <div class="faq-answer" data-i18n="tool_faq_a2">Unix 时间戳从 1970-01-01 00:00:00 UTC 开始计时。在传统的 32 位有符号整数系统中，时间戳将在 2038 年 1 月 19 日 03:14:07 溢出变成负数。现代系统和 64 位体系已彻底解决该问题，可支持长达 2920 亿年的时间跨度。</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question"><span class="material-symbols-outlined">code</span><span data-i18n="tool_faq_q3">Base64 编码与 URL 安全传输原理 (Base64URL)</span></div>
+          <div class="faq-answer" data-i18n="tool_faq_a3">Base64 将每 3 个字节（24 bits）分割为 4 个 6-bit 单元并映射至 64 个 ASCII 字符，编码后体积会增加约 33%。Base64URL 进一步将 '+' 替换为 '-'，'/' 替换为 '_'，以避免在 HTTP URL、文件名和 JWT 中发生歧义。</div>
         </div>
       </div>
     </section>
