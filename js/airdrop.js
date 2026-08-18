@@ -1,18 +1,18 @@
 /**
- * 825412-portal - 极客隔空快传 (Geek AirDrop / Peer Drop Controller)
- * 支持：实时心跳探测、在线设备可视化雷达、双向文件/文本传输、对端一键呼叫
+ * 825412-portal - 极客隔空快传 (Geek AirDrop - WebRTC P2P Engine)
+ * 采用 PeerJS 原生 WebRTC DataChannel 协议，实现端到端纯 P2P 毫秒级直传
  */
 const AirDropController = {
   roomId: '',
   deviceId: '',
   deviceName: '',
   platform: 'desktop',
-  channel: null,
-  pollTimer: null,
-  heartbeatTimer: null,
-  peers: {}, // 记录当前房间内活跃的设备 { [id]: { name, platform, lastSeen } }
-  API_BASE: 'https://api.restful-api.dev/objects',
-  lastReceivedTime: Date.now() - 5000,
+  peer: null,
+  myPeerId: '',
+  isHost: false,
+  activeConnections: {}, // { [peerId]: DataConnection }
+  peersInfo: {},        // { [peerId]: { name, platform } }
+  broadcastChan: null,
 
   init() {
     this.initDeviceIdentity();
@@ -22,16 +22,16 @@ const AirDropController = {
     this.renderPeersList();
   },
 
-  // 1. 初始化设备标识与昵称
+  // 1. 初始化本机标识
   initDeviceIdentity() {
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     this.platform = isMobile ? 'mobile' : 'desktop';
     const platformLabel = isMobile ? '📱 Mobile Device' : '💻 Desktop Workstation';
     
-    let savedDevId = sessionStorage.getItem('airdrop_device_id');
+    let savedDevId = sessionStorage.getItem('airdrop_dev_id');
     if (!savedDevId) {
-      savedDevId = 'dev_' + Math.random().toString(36).substring(2, 8);
-      sessionStorage.setItem('airdrop_device_id', savedDevId);
+      savedDevId = Math.random().toString(36).substring(2, 7);
+      sessionStorage.setItem('airdrop_dev_id', savedDevId);
     }
     this.deviceId = savedDevId;
     this.deviceName = `${platformLabel} (${(navigator.language || 'zh-CN').toUpperCase()})`;
@@ -40,13 +40,12 @@ const AirDropController = {
     if (nameEl) nameEl.textContent = this.deviceName;
   },
 
-  // 2. 初始化房间连接与监听
+  // 2. 初始化房间与 WebRTC 接入
   initRoomConnection() {
     const roomInput = document.getElementById('airdrop-room-input');
     const joinBtn = document.getElementById('airdrop-join-btn');
     const copyLinkBtn = document.getElementById('airdrop-copy-link-btn');
 
-    // 检查 URL 中是否有房间 Hash (#drop=XXXX)
     let initialRoom = '';
     if (window.location.hash.startsWith('#drop=')) {
       initialRoom = window.location.hash.replace('#drop=', '').trim().toUpperCase();
@@ -71,77 +70,156 @@ const AirDropController = {
         const url = `${window.location.origin}${window.location.pathname}#drop=${this.roomId}`;
         navigator.clipboard.writeText(url).then(() => {
           alert(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' 
-            ? 'AirDrop invite link copied! Open it on your mobile phone to connect instantly.' 
-            : '隔空快传邀请链接已复制！在手机浏览器中打开此链接即可秒连。');
+            ? 'AirDrop invite link copied! Open on your mobile phone to connect.' 
+            : '隔空快传邀请链接已复制！在手机端打开即可秒连。');
         });
       });
     }
   },
 
   joinRoom(roomId) {
-    this.roomId = roomId;
-    this.peers = {}; // 重置对端列表
-    this.lastReceivedTime = Date.now() - 3000;
+    this.roomId = roomId.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    this.activeConnections = {};
+    this.peersInfo = {};
 
     const roomBadge = document.getElementById('airdrop-current-room');
     const roomInput = document.getElementById('airdrop-room-input');
-    if (roomBadge) roomBadge.textContent = `#${roomId}`;
-    if (roomInput) roomInput.value = roomId;
+    if (roomBadge) roomBadge.textContent = `#${this.roomId}`;
+    if (roomInput) roomInput.value = this.roomId;
 
-    // 1. 同机跨 Tab 通道
+    // 1. 同机多标签广播通道
     if (window.BroadcastChannel) {
-      if (this.channel) this.channel.close();
-      this.channel = new BroadcastChannel(`airdrop_room_${roomId}`);
-      this.channel.onmessage = (e) => {
+      if (this.broadcastChan) this.broadcastChan.close();
+      this.broadcastChan = new BroadcastChannel(`airdrop_bcast_${this.roomId}`);
+      this.broadcastChan.onmessage = (e) => {
         if (e.data && e.data.sender !== this.deviceId) {
           this.handleIncomingPayload(e.data);
         }
       };
     }
 
-    // 2. 广播自身在线心跳
-    this.broadcastPresence();
-
-    // 3. 启动心跳定时器 (每 2.5 秒广播一次在线状态)
-    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
-    this.heartbeatTimer = setInterval(() => {
-      this.broadcastPresence();
-      this.pruneOfflinePeers();
-    }, 2500);
-
-    // 4. 开启云端中继拉取 (跨网络与手机传输)
-    if (this.pollTimer) clearInterval(this.pollTimer);
-    this.pollCloudRelay();
-    this.pollTimer = setInterval(() => this.pollCloudRelay(), 2500);
-
+    // 2. 建立 WebRTC P2P 节点
+    this.connectPeerNode();
     this.renderPeersList();
-    this.appendSystemNotice(`已接入隔空投送频道 #${roomId}。正在探测同频道设备...`);
   },
 
-  // 3. 广播心跳与状态感知
-  broadcastPresence() {
-    const presencePayload = {
-      type: 'presence',
-      sender: this.deviceId,
-      senderName: this.deviceName,
-      platform: this.platform,
-      timestamp: Date.now()
-    };
-    this.sendPayload(presencePayload, false);
-  },
+  connectPeerNode() {
+    if (typeof Peer === 'undefined') {
+      console.warn('PeerJS library not loaded, fallback to BroadcastChannel');
+      return;
+    }
 
-  pruneOfflinePeers() {
-    const now = Date.now();
-    let changed = false;
-    Object.keys(this.peers).forEach(peerId => {
-      if (now - this.peers[peerId].lastSeen > 8000) {
-        delete this.peers[peerId];
-        changed = true;
+    if (this.peer) {
+      try { this.peer.destroy(); } catch (e) {}
+    }
+
+    const hostPeerId = `a825412_host_${this.roomId.toLowerCase()}`;
+    const clientPeerId = `a825412_c_${this.roomId.toLowerCase()}_${this.deviceId}`;
+
+    // 优先尝试注册为 Host 节点
+    this.peer = new Peer(hostPeerId, {
+      debug: 1,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:global.stun.twilio.com:3478' }
+        ]
       }
     });
-    if (changed) {
+
+    this.peer.on('open', (id) => {
+      this.myPeerId = id;
+      this.isHost = true;
+      this.appendSystemNotice(`已成为频道 #${this.roomId} 主机节点，正在等待对端设备接入...`);
+    });
+
+    this.peer.on('connection', (conn) => {
+      this.setupConnection(conn);
+    });
+
+    // 如果 Host ID 已经被占（说明已有设备在房间），则自动降级为 Client 节点并连接 Host
+    this.peer.on('error', (err) => {
+      if (err.type === 'unavailable-id') {
+        this.peer.destroy();
+        this.isHost = false;
+        this.myPeerId = clientPeerId;
+        
+        this.peer = new Peer(clientPeerId, {
+          debug: 1,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:global.stun.twilio.com:3478' }
+            ]
+          }
+        });
+
+        this.peer.on('open', (id) => {
+          this.appendSystemNotice(`已作为客户端接入频道 #${this.roomId}，正在建立 WebRTC 直连...`);
+          const conn = this.peer.connect(hostPeerId, { reliable: true });
+          this.setupConnection(conn);
+        });
+
+        this.peer.on('connection', (conn) => {
+          this.setupConnection(conn);
+        });
+      } else {
+        console.error('Peer error:', err);
+      }
+    });
+  },
+
+  setupConnection(conn) {
+    conn.on('open', () => {
+      this.activeConnections[conn.peer] = conn;
+
+      // 握手：发送自身身份信息
+      conn.send({
+        type: 'handshake',
+        sender: this.deviceId,
+        senderName: this.deviceName,
+        platform: this.platform
+      });
+
       this.renderPeersList();
+    });
+
+    conn.on('data', (data) => {
+      this.handleIncomingPayload(data, conn);
+    });
+
+    conn.on('close', () => {
+      delete this.activeConnections[conn.peer];
+      delete this.peersInfo[conn.peer];
+      this.renderPeersList();
+    });
+
+    conn.on('error', () => {
+      delete this.activeConnections[conn.peer];
+      delete this.peersInfo[conn.peer];
+      this.renderPeersList();
+    });
+  },
+
+  handleIncomingPayload(payload, conn) {
+    if (!payload || !payload.type) return;
+
+    // 1. 握手报文
+    if (payload.type === 'handshake') {
+      const peerKey = conn ? conn.peer : payload.sender;
+      this.peersInfo[peerKey] = {
+        name: payload.senderName || '未知设备',
+        platform: payload.platform || 'device',
+        deviceId: payload.sender
+      };
+
+      this.renderPeersList();
+      this.appendSystemNotice(`🎉 WebRTC P2P 直连成功！发现对端设备 [${payload.senderName}]，可秒发文件！`);
+      return;
     }
+
+    // 2. 文本或文件内容
+    this.receivePayload(payload);
   },
 
   renderPeersList() {
@@ -149,8 +227,8 @@ const AirDropController = {
     const countBadge = document.getElementById('airdrop-peer-count');
     if (!container) return;
 
-    const peerIds = Object.keys(this.peers);
-    const totalCount = peerIds.length + 1; // 加上本机
+    const peerKeys = Object.keys(this.peersInfo);
+    const totalCount = peerKeys.length + 1;
 
     if (countBadge) {
       countBadge.textContent = `${totalCount} 台设备在线`;
@@ -164,23 +242,23 @@ const AirDropController = {
           <div style="font-size: 13px; font-weight: 700; color: #fff;">${this.deviceName} <span style="font-size: 11px; color: var(--color-secondary);">(本机)</span></div>
           <div style="font-size: 11px; color: #10b981; display: flex; align-items: center; gap: 4px;">
             <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span>
-            正在监听频道...
+            ${this.isHost ? 'Host 节点就绪' : 'Client 节点就绪'}
           </div>
         </div>
       </div>
     `;
 
-    if (peerIds.length === 0) {
+    if (peerKeys.length === 0) {
       html += `
         <!-- 等待对端加入状态 -->
         <div style="display: flex; align-items: center; gap: 8px; background: var(--surface-low); border: 1px dashed var(--border-light); padding: 10px 14px; border-radius: var(--radius-sm); color: var(--text-muted); font-size: 12px;">
           <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-secondary);">qr_code_scanner</span>
-          <span>等待手机或电脑对端连接... (可点击上方复制链接发给手机)</span>
+          <span>等待对端手机或电脑连接... (手机打开上方链接秒连)</span>
         </div>
       `;
     } else {
-      peerIds.forEach(id => {
-        const peer = this.peers[id];
+      peerKeys.forEach(k => {
+        const peer = this.peersInfo[k];
         const icon = peer.platform === 'mobile' ? '📱' : '💻';
         html += `
           <!-- 发现的对端设备卡片 -->
@@ -190,7 +268,7 @@ const AirDropController = {
               <div style="font-size: 13px; font-weight: 700; color: #fff;">${peer.name}</div>
               <div style="font-size: 11px; color: #10b981; display: flex; align-items: center; gap: 4px;">
                 <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span>
-                已就绪，可随时投送
+                WebRTC P2P 已连通，可投送
               </div>
             </div>
           </div>
@@ -201,72 +279,31 @@ const AirDropController = {
     container.innerHTML = html;
   },
 
-  // 4. 发送与广播 Payload
-  async sendPayload(payload, showLocal = true) {
-    if (this.channel) {
-      this.channel.postMessage(payload);
-    }
+  // 3. 发送数据 Payload (优先 P2P WebRTC，降级 BroadcastChannel)
+  sendPayload(payload) {
+    let sentViaP2P = false;
 
-    try {
-      await fetch(this.API_BASE, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: `825412_drop_${this.roomId}`,
-          data: payload
-        })
-      });
-    } catch (err) {
-      // 容错处理
-    }
-
-    if (showLocal && payload.type !== 'presence') {
-      this.renderSentItem(payload);
-    }
-  },
-
-  async pollCloudRelay() {
-    try {
-      const res = await fetch(this.API_BASE);
-      if (!res.ok) return;
-      const list = await res.json();
-      if (!Array.isArray(list)) return;
-
-      const roomItems = list.filter(item => item.name === `825412_drop_${this.roomId}` && item.data);
-      roomItems.forEach(item => {
-        const payload = item.data;
-        if (payload.sender !== this.deviceId && payload.timestamp > this.lastReceivedTime) {
-          this.lastReceivedTime = payload.timestamp;
-          this.handleIncomingPayload(payload);
-        }
-      });
-    } catch (e) {
-      // 静默轮询
-    }
-  },
-
-  handleIncomingPayload(payload) {
-    // 1. 心跳/对端上线报文
-    if (payload.type === 'presence') {
-      const isNew = !this.peers[payload.sender];
-      this.peers[payload.sender] = {
-        name: payload.senderName || '未知设备',
-        platform: payload.platform || 'device',
-        lastSeen: Date.now()
-      };
-      this.renderPeersList();
-
-      if (isNew) {
-        this.appendSystemNotice(`🎉 发现新设备 [${payload.senderName}] 已上线！现在可以互传文件和文本了。`);
+    // 遍历所有 WebRTC 直连通道发送
+    Object.values(this.activeConnections).forEach(conn => {
+      if (conn && conn.open) {
+        conn.send(payload);
+        sentViaP2P = true;
       }
-      return;
+    });
+
+    // 同时本地广播
+    if (this.broadcastChan) {
+      this.broadcastChan.postMessage(payload);
     }
 
-    // 2. 文本或文件报文
-    this.receivePayload(payload);
+    this.renderSentItem(payload);
+
+    if (!sentViaP2P && Object.keys(this.activeConnections).length === 0) {
+      this.appendSystemNotice(`⚠️ 当前频道暂无其他对端设备在线，已在本地广播。请确保手机也打开了相同频道 #${this.roomId}。`);
+    }
   },
 
-  // 5. 文本与文件发送绑定
+  // 4. 文本与文件发送绑定
   initSendActions() {
     const sendTextBtn = document.getElementById('airdrop-send-text-btn');
     const textInput = document.getElementById('airdrop-text-input');
@@ -327,8 +364,8 @@ const AirDropController = {
   },
 
   processFileSend(file) {
-    if (file.size > 10 * 1024 * 1024) {
-      alert('单次投送文件请限制在 10MB 以内，以确保传输速度。');
+    if (file.size > 50 * 1024 * 1024) {
+      alert('P2P 直传单次文件请限制在 50MB 以内。');
       return;
     }
 
@@ -435,7 +472,7 @@ const AirDropController = {
     item.style.fontSize = '12px';
     item.style.color = 'var(--text-muted)';
     item.style.textAlign = 'center';
-    item.style.padding = '8px 0';
+    item.style.padding = '6px 0';
     item.innerHTML = `📡 <em>${msg}</em>`;
     list.prepend(item);
   }
