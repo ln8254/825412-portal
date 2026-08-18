@@ -169,6 +169,8 @@ function checkUrlHashPaste() {
         }
       }, 1200);
     }
+  } else if (hash.startsWith('#drop=')) {
+    triggerTabSwitch('airdrop-view');
   }
 }
 
