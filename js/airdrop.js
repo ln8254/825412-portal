@@ -1,6 +1,6 @@
 /**
- * 825412-portal - 极客隔空快传 (Geek AirDrop - WebRTC P2P Engine)
- * 采用 PeerJS 原生 WebRTC DataChannel 协议，实现端到端纯 P2P 毫秒级直传
+ * 825412-portal - 极客隔空快传 (Geek AirDrop - WebRTC P2P Realtime Engine)
+ * 支持：毫秒级下线感知、高频心跳保活、WebRTC 状态监听、主动手动刷新雷达
  */
 const AirDropController = {
   roomId: '',
@@ -11,14 +11,17 @@ const AirDropController = {
   myPeerId: '',
   isHost: false,
   activeConnections: {}, // { [peerId]: DataConnection }
-  peersInfo: {},        // { [peerId]: { name, platform } }
+  peersInfo: {},        // { [peerId]: { name, platform, lastSeen, deviceId } }
   broadcastChan: null,
+  heartbeatTimer: null,
 
   init() {
     this.initDeviceIdentity();
     this.initRoomConnection();
     this.initSendActions();
     this.initFileDrop();
+    this.initRescanAction();
+    this.initExitListeners();
     this.renderPeersList();
   },
 
@@ -100,6 +103,7 @@ const AirDropController = {
 
     // 2. 建立 WebRTC P2P 节点
     this.connectPeerNode();
+    this.startHeartbeatLoop();
     this.renderPeersList();
   },
 
@@ -137,7 +141,7 @@ const AirDropController = {
       this.setupConnection(conn);
     });
 
-    // 如果 Host ID 已经被占（说明已有设备在房间），则自动降级为 Client 节点并连接 Host
+    // 如果 Host ID 已经被占，自动降级为 Client 节点并连接 Host
     this.peer.on('error', (err) => {
       if (err.type === 'unavailable-id') {
         this.peer.destroy();
@@ -188,38 +192,180 @@ const AirDropController = {
       this.handleIncomingPayload(data, conn);
     });
 
-    conn.on('close', () => {
+    const handlePeerDisconnect = () => {
+      const peerName = this.peersInfo[conn.peer] ? this.peersInfo[conn.peer].name : '对端设备';
       delete this.activeConnections[conn.peer];
       delete this.peersInfo[conn.peer];
       this.renderPeersList();
-    });
+      this.appendSystemNotice(`🔌 设备 [${peerName}] 连接已断开。`);
+    };
 
-    conn.on('error', () => {
-      delete this.activeConnections[conn.peer];
-      delete this.peersInfo[conn.peer];
-      this.renderPeersList();
-    });
+    conn.on('close', handlePeerDisconnect);
+    conn.on('error', handlePeerDisconnect);
+
+    // 监听 WebRTC 底层 ICE 状态，快速捕获网络断开与页面关闭
+    if (conn.peerConnection) {
+      conn.peerConnection.addEventListener('iceconnectionstatechange', () => {
+        const state = conn.peerConnection.iceConnectionState;
+        if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+          handlePeerDisconnect();
+        }
+      });
+    }
+  },
+
+  // 3. 高频心跳循环与超时自动清理 (每 1.5 秒心跳，3.5 秒无响应即判定下线)
+  startHeartbeatLoop() {
+    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+    this.heartbeatTimer = setInterval(() => {
+      const now = Date.now();
+
+      // 向所有连接广播心跳 ping
+      Object.keys(this.activeConnections).forEach(peerId => {
+        const conn = this.activeConnections[peerId];
+        if (conn && conn.open) {
+          try {
+            conn.send({ type: 'ping', sender: this.deviceId });
+          } catch (e) {
+            delete this.activeConnections[peerId];
+            delete this.peersInfo[peerId];
+          }
+        }
+      });
+
+      // 检查对端活跃时间，超时立即剔除
+      let changed = false;
+      Object.keys(this.peersInfo).forEach(peerId => {
+        if (now - this.peersInfo[peerId].lastSeen > 3500) {
+          const peerName = this.peersInfo[peerId].name;
+          delete this.activeConnections[peerId];
+          delete this.peersInfo[peerId];
+          this.appendSystemNotice(`⌛ 设备 [${peerName}] 心跳超时，已自动离线。`);
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        this.renderPeersList();
+      }
+    }, 1500);
   },
 
   handleIncomingPayload(payload, conn) {
     if (!payload || !payload.type) return;
 
+    const peerKey = conn ? conn.peer : payload.sender;
+
     // 1. 握手报文
     if (payload.type === 'handshake') {
-      const peerKey = conn ? conn.peer : payload.sender;
+      const isNew = !this.peersInfo[peerKey];
       this.peersInfo[peerKey] = {
         name: payload.senderName || '未知设备',
         platform: payload.platform || 'device',
-        deviceId: payload.sender
+        deviceId: payload.sender,
+        lastSeen: Date.now()
       };
 
       this.renderPeersList();
-      this.appendSystemNotice(`🎉 WebRTC P2P 直连成功！发现对端设备 [${payload.senderName}]，可秒发文件！`);
+      if (isNew) {
+        this.appendSystemNotice(`🎉 WebRTC P2P 直连成功！发现对端设备 [${payload.senderName}]，可秒发文件！`);
+      }
       return;
     }
 
-    // 2. 文本或文件内容
+    // 2. 心跳 ping / pong
+    if (payload.type === 'ping') {
+      if (this.peersInfo[peerKey]) {
+        this.peersInfo[peerKey].lastSeen = Date.now();
+      }
+      if (conn && conn.open) {
+        try { conn.send({ type: 'pong', sender: this.deviceId }); } catch (e) {}
+      }
+      return;
+    }
+
+    if (payload.type === 'pong') {
+      if (this.peersInfo[peerKey]) {
+        this.peersInfo[peerKey].lastSeen = Date.now();
+      }
+      return;
+    }
+
+    // 3. 对端主动离开 (Bye) 报文
+    if (payload.type === 'bye') {
+      const peerName = this.peersInfo[peerKey] ? this.peersInfo[peerKey].name : '对端设备';
+      delete this.activeConnections[peerKey];
+      delete this.peersInfo[peerKey];
+      this.renderPeersList();
+      this.appendSystemNotice(`👋 设备 [${peerName}] 已主动关闭退出。`);
+      return;
+    }
+
+    // 4. 文本或文件内容
+    if (this.peersInfo[peerKey]) {
+      this.peersInfo[peerKey].lastSeen = Date.now();
+    }
     this.receivePayload(payload);
+  },
+
+  // 4. 页面关闭/刷新监听：主动广播离开通知
+  initExitListeners() {
+    const notifyExit = () => {
+      const byePayload = { type: 'bye', sender: this.deviceId };
+      Object.values(this.activeConnections).forEach(conn => {
+        if (conn && conn.open) {
+          try { conn.send(byePayload); } catch (e) {}
+        }
+      });
+      if (this.broadcastChan) {
+        try { this.broadcastChan.postMessage(byePayload); } catch (e) {}
+      }
+    };
+
+    window.addEventListener('beforeunload', notifyExit);
+    window.addEventListener('pagehide', notifyExit);
+  },
+
+  // 5. 手动主动刷新/重扫按钮
+  initRescanAction() {
+    const rescanBtn = document.getElementById('airdrop-rescan-btn');
+    const rescanIcon = document.getElementById('airdrop-rescan-icon');
+
+    if (!rescanBtn) return;
+
+    rescanBtn.addEventListener('click', () => {
+      if (rescanIcon) {
+        rescanIcon.style.transition = 'transform 0.5s ease';
+        rescanIcon.style.transform = 'rotate(360deg)';
+        setTimeout(() => { rescanIcon.style.transform = 'rotate(0deg)'; }, 500);
+      }
+
+      // 清理死连接并重新握手
+      this.reconnectMesh();
+      this.appendSystemNotice('🔄 已触发设备雷达手动重扫与信令重连。');
+    });
+  },
+
+  reconnectMesh() {
+    // 剔除超时连接
+    const now = Date.now();
+    Object.keys(this.peersInfo).forEach(k => {
+      if (now - this.peersInfo[k].lastSeen > 3000) {
+        delete this.activeConnections[k];
+        delete this.peersInfo[k];
+      }
+    });
+
+    // 重新连接 Host
+    if (!this.isHost && this.peer && this.peer.open) {
+      const hostPeerId = `a825412_host_${this.roomId.toLowerCase()}`;
+      if (!this.activeConnections[hostPeerId] || !this.activeConnections[hostPeerId].open) {
+        const conn = this.peer.connect(hostPeerId, { reliable: true });
+        this.setupConnection(conn);
+      }
+    }
+
+    this.renderPeersList();
   },
 
   renderPeersList() {
@@ -279,7 +425,7 @@ const AirDropController = {
     container.innerHTML = html;
   },
 
-  // 3. 发送数据 Payload (优先 P2P WebRTC，降级 BroadcastChannel)
+  // 6. 发送数据 Payload (优先 P2P WebRTC，降级 BroadcastChannel)
   sendPayload(payload) {
     let sentViaP2P = false;
 
@@ -303,7 +449,7 @@ const AirDropController = {
     }
   },
 
-  // 4. 文本与文件发送绑定
+  // 7. 文本与文件发送绑定
   initSendActions() {
     const sendTextBtn = document.getElementById('airdrop-send-text-btn');
     const textInput = document.getElementById('airdrop-text-input');

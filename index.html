@@ -650,12 +650,18 @@
 
       <!-- 频道内在线对等设备雷达感知区 -->
       <div class="glass-card" style="margin-bottom: 20px; padding: 16px 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
           <span style="font-size: 14px; font-weight: 700; color: var(--color-secondary); display: flex; align-items: center; gap: 6px;">
             <span class="material-symbols-outlined" style="font-size: 18px; color: #10b981;">sensors</span>
             <span data-i18n="airdrop_peers_title">频道内在线设备 (Connected Peers)</span>
           </span>
-          <span id="airdrop-peer-count" style="font-size: 12px; color: var(--text-muted); background: var(--surface-high); padding: 3px 10px; border-radius: 12px;">1 台设备在线</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="airdrop-peer-count" style="font-size: 12px; color: var(--text-muted); background: var(--surface-high); padding: 3px 10px; border-radius: 12px;">1 台设备在线</span>
+            <button class="btn" id="airdrop-rescan-btn" style="background: var(--surface-high); font-size: 12px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 14px;" id="airdrop-rescan-icon">refresh</span>
+              <span data-i18n="airdrop_rescan_btn">刷新对端设备</span>
+            </button>
+          </div>
         </div>
         <div id="airdrop-peers-container" style="display: flex; flex-wrap: wrap; gap: 12px;">
           <!-- 本机与对端设备卡片动态渲染 -->
