@@ -243,12 +243,12 @@ input, button, textarea, select {
 .view-panel {
   display: none;
   animation: fadeIn 0.4s ease-out forwards;
-  height: 100%;
+  flex-grow: 1;
+  width: 100%;
 }
 
 .view-panel.active {
-  display: flex;
-  flex-direction: column;
+  display: block;
 }
 
 @keyframes fadeIn {
@@ -975,8 +975,8 @@ input, button, textarea, select {
 }
 
 .site-footer {
-  margin-top: 40px;
-  padding-top: 20px;
+  margin-top: 60px;
+  padding: 24px 0;
   border-top: 1px solid var(--border-light);
   display: flex;
   justify-content: space-between;
@@ -985,6 +985,9 @@ input, button, textarea, select {
   gap: 16px;
   color: var(--text-muted);
   font-size: 13px;
+  width: 100%;
+  flex-shrink: 0;
+  clear: both;
 }
 
 .site-footer-links {

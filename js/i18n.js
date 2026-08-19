@@ -155,8 +155,8 @@ const I18nController = {
       // 隔空快传技术白皮书
       'airdrop_doc_title': 'WebRTC 极客隔空快传技术原理与安全白皮书',
       'airdrop_doc_sub': '了解端到端免中转点对点通信、STUN NAT 穿透协议与零云端日志安全架构。',
-      'airdrop_doc_mesh_title': '1. WebRTC 点对点直连握手流程 (P2P Mesh)',
-      'airdrop_doc_sec_title': '2. 为什么比微信文件助手/网盘更安全？',
+      'airdrop_card1_body': '<h3><span class="material-symbols-outlined" style="font-size: 18px;">sync_alt</span> 1. WebRTC 点对点直连握手流程 (P2P Mesh)</h3><p><strong>极客隔空快传</strong>基于浏览器底层原生的 <code>RTCPeerConnection</code> 与 <code>RTCDataChannel</code> 技术构建，整个通信生命周期完全脱离集中式服务器中转：</p><ol><li><strong>信令协商 (Signaling)</strong>：两端设备加入相同频道码后，通过公共 STUN 服务器（如 Google STUN）解析出各自公网与局域网的 ICE Candidates（网络候选地址）。</li><li><strong>SDP 交换与打洞穿透</strong>：设备双方交换 SDP Offer/Answer 进行 NAT 穿透握手，直接在双端建立双向 UDP 加密通道。</li><li><strong>SCTP 分块流式投送</strong>：大文件被拆分为 64KB 的二进制 <code>ArrayBuffer</code> 数据包，直接在双方浏览器内存间高速喷射，接收端动态重组并触发本地下载。</li></ol>',
+      'airdrop_card2_body': '<h3><span class="material-symbols-outlined" style="font-size: 18px;">security</span> 2. 为什么比微信文件助手/网盘更安全？</h3><p>在企业办公与敏感数据流转场景中，将代码、Token、密码或未公开文档发送给微信“文件传输助手”存在严重的合规隐患：</p><ul><li><strong>绝对零云端留存</strong>：本站没有任何中央存储服务器，你的文件和文本<strong>绝不经过任何云端硬盘</strong>，传输完毕立即释放内存。</li><li><strong>DTLS 军工级端到端加密</strong>：所有传输报文均由浏览器底层采用 DTLS (Datagram Transport Layer Security) 进行 128/256 位加密，局域网抓包者无法窃听。</li><li><strong>跨生态无缝互联</strong>：无需安装任何客户端或驱动，支持 Windows、Mac、Linux、iOS iPhone/iPad、Android 手机全平台秒级直传。</li></ul>',
       'airdrop_faq_title': '常见问题与传输排错 (FAQ)',
       'airdrop_faq_q1': '两台设备必须连接同一个 WiFi 路由器吗？',
       'airdrop_faq_a1': '不强制！只要两台设备都能访问互联网，WebRTC 就会自动进行 STUN 穿透尝试建立 P2P 直连。如果两台设备处于同一个 WiFi 局域网下，系统会自动优先走内网直连线路，传输速度可直接跑满千兆 WiFi 物理带宽！',
@@ -385,8 +385,8 @@ const I18nController = {
       // AirDrop Whitepaper
       'airdrop_doc_title': 'WebRTC Geek AirDrop Technical Principles & Security Whitepaper',
       'airdrop_doc_sub': 'Learn how peer-to-peer communication, STUN NAT traversal, and zero-cloud-log architecture work.',
-      'airdrop_doc_mesh_title': '1. WebRTC P2P Mesh Handshake Lifecycle',
-      'airdrop_doc_sec_title': '2. Why Is It More Secure Than Cloud Messengers?',
+      'airdrop_card1_body': '<h3><span class="material-symbols-outlined" style="font-size: 18px;">sync_alt</span> 1. WebRTC P2P Direct Mesh Handshake Lifecycle</h3><p><strong>Geek AirDrop</strong> is built natively upon the browser\'s <code>RTCPeerConnection</code> and <code>RTCDataChannel</code> APIs, operating completely free from centralized server relays:</p><ol><li><strong>Signaling Phase</strong>: When peers join the same channel room, public STUN servers resolve their respective public/private ICE Candidate network endpoints.</li><li><strong>SDP Exchange & NAT Traversal</strong>: Devices exchange SDP Offer/Answer handshakes to punch through NAT routers and establish direct bilateral UDP encrypted tunnels.</li><li><strong>SCTP Chunk Streaming</strong>: Large files are partitioned into 64KB binary <code>ArrayBuffer</code> slices, streaming directly across browser memories at full hardware wire speeds.</li></ol>',
+      'airdrop_card2_body': '<h3><span class="material-symbols-outlined" style="font-size: 18px;">security</span> 2. Why Is It More Secure Than Cloud Messengers?</h3><p>For engineering teams handling confidential source code, tokens, or private documents, cloud file helpers present major compliance liabilities:</p><ul><li><strong>Zero Cloud Intermediation</strong>: We operate no central file servers. Your payload <strong>never touches any third-party disk</strong>, freeing memory immediately upon transfer.</li><li><strong>DTLS Military-Grade Encryption</strong>: All DataChannel streams are encrypted with DTLS (Datagram Transport Layer Security) at 128/256-bit strength, preventing LAN sniffing.</li><li><strong>Universal Cross-Platform</strong>: Zero installation or plugins required. Seamlessly connect Windows, macOS, Linux, iOS, and Android in seconds.</li></ul>',
       'airdrop_faq_title': 'Frequently Asked Questions & Troubleshooting (FAQ)',
       'airdrop_faq_q1': 'Do both devices need to be on the same WiFi network?',
       'airdrop_faq_a1': 'No! As long as both devices have internet connectivity, WebRTC performs STUN NAT traversal to establish a direct P2P tunnel. When on the same WiFi, traffic flows over local LAN with gigabit speeds!',
