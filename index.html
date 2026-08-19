@@ -263,6 +263,109 @@
           </div>
         </div>
       </div>
+
+      <!-- 极客技术文库 & 开发者实用指南 (AdSense 高价值内容区) -->
+      <div class="doc-section">
+        <div class="doc-header">
+          <span class="material-symbols-outlined doc-header-icon">menu_book</span>
+          <div>
+            <h2 class="doc-header-title">极客技术文库 & 开发者实用指南 (Developer Knowledge Hub)</h2>
+            <p class="doc-header-subtitle">深入浅出的计算机网络、现代密码学、WebRTC 实时通信与 API 架构设计知识库。</p>
+          </div>
+        </div>
+
+        <div class="doc-grid">
+          <!-- 文库卡片 1 -->
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">lan</span> WebRTC P2P 局域网直连架构解析</h3>
+            <p>传统文件传输（如微信文件助手、企业微信）必须将文件上传到第三方服务器云盘，经过集中转存后再下载，存在<strong>传输慢、大小受限、隐私泄漏</strong>等弊端。</p>
+            <p>本站采用的 <strong>WebRTC (Web Real-Time Communication)</strong> 协议通过 STUN 信令服务器协商双方 NAT 地址后，直接在两台设备之间建立加密的 SCTP over DTLS 数据隧道：</p>
+            <ul>
+              <li><strong>零云端落盘</strong>：数据仅在两端浏览器内存之间流转，服务提供方无法截获。</li>
+              <li><strong>内网极速吞吐</strong>：同局域网下绕过公网带宽限制，传输速度可达内网物理带宽极限（百兆/千兆）。</li>
+            </ul>
+          </div>
+
+          <!-- 文库卡片 2 -->
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">security</span> 现代密码学与信息熵（Entropy）标准</h3>
+            <p>评估一个密码的安全强度，不能仅仅依靠“是否包含特殊符号”，而应依据 <strong>NIST SP 800-63B</strong> 国际密码学标准计算其<strong>信息熵（Bits）</strong>。</p>
+            <p>信息熵公式为：<code>E = L × log2(R)</code>，其中 <code>L</code> 为密码长度，<code>R</code> 为字符集空间大小：</p>
+            <ul>
+              <li><strong>低于 40 Bits</strong>：极弱，普通 GPU 秒级即可通过彩虹表爆破。</li>
+              <li><strong>60 ~ 80 Bits</strong>：中等强度，可抵御常规在线字典攻击。</li>
+              <li><strong>100 Bits 以上</strong>：极高强度，全球顶级超算集群暴力破解需要数十万年。</li>
+            </ul>
+          </div>
+
+          <!-- 文库卡片 3 -->
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">webhook</span> Webhook 事件驱动架构最佳实践</h3>
+            <p>在微服务与分布式系统中，<strong>Webhook（反向 HTTP 回调）</strong>相比传统定时轮询（Polling）节省了 95% 以上的无效网络开销与服务器 CPU 资源。</p>
+            <p>构建高可用的 Webhook 消费端必须遵循以下工程原则：</p>
+            <ul>
+              <li><strong>签名验证（Signature Verification）</strong>：校验 <code>HMAC-SHA256</code> 签名，防止假冒伪造。</li>
+              <li><strong>幂等性保障（Idempotency）</strong>：根据 <code>event_id</code> 做唯一索引去重，防范网络抖动重复投递。</li>
+              <li><strong>异步解耦</strong>：接收到请求后立即返回 <code>200 OK</code>，异步提交消息队列（Kafka/RabbitMQ）处理。</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 常用端口与密码学算法速查表 -->
+        <div class="doc-card" style="margin-bottom: 20px;">
+          <h3><span class="material-symbols-outlined" style="font-size: 18px;">table_chart</span> 开发者网络协议与常用密码学算法速查表</h3>
+          <div class="doc-table-wrapper">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>分类</th>
+                  <th>名称 / 协议</th>
+                  <th>标准端口 / 位宽</th>
+                  <th>典型应用场景</th>
+                  <th>安全等级</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>传输层</strong></td>
+                  <td>HTTPS / TLS 1.3</td>
+                  <td>443 (TCP)</td>
+                  <td>Web 网站端到端加密传输、API 接口调用</td>
+                  <td><span style="color: #10b981; font-weight: 700;">极高 (行业标准)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>实时通信</strong></td>
+                  <td>WebRTC DataChannel</td>
+                  <td>动态 UDP (STUN 3478)</td>
+                  <td>浏览器 P2P 隔空文件快传、音视频通话</td>
+                  <td><span style="color: #10b981; font-weight: 700;">极高 (DTLS 加密)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>哈希散列</strong></td>
+                  <td>SHA-256</td>
+                  <td>256 Bits (32 字节)</td>
+                  <td>区块链、数字证书签名、Webhook HMAC 验签</td>
+                  <td><span style="color: #10b981; font-weight: 700;">极高 (抗碰撞)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>哈希散列</strong></td>
+                  <td>MD5</td>
+                  <td>128 Bits (16 字节)</td>
+                  <td>大文件完整性校验、内容去重 Hash</td>
+                  <td><span style="color: #ef4444; font-weight: 700;">低 (已证实可碰撞)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>身份凭证</strong></td>
+                  <td>JWT (JSON Web Token)</td>
+                  <td>RFC 7519</td>
+                  <td>无状态跨域身份认证、OAuth 2.0 Access Token</td>
+                  <td><span style="color: #06b6d4; font-weight: 700;">高 (需强密钥)</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- 2. 匿名剪贴板 View -->
@@ -555,38 +658,108 @@
         </div>
       </div>
 
-      <!-- 工具箱指南与深度知识库 (6 篇专业技术专栏) -->
-      <div class="faq-container" style="margin-top: 32px;">
-        <h3 style="font-weight: 700; color: var(--color-secondary); font-size: 18px;" data-i18n="tool_faq_title">极客工具箱技术专栏与算法知识库</h3>
+      <!-- 工具箱指南与深度知识库 (6 篇专业技术专栏 + 密码破译表) -->
+      <div class="doc-section">
+        <div class="doc-header">
+          <span class="material-symbols-outlined doc-header-icon">auto_stories</span>
+          <div>
+            <h2 class="doc-header-title">极客工具箱技术专栏与密码学算法知识库</h2>
+            <p class="doc-header-subtitle">涵盖现代密码熵评估模型、JWT 无状态身份认证体系、单向散列抗碰撞性与时间系统原理。</p>
+          </div>
+        </div>
+
+        <!-- 破解时间对照表 -->
+        <div class="doc-card" style="margin-bottom: 20px;">
+          <h3><span class="material-symbols-outlined" style="font-size: 18px;">timer</span> 现代 GPU 算力集群（RTX 4090 矩阵）暴力破解密码耗时对照表</h3>
+          <p style="margin-bottom: 12px;">以下数据基于单机 8 卡 RTX 4090 集群（每秒约 1000 亿次 NTLM 哈希尝试）理论计算结果：</p>
+          <div class="doc-table-wrapper">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>密码长度</th>
+                  <th>纯纯数字 (10个字符)</th>
+                  <th>纯小写字母 (26个字符)</th>
+                  <th>大小写混合 (52个字符)</th>
+                  <th>大小写+数字+特殊符号 (94个字符)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>6 位字符</strong></td>
+                  <td><span style="color: #ef4444; font-weight:700;">瞬时 (0.001 秒)</span></td>
+                  <td><span style="color: #ef4444; font-weight:700;">0.03 秒</span></td>
+                  <td><span style="color: #ef4444; font-weight:700;">0.2 秒</span></td>
+                  <td><span style="color: #f59e0b; font-weight:700;">7 秒</span></td>
+                </tr>
+                <tr>
+                  <td><strong>8 位字符</strong></td>
+                  <td><span style="color: #ef4444; font-weight:700;">0.01 秒</span></td>
+                  <td><span style="color: #ef4444; font-weight:700;">2 秒</span></td>
+                  <td><span style="color: #f59e0b; font-weight:700;">8 分钟</span></td>
+                  <td><span style="color: #f59e0b; font-weight:700;">7 小时</span></td>
+                </tr>
+                <tr>
+                  <td><strong>12 位字符</strong></td>
+                  <td><span style="color: #ef4444; font-weight:700;">1 秒</span></td>
+                  <td><span style="color: #f59e0b; font-weight:700;">3 周</span></td>
+                  <td><span style="color: #10b981; font-weight:700;">200 年</span></td>
+                  <td><span style="color: #10b981; font-weight:700;">3.4 万年</span></td>
+                </tr>
+                <tr>
+                  <td><strong>16 位字符 (推荐)</strong></td>
+                  <td><span style="color: #f59e0b; font-weight:700;">3 小时</span></td>
+                  <td><span style="color: #10b981; font-weight:700;">4.5 万年</span></td>
+                  <td><span style="color: #10b981; font-weight:700;">10 亿年</span></td>
+                  <td><span style="color: #10b981; font-weight:700;">3.2 亿亿年 (绝对安全)</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-callout success">
+            <strong>💡 NIST 黄金法则</strong>：密码长度（Length）对安全强度的提升呈指数级倍增，远大于单纯增加复杂符号。建议日常密码长度<strong>保持在 16 位以上</strong>。
+          </div>
+        </div>
         
-        <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">lock</span><span data-i18n="tool_faq_q1">密码信息熵（Entropy）与防暴力破解数学原理</span></div>
-          <div class="faq-answer" data-i18n="tool_faq_a1">密码信息熵的计算公式为 E = L * log2(N)，其中 L 为密码长度，N 为可用字符集池大小（大写+小写+数字+特殊符号共 94 个）。根据 NIST 安全建议，当熵值超过 80 Bits 时，采用每秒万亿次运算的现代超级算力集群穷举破解也需要数十亿年时间。</div>
-        </div>
-        
-        <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">data_object</span><span data-i18n="tool_faq_q4">JSON (RFC 8259) 标准规范与开发陷阱</span></div>
-          <div class="faq-answer" data-i18n="tool_faq_a4">JSON 是一种严格基于文本的数据交换格式。常见陷阱包括：1) 必须使用双引号包裹键名；2) 尾部多余逗号（Trailing Comma）会导致解析异常；3) JavaScript 在处理超过 2^53 - 1 (9007199254740991) 的 64 位整型时会发生精度截断，建议大整数转为 String 传输。</div>
-        </div>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">lock</span> 1. 密码信息熵（Entropy）数学原理</h3>
+            <p>密码信息熵是香农信息论在计算机安全领域的延伸应用，公式为：<code>E = L × log2(N)</code>。</p>
+            <p>其中 <code>L</code> 为密码长度，<code>N</code> 为可用字符集池大小（大小写+数字+特殊符号共 94 个）。</p>
+            <ul>
+              <li><strong>低于 40 Bits</strong>：极度脆弱，秒级破解。</li>
+              <li><strong>60 ~ 80 Bits</strong>：普通企业级标准。</li>
+              <li><strong>90 Bits 以上</strong>：军工级抗爆破防护。</li>
+            </ul>
+          </div>
+          
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">vpn_key</span> 2. JWT (RFC 7519) 核心架构与安全漏洞</h3>
+            <p>JWT 由 <code>Header.Payload.Signature</code> 三段组成，属于无状态身份凭证。开发中必须防范以下常见漏洞：</p>
+            <ul>
+              <li><strong>None 算法攻击</strong>：部分旧版库若未强制校验 <code>alg</code>，攻击者将 <code>alg: "none"</code> 即可伪造任意管理员身份。</li>
+              <li><strong>弱密钥爆破</strong>：使用纯数字或常见词作为 HMAC 签名密钥，极易被离线穷举爆破出 Secret。</li>
+              <li><strong>防 XSS 窃取</strong>：千万不要将 JWT 存在 <code>localStorage</code> 中，应使用 <code>HttpOnly SameSite=Strict</code> Cookie 存储。</li>
+            </ul>
+          </div>
 
-        <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">vpn_key</span><span data-i18n="tool_faq_q5">JWT (JSON Web Token) 机制与无状态认证架构</span></div>
-          <div class="faq-answer" data-i18n="tool_faq_a5">JWT 由 Header（算法与类型）、Payload（声明载荷）和 Signature（防篡改签名）组成。JWT 属于自包含身份凭证，服务端无需查询 Session 数据库即可验证。在客户端存储时，强烈建议存放于 HttpOnly Cookie 以彻底杜绝 XSS 脚本窃取。</div>
-        </div>
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">fingerprint</span> 3. 单向散列 (MD5 vs SHA-256 vs Argon2)</h3>
+            <p>密码学哈希具备雪崩效应与不可逆性。MD5 与 SHA-1 已被证实存在碰撞漏洞：</p>
+            <ul>
+              <li><strong>数据完整性校验</strong>：推荐使用 <strong>SHA-256</strong> 与 <strong>SHA-512</strong>。</li>
+              <li><strong>用户密码落库存储</strong>：绝不能使用普通的快哈希（MD5/SHA256），必须使用针对 GPU 爆破优化的慢哈希算法：<strong>Argon2id、bcrypt 或 PBKDF2</strong> 并配合动态加盐（Salt）。</li>
+            </ul>
+          </div>
 
-        <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">fingerprint</span><span data-i18n="tool_faq_q6">单向散列算法 (SHA-256 vs MD5) 与碰撞安全</span></div>
-          <div class="faq-answer" data-i18n="tool_faq_a6">散列算法具有不可逆性与雪崩效应。MD5（128位）与 SHA-1 已被证明存在碰撞漏洞，不推荐用于密码存储与数字签名。现代高安全场景推荐使用 SHA-256、SHA-512 以及针对密码存储设计的慢速哈希算法（如 Argon2、bcrypt 与 PBKDF2）。</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">schedule</span><span data-i18n="tool_faq_q2">Unix 时间戳与 2038 年问题 (Year 2038 Problem)</span></div>
-          <div class="faq-answer" data-i18n="tool_faq_a2">Unix 时间戳从 1970-01-01 00:00:00 UTC 开始计时。在传统的 32 位有符号整数系统中，时间戳将在 2038 年 1 月 19 日 03:14:07 溢出变成负数。现代系统和 64 位体系已彻底解决该问题，可支持长达 2920 亿年的时间跨度。</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-question"><span class="material-symbols-outlined">code</span><span data-i18n="tool_faq_q3">Base64 编码与 URL 安全传输原理 (Base64URL)</span></div>
-          <div class="faq-answer" data-i18n="tool_faq_a3">Base64 将每 3 个字节（24 bits）分割为 4 个 6-bit 单元并映射至 64 个 ASCII 字符，编码后体积会增加约 33%。Base64URL 进一步将 '+' 替换为 '-'，'/' 替换为 '_'，以避免在 HTTP URL、文件名和 JWT 中发生歧义。</div>
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">schedule</span> 4. Unix 时间戳与 2038 年危机 (Y2K38)</h3>
+            <p>Unix 时间戳从 <code>1970-01-01 00:00:00 UTC</code> 开始计时：</p>
+            <ul>
+              <li>在传统的 <strong>32 位有符号整数</strong>系统中，最大表示值为 <code>2,147,483,647</code> 秒；</li>
+              <li>将在 <strong>2038 年 1 月 19 日 03:14:07 UTC</strong> 发生整型溢出回滚至 1901 年；</li>
+              <li>现代 64 位体系已彻底解决该问题，可支持长达 2920 亿年的时间跨度。</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -710,6 +883,57 @@
           </div>
         </div>
       </div>
+
+      <!-- 极客隔空快传技术白皮书 & 常见排错 FAQ (AdSense 高价值内容区) -->
+      <div class="doc-section">
+        <div class="doc-header">
+          <span class="material-symbols-outlined doc-header-icon">verified_user</span>
+          <div>
+            <h2 class="doc-header-title">WebRTC 极客隔空快传技术原理与安全白皮书</h2>
+            <p class="doc-header-subtitle">了解端到端免中转点对点通信、STUN NAT 穿透协议与零云端日志安全架构。</p>
+          </div>
+        </div>
+
+        <div class="doc-grid">
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">sync_alt</span> 1. WebRTC 点对点直连握手流程 (P2P Mesh)</h3>
+            <p><strong>极客隔空快传</strong>基于浏览器底层原生的 <code>RTCPeerConnection</code> 与 <code>RTCDataChannel</code> 技术构建，整个通信生命周期完全脱离集中式服务器中转：</p>
+            <ol>
+              <li><strong>信令协商 (Signaling)</strong>：两端设备加入相同频道码后，通过公共 STUN 服务器（如 Google STUN）解析出各自公网与局域网的 ICE Candidates（网络候选地址）。</li>
+              <li><strong>SDP 交换与打洞穿透</strong>：设备双方交换 SDP Offer/Answer 进行 NAT 穿透握手，直接在双端建立双向 UDP 加密通道。</li>
+              <li><strong>SCTP 分块流式投送</strong>：大文件被拆分为 64KB 的二进制 <code>ArrayBuffer</code> 数据包，直接在双方浏览器内存间高速喷射，接收端动态重组并触发本地下载。</li>
+            </ol>
+          </div>
+
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">security</span> 2. 为什么比微信文件助手/网盘更安全？</h3>
+            <p>在企业办公与敏感数据流转场景中，将代码、Token、密码或未公开文档发送给微信“文件传输助手”存在严重的合规隐患：</p>
+            <ul>
+              <li><strong>绝对零云端留存</strong>：本站没有任何中央存储服务器，你的文件和文本<strong>绝不经过任何云端硬盘</strong>，传输完毕立即释放内存。</li>
+              <li><strong>DTLS 军工级端到端加密</strong>：所有传输报文均由浏览器底层采用 DTLS (Datagram Transport Layer Security) 进行 128/256 位加密，局域网抓包者无法窃听。</li>
+              <li><strong>跨生态无缝互联</strong>：无需安装任何客户端或驱动，支持 Windows、Mac、Linux、iOS iPhone/iPad、Android 手机全平台秒级直传。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <h3><span class="material-symbols-outlined" style="font-size: 18px;">quiz</span> 常见问题与传输排错 (FAQ)</h3>
+          <div class="faq-list">
+            <div class="faq-item">
+              <div class="faq-q">两台设备必须连接同一个 WiFi 路由器吗？</div>
+              <div class="faq-a">不强制！只要两台设备都能访问互联网，WebRTC 就会自动进行 STUN 穿透尝试建立 P2P 直连。如果两台设备处于同一个 WiFi 局域网下，系统会自动优先走内网直连线路，传输速度可直接跑满千兆 WiFi 物理带宽！</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q">为什么另一端设备退出后，列表显示有时会延迟几秒？</div>
+              <div class="faq-a">当对端主动关闭标签页时，系统会瞬间广播 <code>bye</code> 告别信令实现 0ms 瞬间下线。如果对端是手机锁屏断网或强制杀死进程，系统依靠底层的 1.5 秒高频 WebRTC 心跳探测器，在 3.5 秒无响应后会自动判定离线并从雷达列表中剔除。您也可以随时点击【刷新对端设备】进行主动重扫。</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q">单次传输文件有体积上限吗？</div>
+              <div class="faq-a">建议单次投送文件在 50MB 以内。由于 WebRTC DataChannel 纯依赖浏览器内存进行流式分片拼接，过大的文件（如几个 G 的视频）容易导致低内存手机端浏览器崩溃。代码文件、高清图片、PDF 文档和各类常用压缩包均可无损秒传。</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- 5. Webhook 调试桩 View -->
@@ -795,6 +1019,65 @@
           </div>
 
           <div id="webhook-requests-list" style="max-height: 550px; overflow-y: auto;"></div>
+        </div>
+      </div>
+
+      <!-- Webhook 架构设计与安全指南 (AdSense 高价值内容区) -->
+      <div class="doc-section">
+        <div class="doc-header">
+          <span class="material-symbols-outlined doc-header-icon">terminal</span>
+          <div>
+            <h2 class="doc-header-title">Webhook 事件驱动架构设计与生产级安全开发指南</h2>
+            <p class="doc-header-subtitle">掌握反向 HTTP 回调设计模式、HMAC-SHA256 验签算法、防重放攻击与分布式幂等性保障。</p>
+          </div>
+        </div>
+
+        <div class="doc-grid">
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">compare_arrows</span> 1. Webhook 与传统 HTTP 轮询 (Polling) 深度对比</h3>
+            <p>在传统的客户端-服务端架构中，为了感知状态变化（如支付是否到账、代码是否推送），客户端必须每隔 3 秒调用一次查询接口：</p>
+            <ul>
+              <li><strong>轮询的劣势</strong>：99% 的请求返回“无变化”，浪费大量服务器 CPU、数据库连接与带宽；且存在秒级延迟。</li>
+              <li><strong>Webhook 的优势</strong>：被动监听，事件发生时（如订单支付成功）由第三方服务器<strong>主动推送一次 HTTP POST 报文</strong>，延迟在毫秒级，带宽消耗降低 90% 以上。</li>
+            </ul>
+          </div>
+
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">lock_clock</span> 2. 生产级 Webhook 消费端五大安全规范</h3>
+            <p>对外暴露公开的回调端点极易受到黑客伪造请求或重放攻击，生产环境必须严格实施以下防线：</p>
+            <ol>
+              <li><strong>密钥签名验证 (HMAC Verification)</strong>：使用预共享密钥 <code>Secret</code> 对请求 Body 计算 <code>HMAC-SHA256</code>，比对 Headers 中的签名。</li>
+              <li><strong>防重放攻击 (Timestamp Validation)</strong>：校验请求头中的时间戳（如 <code>X-Client-Timestamp</code>），超过 5 分钟的过期请求直接拒绝。</li>
+              <li><strong>消费幂等性 (Idempotency)</strong>：根据 <code>order_id</code> 或 <code>event_id</code> 写入分布式锁或唯一索引，防止网络抖动导致的重复充值/重复发货。</li>
+              <li><strong>快速 200 应答与异步消费</strong>：在 500ms 内向发送方返回 <code>200 OK</code>，耗时业务推入后台队列（Redis/Celery）异步执行。</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- 多语言 HMAC-SHA256 签名校验代码速查 -->
+        <div class="doc-card">
+          <h3><span class="material-symbols-outlined" style="font-size: 18px;">code</span> 主流语言 Webhook HMAC-SHA256 安全验签示例代码</h3>
+          
+          <div style="margin-top: 12px;">
+            <div style="font-size: 13px; font-weight: 700; color: #38bdf8; margin-bottom: 6px;">🐍 Python (FastAPI / Flask) 示例:</div>
+            <pre class="code-snippet">import hmac, hashlib
+
+def verify_webhook_signature(raw_body: bytes, signature_header: str, secret_key: str) -> bool:
+    expected_sig = "sha256=" + hmac.new(secret_key.encode(), raw_body, hashlib.sha256).hexdigest()
+    # 使用 hmac.compare_digest 防止基于执行时间差的计时攻击 (Timing Attack)
+    return hmac.compare_digest(expected_sig, signature_header)</pre>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <div style="font-size: 13px; font-weight: 700; color: #38bdf8; margin-bottom: 6px;">🟢 Node.js (Express) 示例:</div>
+            <pre class="code-snippet">const crypto = require('crypto');
+
+function verifyWebhook(rawPayload, signatureHeader, secret) {
+  const hmac = crypto.createHmac('sha256', secret);
+  const digest = 'sha256=' + hmac.update(rawPayload).digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(signatureHeader));
+}</pre>
+          </div>
         </div>
       </div>
     </section>
