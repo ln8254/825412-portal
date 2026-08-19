@@ -663,13 +663,13 @@
         <div class="doc-header">
           <span class="material-symbols-outlined doc-header-icon">auto_stories</span>
           <div>
-            <h2 class="doc-header-title">极客工具箱技术专栏与密码学算法知识库</h2>
-            <p class="doc-header-subtitle">涵盖现代密码熵评估模型、JWT 无状态身份认证体系、单向散列抗碰撞性与时间系统原理。</p>
+            <h2 class="doc-header-title" data-i18n="tool_doc_title">极客工具箱技术专栏与密码学算法知识库</h2>
+            <p class="doc-header-subtitle" data-i18n="tool_doc_sub">涵盖现代密码熵评估模型、JWT 无状态身份认证体系、单向散列抗碰撞性与时间系统原理。</p>
           </div>
         </div>
 
         <!-- 破解时间对照表 -->
-        <div class="doc-card" style="margin-bottom: 20px;">
+        <div class="doc-card" style="margin-bottom: 20px;" data-i18n="tool_gpu_table_body">
           <h3><span class="material-symbols-outlined" style="font-size: 18px;">timer</span> 现代 GPU 算力集群（RTX 4090 矩阵）暴力破解密码耗时对照表</h3>
           <p style="margin-bottom: 12px;">以下数据基于单机 8 卡 RTX 4090 集群（每秒约 1000 亿次 NTLM 哈希尝试）理论计算结果：</p>
           <div class="doc-table-wrapper">
@@ -677,7 +677,7 @@
               <thead>
                 <tr>
                   <th>密码长度</th>
-                  <th>纯纯数字 (10个字符)</th>
+                  <th>纯数字 (10个字符)</th>
                   <th>纯小写字母 (26个字符)</th>
                   <th>大小写混合 (52个字符)</th>
                   <th>大小写+数字+特殊符号 (94个字符)</th>
@@ -721,7 +721,7 @@
         </div>
         
         <div class="doc-grid">
-          <div class="doc-card">
+          <div class="doc-card" data-i18n="tool_card1_body">
             <h3><span class="material-symbols-outlined" style="font-size: 18px;">lock</span> 1. 密码信息熵（Entropy）数学原理</h3>
             <p>密码信息熵是香农信息论在计算机安全领域的延伸应用，公式为：<code>E = L × log2(N)</code>。</p>
             <p>其中 <code>L</code> 为密码长度，<code>N</code> 为可用字符集池大小（大小写+数字+特殊符号共 94 个）。</p>
@@ -732,7 +732,7 @@
             </ul>
           </div>
           
-          <div class="doc-card">
+          <div class="doc-card" data-i18n="tool_card2_body">
             <h3><span class="material-symbols-outlined" style="font-size: 18px;">vpn_key</span> 2. JWT (RFC 7519) 核心架构与安全漏洞</h3>
             <p>JWT 由 <code>Header.Payload.Signature</code> 三段组成，属于无状态身份凭证。开发中必须防范以下常见漏洞：</p>
             <ul>
@@ -742,7 +742,7 @@
             </ul>
           </div>
 
-          <div class="doc-card">
+          <div class="doc-card" data-i18n="tool_card3_body">
             <h3><span class="material-symbols-outlined" style="font-size: 18px;">fingerprint</span> 3. 单向散列 (MD5 vs SHA-256 vs Argon2)</h3>
             <p>密码学哈希具备雪崩效应与不可逆性。MD5 与 SHA-1 已被证实存在碰撞漏洞：</p>
             <ul>
@@ -751,7 +751,7 @@
             </ul>
           </div>
 
-          <div class="doc-card">
+          <div class="doc-card" data-i18n="tool_card4_body">
             <h3><span class="material-symbols-outlined" style="font-size: 18px;">schedule</span> 4. Unix 时间戳与 2038 年危机 (Y2K38)</h3>
             <p>Unix 时间戳从 <code>1970-01-01 00:00:00 UTC</code> 开始计时：</p>
             <ul>
@@ -1033,8 +1033,8 @@
         </div>
 
         <div class="doc-grid">
-          <div class="doc-card">
-            <h3><span class="material-symbols-outlined" style="font-size: 18px;">compare_arrows</span> <span data-i18n="webhook_doc_compare_title">1. Webhook 与传统 HTTP 轮询 (Polling) 深度对比</span></h3>
+          <div class="doc-card" data-i18n="webhook_card1_body">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">compare_arrows</span> 1. Webhook 与传统 HTTP 轮询 (Polling) 深度对比</h3>
             <p>在传统的客户端-服务端架构中，为了感知状态变化（如支付是否到账、代码是否推送），客户端必须每隔 3 秒调用一次查询接口：</p>
             <ul>
               <li><strong>轮询的劣势</strong>：99% 的请求返回“无变化”，浪费大量服务器 CPU、数据库连接与带宽；且存在秒级延迟。</li>
@@ -1042,8 +1042,8 @@
             </ul>
           </div>
 
-          <div class="doc-card">
-            <h3><span class="material-symbols-outlined" style="font-size: 18px;">lock_clock</span> <span data-i18n="webhook_doc_sec_title">2. 生产级 Webhook 消费端五大安全规范</span></h3>
+          <div class="doc-card" data-i18n="webhook_card2_body">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">lock_clock</span> 2. 生产级 Webhook 消费端五大安全规范</h3>
             <p>对外暴露公开的回调端点极易受到黑客伪造请求或重放攻击，生产环境必须严格实施以下防线：</p>
             <ol>
               <li><strong>密钥签名验证 (HMAC Verification)</strong>：使用预共享密钥 <code>Secret</code> 对请求 Body 计算 <code>HMAC-SHA256</code>，比对 Headers 中的签名。</li>
@@ -1055,8 +1055,8 @@
         </div>
 
         <!-- 多语言 HMAC-SHA256 签名校验代码速查 -->
-        <div class="doc-card">
-          <h3><span class="material-symbols-outlined" style="font-size: 18px;">code</span> <span data-i18n="webhook_doc_code_title">主流语言 Webhook HMAC-SHA256 安全验签示例代码</span></h3>
+        <div class="doc-card" data-i18n="webhook_card3_body">
+          <h3><span class="material-symbols-outlined" style="font-size: 18px;">code</span> 主流语言 Webhook HMAC-SHA256 安全验签示例代码</h3>
           
           <div style="margin-top: 12px;">
             <div style="font-size: 13px; font-weight: 700; color: #38bdf8; margin-bottom: 6px;">🐍 Python (FastAPI / Flask) 示例:</div>
