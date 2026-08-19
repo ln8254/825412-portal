@@ -276,7 +276,7 @@
 
         <div class="doc-grid">
           <!-- 文库卡片 1 -->
-          <div class="doc-card">
+          <div class="doc-card" data-i18n="dash_card1_body">
             <h3><span class="material-symbols-outlined" style="font-size: 18px;">lan</span> WebRTC P2P 局域网直连架构解析</h3>
             <p>传统文件传输（如微信文件助手、企业微信）必须将文件上传到第三方服务器云盘，经过集中转存后再下载，存在<strong>传输慢、大小受限、隐私泄漏</strong>等弊端。</p>
             <p>本站采用的 <strong>WebRTC (Web Real-Time Communication)</strong> 协议通过 STUN 信令服务器协商双方 NAT 地址后，直接在两台设备之间建立加密的 SCTP over DTLS 数据隧道：</p>
@@ -287,7 +287,7 @@
           </div>
 
           <!-- 文库卡片 2 -->
-          <div class="doc-card">
+          <div class="doc-card" data-i18n="dash_card2_body">
             <h3><span class="material-symbols-outlined" style="font-size: 18px;">security</span> 现代密码学与信息熵（Entropy）标准</h3>
             <p>评估一个密码的安全强度，不能仅仅依靠“是否包含特殊符号”，而应依据 <strong>NIST SP 800-63B</strong> 国际密码学标准计算其<strong>信息熵（Bits）</strong>。</p>
             <p>信息熵公式为：<code>E = L × log2(R)</code>，其中 <code>L</code> 为密码长度，<code>R</code> 为字符集空间大小：</p>
@@ -299,7 +299,7 @@
           </div>
 
           <!-- 文库卡片 3 -->
-          <div class="doc-card">
+          <div class="doc-card" data-i18n="dash_card3_body">
             <h3><span class="material-symbols-outlined" style="font-size: 18px;">webhook</span> Webhook 事件驱动架构最佳实践</h3>
             <p>在微服务与分布式系统中，<strong>Webhook（反向 HTTP 回调）</strong>相比传统定时轮询（Polling）节省了 95% 以上的无效网络开销与服务器 CPU 资源。</p>
             <p>构建高可用的 Webhook 消费端必须遵循以下工程原则：</p>
@@ -312,7 +312,7 @@
         </div>
 
         <!-- 常用端口与密码学算法速查表 -->
-        <div class="doc-card" style="margin-bottom: 20px;">
+        <div class="doc-card" style="margin-bottom: 20px;" data-i18n="dash_table_body">
           <h3><span class="material-symbols-outlined" style="font-size: 18px;">table_chart</span> 开发者网络协议与常用密码学算法速查表</h3>
           <div class="doc-table-wrapper">
             <table class="doc-table">
