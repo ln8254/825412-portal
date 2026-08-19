@@ -9,37 +9,103 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 </head>
 <body style="display: block; overflow: auto; padding: 40px 20px;">
-  <div style="max-width: 800px; margin: 0 auto; background: rgba(19, 27, 46, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 36px;">
-    <a href="/" style="color: #06b6d4; text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 20px;">← 返回 825412.xyz 首页</a>
-    <h1 style="color: #8b5cf6; font-size: 26px; margin-bottom: 8px;">关于 825412.xyz 极客多功能工具箱</h1>
-    <p style="color: #64748b; font-size: 13px; margin-bottom: 24px;">极简 · 安全 · 纯前端 · 零日志的开发者瑞士军刀</p>
+  <div style="max-width: 820px; margin: 0 auto; background: rgba(19, 27, 46, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 36px;">
     
-    <div style="font-size: 14px; line-height: 1.8; color: #dae2fd;">
-      <p><strong>825412.xyz</strong> 是一个由独立开发者专为全球程序员、极客与网络工程师打造的开放式实用工具与知识分享平台。</p>
-      <p>在日常开发与运维工作中，我们经常需要处理诸如“手机电脑临时互传文件”、“测试支付 Webhook 回调报文”、“评估密码破解难度”、“格式化杂乱的 JSON”或“解析调试 JWT 令牌”等高频任务。市面上许多工具充斥着强制注册登录、繁琐弹窗甚至潜在的数据窃取风险。</p>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+      <a href="/" style="color: #06b6d4; text-decoration: none; font-size: 14px; font-weight: 600;">← 返回 825412.xyz 首页</a>
+      <div style="display: flex; gap: 8px;">
+        <button id="btn-lang-zh" onclick="setLang('zh')" style="background: #8b5cf6; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; cursor: pointer;">🇨🇳 中文</button>
+        <button id="btn-lang-en" onclick="setLang('en')" style="background: rgba(255,255,255,0.1); color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer;">🇺🇸 English</button>
+      </div>
+    </div>
 
-      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">平台核心原则</h2>
+    <!-- 中文版 -->
+    <div id="content-zh" style="font-size: 14px; line-height: 1.8; color: #dae2fd;">
+      <h1 style="color: #8b5cf6; font-size: 26px; margin-bottom: 8px;">关于 825412.xyz 极客多功能工具箱</h1>
+      <p style="color: #64748b; font-size: 13px; margin-bottom: 24px;">极简 · 安全 · 纯前端 · 零日志的开发者瑞士军刀</p>
+
+      <p><strong>825412.xyz</strong> 是专为全球软件工程师、系统运维人员与科技爱好者打造的高性能在线极客工具箱与知识分享平台。</p>
+      <p>在日常开发中，跨设备快传文件、排查 Webhook 回调、评估密码破译难度、校验 JSON 与调试 JWT 是极其高频的需求。市面上的许多同类工具充斥着强制注册登录、繁琐弹窗及潜在的数据泄露隐患。本站致力于打破这些壁垒，提供纯前端、零依赖、即开即用的高品质工具体验。</p>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">平台核心设计原则</h2>
       <ul>
-        <li><strong>零安装与免注册：</strong>打开浏览器即刻使用，拒绝一切繁琐的注册验证门槛。</li>
-        <li><strong>隐私优先与本地计算：</strong>大部分算法工具均运行在客户端本地内存，绝不将用户的密码或代码上传到远端。</li>
-        <li><strong>极客视觉与高效体验：</strong>采用 Cyberpunk 暗色主题与响应式布局，无论在电脑宽屏还是手机端均能舒适操作。</li>
+        <li><strong>免注册即开即用：</strong>无需手机号或邮箱注册，打开网页立刻进入工作流。</li>
+        <li><strong>纯前端隐私安全：</strong>密码生成、哈希散列计算、JWT 解码均在浏览器本地内存执行，绝不向远端上传用户数据。</li>
+        <li><strong>WebRTC P2P 零中转：</strong>隔空快传直接在设备间点对点传输，杜绝第三方云端落盘。</li>
       </ul>
 
-      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">核心工具矩阵</h2>
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">核心工具板块</h2>
       <ol>
-        <li><strong>极客隔空快传 (AirDrop 网页版)：</strong>基于 WebRTC P2P 技术，跨设备局域网秒传大文件与文本，彻底摆脱社交软件文件助手。</li>
-        <li><strong>Webhook 调试桩 & API 回显：</strong>一键生成专用 HTTP 测试端点，实时捕获、解析与排查第三方回调报文。</li>
+        <li><strong>极客隔空快传 (AirDrop 网页版)：</strong>基于 WebRTC P2P 技术，跨设备局域网秒传大文件与文本。</li>
+        <li><strong>Webhook 调试桩 & API 测试中继：</strong>一键生成专用公网 HTTP 测试端点，实时捕获分析第三方回调。</li>
         <li><strong>匿名剪贴板：</strong>阅后即焚、支持定时自毁的代码与敏感文本临时中转站。</li>
-        <li><strong>密码信息熵与暴力破解评估：</strong>依据 NIST 800-63B 标准科学计算密码抗算力穷举能力。</li>
+        <li><strong>密码信息熵评估：</strong>基于 NIST 800-63B 标准科学计算密码抗暴力破解算力耗时。</li>
         <li><strong>JWT 令牌调试器：</strong>RFC 7519 规范三段式令牌离线解析与有效期校验。</li>
-        <li><strong>JSON 格式化与高亮校验：</strong>一键美化、压缩与语法错误定位。</li>
+        <li><strong>JSON 格式化与校验：</strong>一键美化、压缩与语法错误定位。</li>
         <li><strong>密码学散列计算：</strong>纯 JS 实现 MD5、SHA-1、SHA-256、SHA-512 离线 Hash 计算。</li>
       </ol>
 
-      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">联系我们与开源合作</h2>
-      <p>如有任何功能建议、漏洞反馈或商务合作咨询，欢迎随时与我们沟通：<br>
-      <strong>联系邮箱：</strong> <code>leen8254@gmail.com</code></p>
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">联系我们</h2>
+      <p>站长联络邮箱：<code>leen8254@gmail.com</code></p>
     </div>
+
+    <!-- 英文版 (English Version) -->
+    <div id="content-en" style="display: none; font-size: 14px; line-height: 1.8; color: #dae2fd;">
+      <h1 style="color: #8b5cf6; font-size: 26px; margin-bottom: 8px;">About 825412.xyz Geek Toolbox</h1>
+      <p style="color: #64748b; font-size: 13px; margin-bottom: 24px;">Minimalist · Secure · Client-Side · Zero-Log Developer Swiss Army Knife</p>
+
+      <p><strong>825412.xyz</strong> is a high-performance online developer utility and technical knowledge hub created for software engineers, DevOps specialists, and tech enthusiasts worldwide.</p>
+      <p>Our mission is to eliminate cumbersome registration walls, intrusive ads, and privacy risks common across traditional online tools. All utilities on this platform run client-side in your browser, guaranteeing speed, simplicity, and total data sovereignty.</p>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">Core Engineering Principles</h2>
+      <ul>
+        <li><strong>Zero Registration Required:</strong> Instant access with zero sign-ups, subscriptions, or paywalls.</li>
+        <li><strong>Local In-Browser Computation:</strong> Passwords, cryptographic hashes, JWT tokens, and JSON payloads remain 100% inside your browser's private memory space.</li>
+        <li><strong>P2P Direct Transfer:</strong> Geek AirDrop utilizes WebRTC to move files device-to-device with zero intermediate cloud storage.</li>
+      </ul>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">Featured Developer Utilities</h2>
+      <ol>
+        <li><strong>Geek AirDrop (Web P2P Drop):</strong> Cross-platform WebRTC P2P direct file and text sharing.</li>
+        <li><strong>Webhook Inspector:</strong> Real-time HTTP callback testing, header inspection, and payload capture.</li>
+        <li><strong>Anonymous Pastebin:</strong> Self-destructing, encrypted temporary text and code snippets.</li>
+        <li><strong>Password Entropy & Security Engine:</strong> NIST SP 800-63B mathematical brute-force resistance estimator.</li>
+        <li><strong>JWT Token Debugger:</strong> RFC 7519 offline token inspection and expiration validator.</li>
+        <li><strong>JSON Formatter & Linter:</strong> Real-time AST syntax validation, beautification, and minification.</li>
+        <li><strong>Cryptographic Hashes:</strong> Client-side MD5, SHA-1, SHA-256, and SHA-512 calculation.</li>
+      </ol>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">Contact Us</h2>
+      <p>Email: <code>leen8254@gmail.com</code></p>
+    </div>
+
   </div>
+
+  <script>
+    function setLang(lang) {
+      const zh = document.getElementById('content-zh');
+      const en = document.getElementById('content-en');
+      const btnZh = document.getElementById('btn-lang-zh');
+      const btnEn = document.getElementById('btn-lang-en');
+      if (lang === 'en') {
+        zh.style.display = 'none';
+        en.style.display = 'block';
+        btnEn.style.background = '#8b5cf6';
+        btnEn.style.color = '#fff';
+        btnZh.style.background = 'rgba(255,255,255,0.1)';
+        btnZh.style.color = '#fff';
+      } else {
+        zh.style.display = 'block';
+        en.style.display = 'none';
+        btnZh.style.background = '#8b5cf6';
+        btnZh.style.color = '#fff';
+        btnEn.style.background = 'rgba(255,255,255,0.1)';
+        btnEn.style.color = '#fff';
+      }
+    }
+    if (navigator.language && !navigator.language.startsWith('zh')) {
+      setLang('en');
+    }
+  </script>
 </body>
 </html>

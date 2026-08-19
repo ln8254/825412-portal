@@ -146,6 +146,19 @@ const I18nController = {
       'airdrop_send_text_btn': '投送文本至对端',
       'airdrop_recv_title': '📥 实时接收传输流',
 
+      // 隔空快传技术白皮书
+      'airdrop_doc_title': 'WebRTC 极客隔空快传技术原理与安全白皮书',
+      'airdrop_doc_sub': '了解端到端免中转点对点通信、STUN NAT 穿透协议与零云端日志安全架构。',
+      'airdrop_doc_mesh_title': '1. WebRTC 点对点直连握手流程 (P2P Mesh)',
+      'airdrop_doc_sec_title': '2. 为什么比微信文件助手/网盘更安全？',
+      'airdrop_faq_title': '常见问题与传输排错 (FAQ)',
+      'airdrop_faq_q1': '两台设备必须连接同一个 WiFi 路由器吗？',
+      'airdrop_faq_a1': '不强制！只要两台设备都能访问互联网，WebRTC 就会自动进行 STUN 穿透尝试建立 P2P 直连。如果两台设备处于同一个 WiFi 局域网下，系统会自动优先走内网直连线路，传输速度可直接跑满千兆 WiFi 物理带宽！',
+      'airdrop_faq_q2': '为什么另一端设备退出后，列表显示有时会延迟几秒？',
+      'airdrop_faq_a2': '当对端主动关闭标签页时，系统会瞬间广播 bye 告别信令实现 0ms 瞬间下线。如果对端是手机锁屏断网或强制杀死进程，系统依靠底层的 1.5 秒高频 WebRTC 心跳探测器，在 3.5 秒无响应后会自动判定离线并从雷达列表中剔除。您也可以随时点击【刷新对端设备】进行主动重扫。',
+      'airdrop_faq_q3': '单次传输文件有体积上限吗？',
+      'airdrop_faq_a3': '建议单次投送文件在 50MB 以内。由于 WebRTC DataChannel 纯依赖浏览器内存进行流式分片拼接，过大的文件（如几个 G 的视频）容易导致低内存手机端浏览器崩溃。代码文件、高清图片、PDF 文档和各类常用压缩包均可无损秒传。',
+
       // Webhook 调试桩
       'webhook_title': 'Webhook 调试桩 & API 测试中继',
       'webhook_subtitle': '一键生成专属公网 HTTP 回调端点，实时捕获、格式化并分析第三方 Webhook (GitHub, Stripe, 微信支付等) 请求报文。',
@@ -160,8 +173,16 @@ const I18nController = {
       'webhook_logs_title': '📡 捕获到的请求报文',
       'webhook_empty_hint': '正在监听端点... 发送请求后将自动在此实时显示 Headers 与 Body 报文。',
 
+      // Webhook 技术手册
+      'webhook_doc_title': 'Webhook 事件驱动架构设计与生产级安全开发指南',
+      'webhook_doc_sub': '掌握反向 HTTP 回调设计模式、HMAC-SHA256 验签算法、防重放攻击与分布式幂等性保障。',
+      'webhook_doc_compare_title': '1. Webhook 与传统 HTTP 轮询 (Polling) 深度对比',
+      'webhook_doc_sec_title': '2. 生产级 Webhook 消费端五大安全规范',
+      'webhook_doc_code_title': '主流语言 Webhook HMAC-SHA256 安全验签示例代码',
+
       // 工具箱深度技术知识专栏
       'tool_faq_title': '极客工具箱技术专栏与算法知识库',
+      'tool_doc_gpu_title': '现代 GPU 算力集群（RTX 4090 矩阵）暴力破解密码耗时对照表',
       'tool_faq_q1': '密码信息熵（Entropy）与防暴力破解数学原理',
       'tool_faq_a1': '密码信息熵的计算公式为 E = L * log2(N)，其中 L 为密码长度，N 为可用字符集池大小（大写+小写+数字+特殊符号共 94 个）。根据 NIST 安全建议，当熵值超过 80 Bits 时，采用每秒万亿次运算的现代超级算力集群穷举破解也需要数十亿年时间。',
       'tool_faq_q4': 'JSON (RFC 8259) 标准规范与开发陷阱',
@@ -224,97 +245,114 @@ const I18nController = {
 
       // Dashboard
       'dash_title': 'Dashboard',
-      'dash_subtitle': 'Real-time network node monitoring & quick tool access.',
-      'dash_node_title': 'System Node & Visitor Monitor',
+      'dash_subtitle': 'Real-time telemetry, node latency metrics, and instant tool access.',
+      'dash_node_title': 'System & Node Telemetry',
       'dash_visitor_ip': 'Visitor IP',
-      'dash_location': 'Location & ISP',
-      'dash_ping': 'Ping Latency',
+      'dash_location': 'Connection Region',
+      'dash_ping': 'Round-Trip Latency (Ping)',
       'dash_ai_title': 'AI Neural Link',
-      'dash_ai_nokey': 'API Key missing. Enter key in Settings to activate AI Chat link.',
-      'dash_ai_ready': '<span style="color: var(--color-tertiary); font-weight: 600;">Neural Link Active.</span> Connected to Gemini API Core.',
-      'dash_ai_btn': 'Start Chat',
+      'dash_ai_nokey': 'No API Key configured. Please enter your key in Settings to activate AI conversation.',
+      'dash_ai_ready': '<span style="color: var(--color-tertiary); font-weight: 600;">Neural Link Online.</span> Connected to Gemini API Core.',
+      'dash_ai_btn': 'Open Chat',
       'dash_toolbox_title': 'Quick Toolbox',
       'dash_shortcut_pwd': 'Password Generator',
       'dash_shortcut_time': 'Time Converter',
       'dash_shortcut_text': 'Text Processor',
-      'dash_no_pastes': 'No recent paste shares...',
-      'dash_go_clip': 'Go to Pastebin',
+      'dash_no_pastes': 'No recent pastes created yet...',
+      'dash_go_clip': 'Open Pastebin',
       'dash_go_airdrop': 'Open AirDrop',
 
-      // Clipboard
+      // Dashboard Knowledge Hub
+      'dash_kb_title': 'Developer Knowledge Hub & Technical Guides',
+      'dash_kb_sub': 'In-depth technical guides covering computer networks, modern cryptography, WebRTC P2P mesh, and API architecture.',
+      'dash_kb_webrtc_title': 'WebRTC P2P LAN Direct Connect Architecture',
+      'dash_kb_entropy_title': 'Modern Cryptography & NIST Password Entropy Standards',
+      'dash_kb_webhook_title': 'Webhook Event-Driven Architecture Best Practices',
+      'dash_kb_table_title': 'Developer Network Protocols & Cryptographic Algorithms Cheatsheet',
+
+      // Pastebin
       'clip_title': 'Anonymous Pastebin',
-      'clip_subtitle': 'Fast, temporary text sharing tool. Self-destructs upon expiration.',
-      'clip_ph': '// Paste your text or code snippet here...',
+      'clip_subtitle': 'Fast, zero-login temporary text & code sharing with auto-expiration.',
+      'clip_ph': '// Paste your code snippet or notes here...',
       'clip_1h': 'Expires in 1 Hour',
       'clip_24h': 'Expires in 24 Hours',
       'clip_7d': 'Expires in 7 Days',
-      'clip_btn_create': 'Create Share Link',
+      'clip_btn_create': 'Generate Share Link',
       'clip_share_result': 'Share Result',
-      'clip_share_url_label': 'Your Share Link (Click to Copy):',
-      'clip_local_history': 'Local History',
-
-      // Clipboard FAQ
-      'clip_faq_title': 'Anonymous Pastebin Guide & FAQ',
-      'clip_faq_q1': 'How does Anonymous Pastebin work?',
-      'clip_faq_a1': 'Paste code or notes in the editor, choose expiration time, and click "Create Share Link". A unique Hash URL (e.g. #paste=xxxx) is generated. Recipients can open the link to instantly read and copy the content.',
-      'clip_faq_q2': 'Security & Self-Destruction Mechanism',
-      'clip_faq_a2': 'Data self-destructs after 1h, 24h, or 7 days. Once expired, cloud data is permanently wiped out. No sign-up or personal data is ever required.',
+      'clip_copy_link': 'Copy Link',
+      'clip_direct_link': 'Direct Link:',
+      'clip_open_link': 'Open Link in New Tab',
+      'clip_recent_title': 'Recent Shared Pastes (Local History)',
+      'clip_clear_history': 'Clear History',
+      'clip_history_empty': 'No paste history in local storage.',
+      'clip_faq_title': 'Pastebin Security & Architecture Guide',
+      'clip_faq_q1': 'How does the anonymous pastebin work?',
+      'clip_faq_a1': 'Paste any code or text, choose an expiration duration, and click Create Share Link. The system generates a unique hash link (#paste=xxxx). Anyone opening the link can view and copy the content with zero registration.',
+      'clip_faq_q2': 'Data encryption and self-destruction model',
+      'clip_faq_a2': 'We support 1-hour, 24-hour, and 7-day auto-destruction. Once expired, data is permanently purged. We collect no PII or credentials, ensuring complete anonymity.',
 
       // Toolbox
-      'tool_title': 'Geek Toolbox',
+      'tool_title': 'Geek Developer Toolbox',
       'tool_subtitle': 'Zero-installation, client-side, privacy-focused online developer suite.',
       'tool_pwd_tab': 'Password Gen',
       'tool_json_tab': 'JSON Formatter',
       'tool_jwt_tab': 'JWT Debugger',
       'tool_hash_tab': 'Hash Calculator',
-      'tool_time_tab': 'Timestamp',
+      'tool_time_tab': 'Time Converter',
       'tool_text_tab': 'Text Utilities',
 
-      // Password Generator & Entropy
-      'tool_pwd_gen': 'Click generate button below',
-      'pwd_strength_title': 'Password Security Evaluation:',
-      'pwd_crack_time_label': 'Estimated Brute-Force Crack Time:',
+      // Password Generator
+      'tool_pwd_gen': 'Click Generate Button Below',
+      'pwd_strength_title': 'Security Grade:',
+      'pwd_crack_time_label': 'Brute-Force Estimate (RTX 4090):',
       'pwd_charset_size_label': 'Available Charset Pool (N):',
-      'pwd_rec_label': 'Security Compliance Tip:',
+      'pwd_rec_label': 'Compliance Suggestion:',
       'tool_pwd_len': 'Password Length:',
       'tool_pwd_upper': 'Uppercase (A-Z)',
       'tool_pwd_lower': 'Lowercase (a-z)',
       'tool_pwd_num': 'Numbers (0-9)',
-      'tool_pwd_sym': 'Symbols (!@#$%)',
+      'tool_pwd_sym': 'Special Symbols (!@#$...)',
       'tool_pwd_btn': 'Generate Secure Password',
 
-      // JSON Tool
+      // JSON Formatter
       'json_btn_format_2': 'Format (2 Spaces)',
       'json_btn_format_4': 'Format (4 Spaces)',
       'json_btn_minify': 'Minify JSON',
-      'json_btn_copy': 'Copy Result',
+      'json_btn_copy': 'Copy JSON',
       'json_ph': 'Paste raw JSON string here to format or validate...',
-      'json_status_ready': 'JSON parser ready. Real-time syntax tree analysis and linting active.',
+      'json_status_ready': 'JSON parser ready. Real-time AST syntax validation active.',
 
-      // JWT Tool
-      'jwt_input_label': 'Encoded Token (To Decode):',
+      // JWT Debugger
+      'jwt_input_label': 'Encoded Token (Raw JWT):',
       'jwt_btn_sample': 'Load Sample',
-      'jwt_ph': 'Paste your eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... here',
-      'jwt_valid_text': 'Client-Side Pure Parsing: Tokens are never uploaded to any remote server.',
+      'jwt_ph': 'Paste eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... here',
+      'jwt_valid_text': 'Client-side offline parsing: No token is ever transmitted to any remote server.',
       'jwt_header_title': 'HEADER: ALGORITHM & TOKEN TYPE',
       'jwt_payload_title': 'PAYLOAD: DATA CLAIMS',
 
-      // Hash Tool
-      'hash_ph': 'Enter any text or password string to calculate cryptographic hashes...',
+      // Hash Calculator
+      'hash_ph': 'Enter any string to calculate cryptographic hashes in real time...',
+      'hash_md5_label': 'MD5 (128-bit / Fast Checksum):',
+      'hash_sha1_label': 'SHA-1 (160-bit):',
+      'hash_sha256_label': 'SHA-256 (256-bit / Industry Standard):',
+      'hash_sha512_label': 'SHA-512 (512-bit / Military Grade):',
 
-      // Timestamp
-      'tool_time_curr': 'Current Local Time',
-      'tool_time_copy_sec': 'Copy Seconds',
-      'tool_time_conv_title': 'Timestamp Conversion',
-      'tool_time_conv_label': 'Timestamp (sec) -> Datetime',
-      'tool_time_conv_btn': 'Convert',
-      'time_code_cheatsheet': 'Current Timestamp Code Cheatsheet:',
+      // Time Converter
+      'time_current_label': 'Current Timestamp:',
+      'time_btn_copy': 'Copy',
+      'time_btn_refresh': 'Refresh',
+      'time_ts2date_title': 'Timestamp ➡️ Date String',
+      'time_ts_input_label': 'Timestamp (sec / ms):',
+      'time_btn_convert': 'Convert to Date',
+      'time_date2ts_title': 'Date String ➡️ Timestamp',
+      'time_date_input_label': 'Date & Time:',
+      'time_btn_to_ts': 'Convert to Timestamp',
 
       // Text Utilities
-      'tool_text_ph': 'Enter text to process here...',
+      'tool_text_ph': 'Type or paste text you want to process...',
       'tool_text_upper': 'UPPERCASE',
       'tool_text_lower': 'lowercase',
-      'tool_text_count': 'Word Count & Metrics',
+      'tool_text_count': 'Word & Char Count',
       'tool_text_b64enc': 'Base64 Encode',
       'tool_text_b64dec': 'Base64 Decode',
       'tool_text_urlenc': 'URL Encode',
@@ -322,21 +360,34 @@ const I18nController = {
       'tool_text_clear': 'Clear',
       'tool_text_res_label': 'Result:',
 
-      // Geek AirDrop
-      'airdrop_title': 'Geek AirDrop (Web Peer-to-Peer)',
-      'airdrop_subtitle': 'Sign-in free, instant cross-device file & text transfer across local networks and mobile devices.',
+      // AirDrop
+      'airdrop_title': 'Geek AirDrop (Web P2P File Drop)',
+      'airdrop_subtitle': 'Zero-login, cross-device instant file, text, and clipboard transfer via WebRTC P2P.',
       'airdrop_my_device': 'My Device Identity:',
-      'airdrop_room_label': 'Active Channel Room:',
+      'airdrop_room_label': 'Current Channel:',
       'airdrop_copy_invite': 'Mobile Scan / Copy Direct Link',
       'airdrop_join_btn': 'Switch Channel',
       'airdrop_send_title': '📤 Transfer Files & Text',
       'airdrop_peers_title': 'Connected Peers in Channel',
       'airdrop_rescan_btn': 'Refresh Peers',
       'airdrop_drop_hint': 'Drop files here or click to select',
-      'airdrop_drop_sub': 'Supports images, zips, code, docs (Max 10MB)',
+      'airdrop_drop_sub': 'Supports images, zips, code, docs (Max 50MB)',
       'airdrop_text_ph': 'Type text or code to instantly transfer across devices...',
       'airdrop_send_text_btn': 'Send Text to Peers',
       'airdrop_recv_title': '📥 Real-Time Incoming Stream',
+
+      // AirDrop Whitepaper
+      'airdrop_doc_title': 'WebRTC Geek AirDrop Technical Principles & Security Whitepaper',
+      'airdrop_doc_sub': 'Learn how peer-to-peer communication, STUN NAT traversal, and zero-cloud-log architecture work.',
+      'airdrop_doc_mesh_title': '1. WebRTC P2P Mesh Handshake Lifecycle',
+      'airdrop_doc_sec_title': '2. Why Is It More Secure Than Cloud Messengers?',
+      'airdrop_faq_title': 'Frequently Asked Questions & Troubleshooting (FAQ)',
+      'airdrop_faq_q1': 'Do both devices need to be on the same WiFi network?',
+      'airdrop_faq_a1': 'No! As long as both devices have internet connectivity, WebRTC performs STUN NAT traversal to establish a direct P2P tunnel. When on the same WiFi, traffic flows over local LAN with gigabit speeds!',
+      'airdrop_faq_q2': 'Why is there a slight delay when a peer disconnects?',
+      'airdrop_faq_a2': 'When a tab is closed, a bye beacon is broadcasted instantly for 0ms teardown. If a mobile device goes to sleep or disconnects abruptly, our 1.5s heartbeat timer cleans up dead connections within 3.5 seconds. You can also click Refresh Peers at any time.',
+      'airdrop_faq_q3': 'Is there a file size limit?',
+      'airdrop_faq_a3': 'We recommend files under 50MB. Because WebRTC DataChannel streams in memory chunks, very large files may strain low-memory mobile browsers. Source code, documents, photos, and zip archives transfer effortlessly.',
 
       // Webhook Inspector
       'webhook_title': 'Webhook Inspector & API Echo Testbed',
@@ -352,8 +403,16 @@ const I18nController = {
       'webhook_logs_title': '📡 Captured Request Payloads',
       'webhook_empty_hint': 'Listening on endpoint... Send HTTP requests to inspect Headers and Body payloads in real time.',
 
+      // Webhook Guide
+      'webhook_doc_title': 'Webhook Architecture Design & Production Security Guide',
+      'webhook_doc_sub': 'Master reverse HTTP callbacks, HMAC-SHA256 signature verification, anti-replay timestamps, and idempotency.',
+      'webhook_doc_compare_title': '1. Webhook vs Traditional HTTP Polling Comparison',
+      'webhook_doc_sec_title': '2. Five Production Security Rules for Webhook Consumers',
+      'webhook_doc_code_title': 'HMAC-SHA256 Signature Verification Code Snippets',
+
       // In-depth Knowledge Base
       'tool_faq_title': 'Geek Toolbox Tech Articles & Knowledge Base',
+      'tool_doc_gpu_title': 'Modern GPU Cluster (RTX 4090 Matrix) Brute-Force Password Cracking Time Matrix',
       'tool_faq_q1': 'Password Entropy & Mathematical Brute-Force Resistance',
       'tool_faq_a1': 'Password entropy formula is E = L * log2(N), where L is length and N is charset pool size (94 possible ASCII chars). According to NIST guidelines, passwords with >80 bits entropy require billions of years to brute-force on modern supercomputer clusters.',
       'tool_faq_q4': 'JSON (RFC 8259) Standards & Common Developer Pitfalls',

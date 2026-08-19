@@ -9,30 +9,91 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 </head>
 <body style="display: block; overflow: auto; padding: 40px 20px;">
-  <div style="max-width: 800px; margin: 0 auto; background: rgba(19, 27, 46, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 36px;">
-    <a href="/" style="color: #06b6d4; text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 20px;">← 返回 825412.xyz 首页</a>
-    <h1 style="color: #10b981; font-size: 26px; margin-bottom: 8px;">服务条款 (Terms of Service)</h1>
-    <p style="color: #64748b; font-size: 13px; margin-bottom: 24px;">生效日期：2026年6月5日 | 最近修订：2026年8月19日</p>
+  <div style="max-width: 820px; margin: 0 auto; background: rgba(19, 27, 46, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 36px;">
     
-    <div style="font-size: 14px; line-height: 1.8; color: #dae2fd;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+      <a href="/" style="color: #06b6d4; text-decoration: none; font-size: 14px; font-weight: 600;">← 返回 825412.xyz 首页</a>
+      <div style="display: flex; gap: 8px;">
+        <button id="btn-lang-zh" onclick="setLang('zh')" style="background: #10b981; color: #0f172a; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; cursor: pointer;">🇨🇳 中文</button>
+        <button id="btn-lang-en" onclick="setLang('en')" style="background: rgba(255,255,255,0.1); color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer;">🇺🇸 English</button>
+      </div>
+    </div>
+
+    <!-- 中文版服务条款 -->
+    <div id="content-zh" style="font-size: 14px; line-height: 1.8; color: #dae2fd;">
+      <h1 style="color: #10b981; font-size: 26px; margin-bottom: 8px;">服务条款 (Terms of Service)</h1>
+      <p style="color: #64748b; font-size: 13px; margin-bottom: 24px;">生效日期：2026年6月5日 | 最近修订：2026年8月19日</p>
+
       <p>欢迎访问 <strong>825412.xyz</strong>。当您访问或使用本站提供的任何在线工具与服务时，即表示您已阅读、理解并同意遵守本服务条款。</p>
 
       <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">1. 服务性质与使用规范</h2>
-      <p>本站提供的在线开发者工具仅供合法的开发测试、教学研究及日常办公使用。任何用户严禁将本站工具用于以下非法行为：</p>
+      <p>本站提供的在线开发者工具仅供合法的软件开发测试、科研教学及日常办公使用。任何用户严禁将本站工具用于以下行为：</p>
       <ul>
         <li>通过匿名剪贴板或快传通道传播含有违法违规、侵犯他人隐私或恶意木马病毒的内容。</li>
-        <li>对本站 Webhook 调试桩或公共服务器进行拒绝服务攻击 (DDoS) 或自动化恶意刷量。</li>
+        <li>对本站 Webhook 调试桩或公共服务器进行分布式拒绝服务攻击 (DDoS) 或自动化恶意刷量。</li>
       </ul>
 
       <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">2. 免责声明 (Disclaimer)</h2>
-      <p>本站所有工具均按“现状 (As Is)”提供，不提供任何形式的明示或暗示保证。对于因不可抗力、网络中断或第三方接口波动导致的任何数据损失，本站不承担连带责任。</p>
+      <p>本站所有工具均按“现状 (As Is)”提供，不提供任何明示或暗示的商业可用性担保。对于因网络波动、第三方公共节点或用户本地环境导致的数据丢失，本站不承担连带赔偿责任。</p>
 
-      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">3. 知识产权与商标</h2>
-      <p>本站所有原创前端界面设计、交互逻辑、文章与图标均受著作权与知识产权法保护。代码中引用的开源库（如 PeerJS、Puter.js）遵循其各自的开源许可证。</p>
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">3. 知识产权与授权</h2>
+      <p>本站所有原创界面设计、文字排版、自研算法与图标均受知识产权法律保护。引用的开源库遵循其各自的 MIT/Apache 开源协议。</p>
 
-      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">4. 条款修订与联系方式</h2>
-      <p>本站保留随时修订本服务条款的权利。如有任何疑问，请联系站长邮箱：<code>leen8254@gmail.com</code>。</p>
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">4. 联系方式</h2>
+      <p>站长联络邮箱：<code>leen8254@gmail.com</code></p>
     </div>
+
+    <!-- 英文版服务条款 (English Version) -->
+    <div id="content-en" style="display: none; font-size: 14px; line-height: 1.8; color: #dae2fd;">
+      <h1 style="color: #10b981; font-size: 26px; margin-bottom: 8px;">Terms of Service</h1>
+      <p style="color: #64748b; font-size: 13px; margin-bottom: 24px;">Effective Date: June 5, 2026 | Last Revised: August 19, 2026</p>
+
+      <p>Welcome to <strong>825412.xyz</strong>. By accessing or using any tools provided on this website, you agree to be bound by these Terms of Service.</p>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">1. Permitted Use and Restrictions</h2>
+      <p>Our online utilities are provided exclusively for lawful software development, diagnostic testing, educational research, and personal productivity. You agree not to:</p>
+      <ul>
+        <li>Transmit malware, unlawful material, or infringe on third-party intellectual property via our pastebin or P2P transfer pipes.</li>
+        <li>Launch Denial of Service (DoS/DDoS) attacks or automated abusive queries against our Webhook gateways or network endpoints.</li>
+      </ul>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">2. Disclaimer of Warranties</h2>
+      <p>All utilities and guides on this platform are provided on an "as is" and "as available" basis without warranties of any kind. We are not liable for any data loss, connection interruptions, or consequential damages.</p>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">3. Intellectual Property</h2>
+      <p>All original UI designs, styling, documentation, and algorithms are proprietary. Third-party open-source components adhere to their respective MIT/Apache licenses.</p>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">4. Contact Information</h2>
+      <p>Email: <code>leen8254@gmail.com</code></p>
+    </div>
+
   </div>
+
+  <script>
+    function setLang(lang) {
+      const zh = document.getElementById('content-zh');
+      const en = document.getElementById('content-en');
+      const btnZh = document.getElementById('btn-lang-zh');
+      const btnEn = document.getElementById('btn-lang-en');
+      if (lang === 'en') {
+        zh.style.display = 'none';
+        en.style.display = 'block';
+        btnEn.style.background = '#10b981';
+        btnEn.style.color = '#0f172a';
+        btnZh.style.background = 'rgba(255,255,255,0.1)';
+        btnZh.style.color = '#fff';
+      } else {
+        zh.style.display = 'block';
+        en.style.display = 'none';
+        btnZh.style.background = '#10b981';
+        btnZh.style.color = '#0f172a';
+        btnEn.style.background = 'rgba(255,255,255,0.1)';
+        btnEn.style.color = '#fff';
+      }
+    }
+    if (navigator.language && !navigator.language.startsWith('zh')) {
+      setLang('en');
+    }
+  </script>
 </body>
 </html>

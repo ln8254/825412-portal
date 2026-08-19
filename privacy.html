@@ -9,12 +9,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 </head>
 <body style="display: block; overflow: auto; padding: 40px 20px;">
-  <div style="max-width: 800px; margin: 0 auto; background: rgba(19, 27, 46, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 36px;">
-    <a href="/" style="color: #06b6d4; text-decoration: none; font-size: 14px; display: inline-block; margin-bottom: 20px;">← 返回 825412.xyz 首页</a>
-    <h1 style="color: #06b6d4; font-size: 26px; margin-bottom: 8px;">隐私政策 (Privacy Policy)</h1>
-    <p style="color: #64748b; font-size: 13px; margin-bottom: 24px;">生效日期：2026年6月5日 | 最近修订：2026年8月19日</p>
+  <div style="max-width: 820px; margin: 0 auto; background: rgba(19, 27, 46, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 36px;">
     
-    <div style="font-size: 14px; line-height: 1.8; color: #dae2fd;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+      <a href="/" style="color: #06b6d4; text-decoration: none; font-size: 14px; font-weight: 600;">← 返回 825412.xyz 首页</a>
+      <div style="display: flex; gap: 8px;">
+        <button id="btn-lang-zh" onclick="setLang('zh')" style="background: #06b6d4; color: #0f172a; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; cursor: pointer;">🇨🇳 中文</button>
+        <button id="btn-lang-en" onclick="setLang('en')" style="background: rgba(255,255,255,0.1); color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer;">🇺🇸 English</button>
+      </div>
+    </div>
+
+    <!-- 中文版隐私政策 -->
+    <div id="content-zh" style="font-size: 14px; line-height: 1.8; color: #dae2fd;">
+      <h1 style="color: #06b6d4; font-size: 26px; margin-bottom: 8px;">隐私政策 (Privacy Policy)</h1>
+      <p style="color: #64748b; font-size: 13px; margin-bottom: 24px;">生效日期：2026年6月5日 | 最近修订：2026年8月19日</p>
+
       <p>825412.xyz（以下简称“本站”）极其重视用户的个人隐私与数据安全。本隐私政策旨在向您说明本站在您使用我们的在线开发者工具、隔空快传及 Webhook 调试等服务时，如何收集、使用和保护您的信息。</p>
 
       <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">1. 信息收集与零云端落盘原则</h2>
@@ -41,6 +50,67 @@
       <p>如果您对本站的隐私政策或数据处理有任何疑问、建议或合规咨询，请通过电子邮件与站长取得联系：<br>
       <strong>联系邮箱：</strong> <code>leen8254@gmail.com</code></p>
     </div>
+
+    <!-- 英文版隐私政策 (English Version for Googlebot & Global Visitors) -->
+    <div id="content-en" style="display: none; font-size: 14px; line-height: 1.8; color: #dae2fd;">
+      <h1 style="color: #06b6d4; font-size: 26px; margin-bottom: 8px;">Privacy Policy</h1>
+      <p style="color: #64748b; font-size: 13px; margin-bottom: 24px;">Effective Date: June 5, 2026 | Last Revised: August 19, 2026</p>
+
+      <p>825412.xyz ("we", "us", or "our") deeply respects and protects user privacy and data security. This Privacy Policy explains how we collect, use, and safeguard your information when you access our online developer utilities, WebRTC AirDrop, and Webhook debugging services.</p>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">1. Information Collection & Zero-Cloud-Storage Principle</h2>
+      <p>We are dedicated to providing sign-up-free, client-side online developer tools under strict data minimization standards:</p>
+      <ul>
+        <li><strong>Geek AirDrop:</strong> Utilizes WebRTC DataChannel peer-to-peer technology. File and text transfers occur directly between the communicating devices without ever being relayed or stored on any central server.</li>
+        <li><strong>Anonymous Pastebin:</strong> Stores temporary text snippets solely based on your chosen expiration period (1 hour, 24 hours, or 7 days), after which data is permanently and irreversibly purged.</li>
+        <li><strong>Client-Side Utilities:</strong> Password generation, cryptographic hashing, JWT debugging, and JSON formatting execute 100% locally in your browser's memory without any network transmission.</li>
+      </ul>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">2. Cookies and Google AdSense Advertising Compliance</h2>
+      <p>This website uses <strong>Google AdSense</strong> and related advertising partner networks. Please review the following cookie disclosures:</p>
+      <ul>
+        <li>Third party vendors, including Google, use cookies to serve ads based on a user's prior visits to your website or other websites.</li>
+        <li>Google's use of advertising cookies (including the DART cookie) enables it and its partners to serve ads to users based on their visit to your sites and/or other sites on the Internet.</li>
+        <li>Users may opt out of personalized advertising by visiting <a href="https://adssettings.google.com" target="_blank" style="color: #06b6d4;">Google Ads Settings</a>.</li>
+        <li>Alternatively, users can opt out of a third-party vendor's use of cookies for personalized advertising by visiting <a href="https://www.aboutads.info" target="_blank" style="color: #06b6d4;">aboutads.info</a>.</li>
+      </ul>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">3. Web Server Telemetry & Security</h2>
+      <p>To prevent DDoS attacks and optimize global edge routing, global CDNs (e.g. Cloudflare) may record standard access logs (including origin IP, User-Agent, request timestamp, and HTTP response codes) for audit and performance diagnostics.</p>
+
+      <h2 style="font-size: 18px; color: #fff; margin: 24px 0 10px;">4. Contact Us</h2>
+      <p>For any privacy inquiries or compliance questions, please contact the site operator:<br>
+      <strong>Email:</strong> <code>leen8254@gmail.com</code></p>
+    </div>
+
   </div>
+
+  <script>
+    function setLang(lang) {
+      const zh = document.getElementById('content-zh');
+      const en = document.getElementById('content-en');
+      const btnZh = document.getElementById('btn-lang-zh');
+      const btnEn = document.getElementById('btn-lang-en');
+      if (lang === 'en') {
+        zh.style.display = 'none';
+        en.style.display = 'block';
+        btnEn.style.background = '#06b6d4';
+        btnEn.style.color = '#0f172a';
+        btnZh.style.background = 'rgba(255,255,255,0.1)';
+        btnZh.style.color = '#fff';
+      } else {
+        zh.style.display = 'block';
+        en.style.display = 'none';
+        btnZh.style.background = '#06b6d4';
+        btnZh.style.color = '#0f172a';
+        btnEn.style.background = 'rgba(255,255,255,0.1)';
+        btnEn.style.color = '#fff';
+      }
+    }
+    // 自动检测英文环境
+    if (navigator.language && !navigator.language.startsWith('zh')) {
+      setLang('en');
+    }
+  </script>
 </body>
 </html>
