@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. 模拟 Dashboard 系统资源监控
   startSystemMetricsMonitor();
 
-  // 5. 自动检测 URL Hash 分享码并解析展示
-  checkUrlHashPaste();
+  // 5. 自动检测 URL 参数与 Hash 分享码并深度直达目标功能
+  handleUrlRoutingAndDeepLinks();
 
   // 6. 初始化隐私政策、服务条款、关于本站及联系我们模态框
   initLegalModals();
@@ -155,30 +155,62 @@ function triggerTabSwitch(viewId) {
 }
 
 /**
- * 自动检查并解析 URL Hash 中的剪贴板分享链接
+ * 自动检查并解析 URL 参数 (?view=, ?room=, ?paste=) 与 URL Hash (#drop=, #paste=, #webhook) 深度直达路由
  */
-function checkUrlHashPaste() {
+function handleUrlRoutingAndDeepLinks() {
+  const params = new URLSearchParams(window.location.search);
   const hash = window.location.hash;
-  if (hash.startsWith('#paste=')) {
-    const code = hash.replace('#paste=', '').trim();
+
+  // 1. 极客隔空快传 (?view=airdrop, ?room=ABCDE, #drop=ABCDE)
+  const roomParam = params.get('room');
+  if (params.get('view') === 'airdrop' || roomParam || hash.startsWith('#drop=')) {
+    triggerTabSwitch('airdrop-view');
+    const roomId = roomParam || (hash.startsWith('#drop=') ? hash.replace('#drop=', '').trim() : '');
+    if (roomId && typeof AirDropController !== 'undefined') {
+      setTimeout(() => {
+        AirDropController.joinRoom(roomId);
+      }, 100);
+    }
+    return;
+  }
+
+  // 2. 匿名云剪贴板 (?view=clipboard, #paste=CODE)
+  if (params.get('view') === 'clipboard' || hash.startsWith('#paste=')) {
+    triggerTabSwitch('clipboard-view');
+    const code = params.get('paste') || (hash.startsWith('#paste=') ? hash.replace('#paste=', '').trim() : '');
     if (code) {
-      // 延迟一段时间执行，确保 Puter.js 已加载且环境就绪
       setTimeout(() => {
         if (typeof ClipboardController !== 'undefined') {
           ClipboardController.showPaste(code);
         }
       }, 1200);
     }
-  } else if (hash.startsWith('#drop=')) {
-    triggerTabSwitch('airdrop-view');
-  } else if (hash.startsWith('#webhook')) {
+    return;
+  }
+
+  // 3. Webhook 调试桩 (?view=webhook, #webhook)
+  if (params.get('view') === 'webhook' || hash.startsWith('#webhook')) {
     triggerTabSwitch('webhook-view');
-    if (hash === '#webhook-test') {
+    if (hash === '#webhook-test' || params.get('mock') === 'true') {
       setTimeout(() => {
         const btn = document.getElementById('webhook-send-mock-btn');
         if (btn) btn.click();
       }, 500);
     }
+    return;
+  }
+
+  // 4. 开发者工具箱 (?view=toolbox, ?tool=jwt / json / password / hash / time / text)
+  if (params.get('view') === 'toolbox') {
+    triggerTabSwitch('toolbox-view');
+    const tool = params.get('tool');
+    if (tool) {
+      setTimeout(() => {
+        const tabBtn = document.querySelector(`[data-tab="${tool}-tab"]`);
+        if (tabBtn) tabBtn.click();
+      }, 100);
+    }
+    return;
   }
 }
 

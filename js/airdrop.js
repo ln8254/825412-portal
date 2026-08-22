@@ -103,7 +103,7 @@ const AirDropController = {
           <div class="modal-header">
             <h2 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
               <span class="material-symbols-outlined" style="color: var(--color-secondary);">qr_code_scanner</span>
-              <span>手机扫码一键互联</span>
+              <span data-i18n="airdrop_qr_modal_title">手机扫码一键互联</span>
             </h2>
             <span class="material-symbols-outlined modal-close" id="close-qr-modal">close</span>
           </div>
@@ -111,8 +111,11 @@ const AirDropController = {
             <div class="qr-canvas-container">
               <img id="airdrop-qr-img" src="" alt="AirDrop Room QR Code" style="width: 180px; height: 180px; display: block;" />
             </div>
-            <div style="font-weight: 700; font-size: 16px; color: #fff; margin-bottom: 4px;">房间号: <span id="qr-room-badge" style="color: var(--color-secondary);">#${this.roomId}</span></div>
-            <div class="qr-tip-text">用手机自带相机或浏览器扫一扫，免安装 App 秒级加入当前房间直传文件与文本！</div>
+            <div style="font-weight: 700; font-size: 16px; color: #fff; margin-bottom: 4px;">
+              <span data-i18n="airdrop_qr_room_label">房间号:</span>
+              <span id="qr-room-badge" style="color: var(--color-secondary); font-family: var(--font-mono);">#${this.roomId}</span>
+            </div>
+            <div class="qr-tip-text" data-i18n="airdrop_qr_modal_tip">用手机自带相机或浏览器扫一扫，免安装 App 秒级加入当前房间直传文件与文本！</div>
           </div>
         </div>
       `;
@@ -126,11 +129,20 @@ const AirDropController = {
       });
     }
 
-    const shareUrl = `${window.location.origin}${window.location.pathname}?room=${this.roomId}`;
+    // 构造精准跳转至隔空快传视图与当前房间的完整 URL
+    const isStandaloneAirdrop = window.location.pathname.endsWith('airdrop.html');
+    const targetPath = isStandaloneAirdrop ? 'airdrop.html' : '';
+    const shareUrl = `${window.location.origin}/${targetPath}?view=airdrop&room=${this.roomId}`;
+    
     const qrImg = modal.querySelector('#airdrop-qr-img');
     const badge = modal.querySelector('#qr-room-badge');
     if (badge) badge.textContent = `#${this.roomId}`;
     if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`;
+
+    // 动态应用当前语言包
+    if (typeof I18nController !== 'undefined') {
+      I18nController.applyLanguage(I18nController.currentLang);
+    }
 
     modal.classList.add('active');
   },
