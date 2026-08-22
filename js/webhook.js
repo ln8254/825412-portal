@@ -83,7 +83,7 @@ const WebhookController = {
       copyUrlBtn.addEventListener('click', () => {
         const text = `https://echo.free.beeceptor.com/webhook/825412_${this.hookId}`;
         navigator.clipboard.writeText(text).then(() => {
-          alert('专属 Webhook 接收地址已复制到剪贴板！');
+          if (typeof Toast !== 'undefined') Toast.success('专属 Webhook 接收地址已复制到剪贴板！');
         });
       });
     }
@@ -93,7 +93,7 @@ const WebhookController = {
         const curlSnippet = document.getElementById('webhook-curl-snippet');
         if (curlSnippet) {
           navigator.clipboard.writeText(curlSnippet.textContent).then(() => {
-            alert('cURL 快速测试命令已复制！可在电脑终端中直接回车发送。');
+            if (typeof Toast !== 'undefined') Toast.success('cURL 快速测试命令已复制！可在终端中回车发送。');
           });
         }
       });
@@ -104,13 +104,14 @@ const WebhookController = {
         this.capturedRequests = [];
         localStorage.removeItem('webhook_captured_logs');
         this.renderRequestList();
+        if (typeof Toast !== 'undefined') Toast.info('捕获日志已清空。');
       });
     }
 
     if (refreshBtn) {
       refreshBtn.addEventListener('click', () => {
         this.renderRequestList();
-        alert('请求列表已更新！');
+        if (typeof Toast !== 'undefined') Toast.info('请求列表已刷新。');
       });
     }
   },
@@ -162,6 +163,7 @@ const WebhookController = {
 
       sendBtn.disabled = false;
       sendBtn.innerHTML = '<span class="material-symbols-outlined">send</span> 发送模拟请求';
+      if (typeof Toast !== 'undefined') Toast.success(`成功触发 ${method} Webhook 模拟报文！`);
     });
   },
 
@@ -252,7 +254,7 @@ const WebhookController = {
         if (item && item.body) {
           const text = typeof item.body === 'object' ? JSON.stringify(item.body, null, 2) : item.body;
           navigator.clipboard.writeText(text).then(() => {
-            alert('已成功复制 Payload JSON 数据！');
+            if (typeof Toast !== 'undefined') Toast.success('已成功复制 Payload JSON 数据！');
           });
         }
       });

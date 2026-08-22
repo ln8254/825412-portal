@@ -48,9 +48,14 @@ const AirDropController = {
     const roomInput = document.getElementById('airdrop-room-input');
     const joinBtn = document.getElementById('airdrop-join-btn');
     const copyLinkBtn = document.getElementById('airdrop-copy-link-btn');
+    const qrBtn = document.getElementById('airdrop-qr-btn');
 
+    // 解析 URL 中的 ?room= 或 #drop= 房间号参数
     let initialRoom = '';
-    if (window.location.hash.startsWith('#drop=')) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('room')) {
+      initialRoom = urlParams.get('room').trim().toUpperCase();
+    } else if (window.location.hash.startsWith('#drop=')) {
       initialRoom = window.location.hash.replace('#drop=', '').trim().toUpperCase();
     }
     if (!initialRoom) {
@@ -64,20 +69,70 @@ const AirDropController = {
         const val = roomInput.value.trim().toUpperCase();
         if (val) {
           this.joinRoom(val);
+          if (typeof Toast !== 'undefined') Toast.success(`已切换至房间: #${val}`);
         }
       });
     }
 
     if (copyLinkBtn) {
       copyLinkBtn.addEventListener('click', () => {
-        const url = `${window.location.origin}${window.location.pathname}#drop=${this.roomId}`;
+        const url = `${window.location.origin}${window.location.pathname}?room=${this.roomId}`;
         navigator.clipboard.writeText(url).then(() => {
-          alert(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' 
-            ? 'AirDrop invite link copied! Open on your mobile phone to connect.' 
-            : '隔空快传邀请链接已复制！在手机端打开即可秒连。');
+          if (typeof Toast !== 'undefined') {
+            Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' 
+              ? 'AirDrop invite link copied! Open on your mobile phone to connect.' 
+              : '隔空快传邀请链接已复制！手机打开即可秒连。');
+          }
         });
       });
     }
+
+    if (qrBtn) {
+      qrBtn.addEventListener('click', () => this.openQrModal());
+    }
+  },
+
+  openQrModal() {
+    let modal = document.getElementById('airdrop-qr-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'airdrop-qr-modal';
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-content glass-panel" style="max-width: 380px;">
+          <div class="modal-header">
+            <h2 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-outlined" style="color: var(--color-secondary);">qr_code_scanner</span>
+              <span>手机扫码一键互联</span>
+            </h2>
+            <span class="material-symbols-outlined modal-close" id="close-qr-modal">close</span>
+          </div>
+          <div class="qr-modal-body">
+            <div class="qr-canvas-container">
+              <img id="airdrop-qr-img" src="" alt="AirDrop Room QR Code" style="width: 180px; height: 180px; display: block;" />
+            </div>
+            <div style="font-weight: 700; font-size: 16px; color: #fff; margin-bottom: 4px;">房间号: <span id="qr-room-badge" style="color: var(--color-secondary);">#${this.roomId}</span></div>
+            <div class="qr-tip-text">用手机自带相机或浏览器扫一扫，免安装 App 秒级加入当前房间直传文件与文本！</div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      modal.querySelector('#close-qr-modal').addEventListener('click', () => {
+        modal.classList.remove('active');
+      });
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+      });
+    }
+
+    const shareUrl = `${window.location.origin}${window.location.pathname}?room=${this.roomId}`;
+    const qrImg = modal.querySelector('#airdrop-qr-img');
+    const badge = modal.querySelector('#qr-room-badge');
+    if (badge) badge.textContent = `#${this.roomId}`;
+    if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`;
+
+    modal.classList.add('active');
   },
 
   joinRoom(roomId) {
@@ -511,7 +566,7 @@ const AirDropController = {
 
   processFileSend(file) {
     if (file.size > 50 * 1024 * 1024) {
-      alert('P2P 直传单次文件请限制在 50MB 以内。');
+      if (typeof Toast !== 'undefined') Toast.warning('P2P 直传单次文件请限制在 50MB 以内。');
       return;
     }
 
@@ -560,6 +615,7 @@ const AirDropController = {
           </a>
         </div>
       `;
+      if (typeof Toast !== 'undefined') Toast.success(`收到新文件: ${payload.fileName}`);
     } else {
       item.innerHTML = `
         <div style="flex-grow: 1;">
@@ -568,11 +624,12 @@ const AirDropController = {
             <span style="font-size: 11px; color: var(--text-muted);">${new Date(payload.timestamp).toLocaleTimeString()}</span>
           </div>
           <div style="font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); white-space: pre-wrap; background: var(--surface-low); padding: 8px 12px; border-radius: 4px; margin-bottom: 6px;">${payload.content}</div>
-          <button class="btn" onclick="navigator.clipboard.writeText('${payload.content.replace(/'/g, "\\'")}').then(() => alert('已复制接收内容！'))" style="background: var(--surface-high); font-size: 11px; padding: 4px 10px;">
+          <button class="btn" onclick="navigator.clipboard.writeText('${payload.content.replace(/'/g, "\\'")}').then(() => { if (typeof Toast !== 'undefined') Toast.success('已复制接收内容！'); })" style="background: var(--surface-high); font-size: 11px; padding: 4px 10px;">
             <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">content_copy</span> 复制文本
           </button>
         </div>
       `;
+      if (typeof Toast !== 'undefined') Toast.info(`收到来自 ${payload.senderName} 的文本`);
     }
 
     list.prepend(item);

@@ -62,12 +62,18 @@
   <!-- 引入 Puter.js 免费前端云储存库 (解决 CORS 跨域限制) -->
   <script src="https://js.puter.com/v2/"></script>
   
+  <!-- PWA 渐进式 Web 应用配置 -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#06b6d4">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <!-- Google AdSense 自动广告 -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5943907597157682"
      crossorigin="anonymous"></script>
      
   <!-- 核心样式 -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2.5.1">
 </head>
 <body>
 
@@ -78,6 +84,7 @@
       <span class="logo-text" style="font-size: 18px;">825412.xyz</span>
     </div>
     <div class="mobile-header-actions">
+      <button class="mobile-icon-btn" onclick="CommandPalette.open()" title="Command Palette">🔍</button>
       <button class="mobile-icon-btn" id="mobile-lang-btn" title="Toggle Language">🌐</button>
       <button class="mobile-icon-btn" id="mobile-menu-btn" aria-label="Toggle Menu">
         <span class="material-symbols-outlined">menu</span>
@@ -93,6 +100,17 @@
     <div class="logo-container">
       <div class="logo-icon">82</div>
       <span class="logo-text">825412.xyz</span>
+    </div>
+
+    <!-- 极客快捷指令面板触发条 -->
+    <div style="padding: 0 12px; margin-bottom: 16px;">
+      <button class="btn" onclick="CommandPalette.open()" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; font-size: 12px; display: flex; align-items: center; justify-content: space-between; border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer;">
+        <span style="display: flex; align-items: center; gap: 6px;">
+          <span class="material-symbols-outlined" style="font-size: 16px; color: var(--color-secondary);">search</span>
+          <span>指令搜索...</span>
+        </span>
+        <kbd class="cmd-badge">⌘K</kbd>
+      </button>
     </div>
     
     <ul class="nav-menu">
@@ -816,12 +834,16 @@
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;" data-i18n="airdrop_my_device">当前设备标识:</div>
             <div id="airdrop-my-name" style="font-size: 16px; font-weight: 700; color: var(--color-secondary);">💻 Desktop Workstation</div>
           </div>
-          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
             <span style="font-size: 13px; color: var(--text-secondary);" data-i18n="airdrop_room_label">当前互传频道:</span>
             <span id="airdrop-current-room" style="font-family: var(--font-mono); font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: 4px;">#ROOM</span>
-            <button class="btn btn-primary" id="airdrop-copy-link-btn" style="padding: 8px 14px; font-size: 13px;">
-              <span class="material-symbols-outlined" style="font-size: 16px;">qr_code_2</span>
-              <span data-i18n="airdrop_copy_invite">手机扫码/复制直连链接</span>
+            <button class="btn btn-primary" id="airdrop-qr-btn" style="padding: 8px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" style="font-size: 18px;">qr_code_scanner</span>
+              <span>手机扫码互联</span>
+            </button>
+            <button class="btn" id="airdrop-copy-link-btn" style="padding: 8px 14px; font-size: 13px; background: var(--surface-high); display: inline-flex; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" style="font-size: 18px;">link</span>
+              <span data-i18n="airdrop_copy_invite">复制直连链接</span>
             </button>
           </div>
         </div>

@@ -141,7 +141,7 @@ const ClipboardController = {
       const text = contentArea.value;
       if (text && !text.startsWith('正在') && !text.startsWith('该剪贴板')) {
         navigator.clipboard.writeText(text).then(() => {
-          alert('文本内容已成功复制！');
+          if (typeof Toast !== 'undefined') Toast.success('文本内容已成功复制！');
         });
       }
     });
@@ -162,7 +162,7 @@ const ClipboardController = {
     saveBtn.addEventListener('click', async () => {
       const text = contentText.value.trim();
       if (!text) {
-        alert('请输入需要分享的内容！');
+        if (typeof Toast !== 'undefined') Toast.warning('请输入需要分享的内容！');
         return;
       }
 
@@ -215,10 +215,11 @@ const ClipboardController = {
 
         // 重置编辑器
         contentText.value = '';
+        if (typeof Toast !== 'undefined') Toast.success('匿名分享链接创建成功！');
 
       } catch (err) {
         console.error(err);
-        alert('创建匿名分享失败，请检查网络连接或稍后再试。');
+        if (typeof Toast !== 'undefined') Toast.error('创建匿名分享失败，请检查网络连接或稍后再试。');
       } finally {
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<span class="material-symbols-outlined">publish</span> 创建分享链接';
@@ -230,7 +231,7 @@ const ClipboardController = {
       const url = shareUrlDiv.textContent;
       if (url) {
         navigator.clipboard.writeText(url).then(() => {
-          alert('站内分享链接已复制到剪贴板！');
+          if (typeof Toast !== 'undefined') Toast.success('站内分享链接已复制到剪贴板！');
         });
       }
     });

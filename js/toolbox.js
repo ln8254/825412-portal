@@ -22,7 +22,9 @@ const ToolboxController = {
           const el = document.getElementById(valId);
           if (el && el.textContent && el.textContent !== '-') {
             navigator.clipboard.writeText(el.textContent).then(() => {
-              alert(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Hash copied to clipboard!' : '哈希散列值已复制到剪贴板！');
+              if (typeof Toast !== 'undefined') {
+                Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Hash copied to clipboard!' : '哈希散列值已复制到剪贴板！');
+              }
             });
           }
         });
@@ -71,7 +73,9 @@ const ToolboxController = {
       const pwd = document.getElementById('generated-password').textContent;
       if (pwd && !pwd.startsWith('点击') && !pwd.startsWith('Click')) {
         navigator.clipboard.writeText(pwd).then(() => {
-          alert(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Password copied to clipboard!' : '密码已成功复制到剪贴板！');
+          if (typeof Toast !== 'undefined') {
+            Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Password copied to clipboard!' : '密码已成功复制到剪贴板！');
+          }
         });
       }
     });
@@ -234,7 +238,9 @@ const ToolboxController = {
       copyBtn.addEventListener('click', () => {
         if (input.value) {
           navigator.clipboard.writeText(input.value).then(() => {
-            alert(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'JSON copied to clipboard!' : 'JSON 内容已复制到剪贴板！');
+            if (typeof Toast !== 'undefined') {
+              Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'JSON copied to clipboard!' : 'JSON 内容已复制到剪贴板！');
+            }
           });
         }
       });
@@ -537,7 +543,9 @@ const ToolboxController = {
 
     copyCurrentTs.addEventListener('click', () => {
       navigator.clipboard.writeText(currentTsInput.value).then(() => {
-        alert(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Timestamp copied!' : '当前时间戳已复制！');
+        if (typeof Toast !== 'undefined') {
+          Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Timestamp copied!' : '当前时间戳已复制！');
+        }
       });
     });
 
@@ -546,12 +554,15 @@ const ToolboxController = {
     convertBtn.addEventListener('click', () => {
       const ts = parseInt(inputTs.value.trim());
       if (isNaN(ts)) {
-        alert(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Please enter a valid numeric timestamp!' : '请输入有效的时间戳数值！');
+        if (typeof Toast !== 'undefined') {
+          Toast.warning(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Please enter a valid numeric timestamp!' : '请输入有效的时间戳数值！');
+        }
         return;
       }
       const isMs = ts.toString().length > 10;
       const date = new Date(isMs ? ts : ts * 1000);
       outputDatetime.value = `${date.toLocaleString()} | ISO: ${date.toISOString()}`;
+      if (typeof Toast !== 'undefined') Toast.success('转换成功！');
     });
   },
 
@@ -602,7 +613,7 @@ const ToolboxController = {
         }));
         showResult(encoded);
       } catch (err) {
-        alert('编码失败，字符可能包含非法格式。');
+        if (typeof Toast !== 'undefined') Toast.error('编码失败，字符可能包含非法格式。');
       }
     });
 
@@ -613,7 +624,7 @@ const ToolboxController = {
         }).join(''));
         showResult(decoded);
       } catch (err) {
-        alert('解码失败，请确认该文本为有效的 Base64 字符串。');
+        if (typeof Toast !== 'undefined') Toast.error('解码失败，请确认该文本为有效的 Base64 字符串。');
       }
     });
 
@@ -625,7 +636,7 @@ const ToolboxController = {
       try {
         showResult(decodeURIComponent(input.value));
       } catch (err) {
-        alert('URL 解码失败，包含不合规的百分号编码。');
+        if (typeof Toast !== 'undefined') Toast.error('URL 解码失败，包含不合规的百分号编码。');
       }
     });
 

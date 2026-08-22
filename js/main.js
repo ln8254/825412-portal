@@ -361,4 +361,243 @@ function closeMobileSidebar() {
   if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
 }
 
+/**
+ * ==========================================
+ * 全局悬浮毛玻璃 Toast 通知流 (Toast Controller)
+ * ==========================================
+ */
+const Toast = {
+  container: null,
+
+  init() {
+    let el = document.getElementById('toast-container');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'toast-container';
+      el.className = 'toast-container';
+      document.body.appendChild(el);
+    }
+    this.container = el;
+  },
+
+  show(message, type = 'info', duration = 2800) {
+    if (!this.container) this.init();
+
+    const icons = {
+      success: 'check_circle',
+      info: 'info',
+      warning: 'warning',
+      error: 'error'
+    };
+
+    const iconName = icons[type] || 'info';
+    const toast = document.createElement('div');
+    toast.className = `toast-item ${type}`;
+    toast.innerHTML = `
+      <span class="material-symbols-outlined" style="font-size: 20px; color: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#06b6d4'};">${iconName}</span>
+      <span style="flex-grow: 1;">${message}</span>
+    `;
+
+    this.container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('toast-out');
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 250);
+    }, duration);
+  },
+
+  success(msg) { this.show(msg, 'success'); },
+  info(msg) { this.show(msg, 'info'); },
+  warning(msg) { this.show(msg, 'warning'); },
+  error(msg) { this.show(msg, 'error'); }
+};
+
+// 暴露全局便捷通知
+window.showToast = (msg, type) => Toast.show(msg, type);
+
+/**
+ * ==========================================
+ * 极客全局指令面板 (Command Palette: Cmd+K / Ctrl+K)
+ * ==========================================
+ */
+const CommandPalette = {
+  backdrop: null,
+  input: null,
+  results: null,
+  selectedIndex: 0,
+  items: [
+    { title: '控制台概览 (Dashboard Overview)', icon: 'dashboard', badge: 'Tab 1', action: () => triggerTabSwitch('dashboard-view') },
+    { title: '极客隔空快传 (WebRTC P2P AirDrop)', icon: 'near_me', badge: 'Tab 2', action: () => triggerTabSwitch('airdrop-view') },
+    { title: '极客开发者工具箱 (Geek Toolbox)', icon: 'construction', badge: 'Tab 3', action: () => triggerTabSwitch('toolbox-view') },
+    { title: '匿名云剪贴板 (Anonymous Pastebin)', icon: 'content_paste', badge: 'Tab 4', action: () => triggerTabSwitch('clipboard-view') },
+    { title: 'Webhook 调试桩 (Webhook Inspector)', icon: 'terminal', badge: 'Tab 5', action: () => triggerTabSwitch('webhook-view') },
+    { title: 'AI 智能助手 (Gemini Chat)', icon: 'smart_toy', badge: 'Tab 6', action: () => triggerTabSwitch('ai-view') },
+    { title: '一键生成高强度密码 (Generate Password)', icon: 'lock_reset', badge: 'Action', action: () => { triggerTabSwitch('toolbox-view'); if (typeof ToolboxController !== 'undefined') ToolboxController.generatePassword(); } },
+    { title: '切换界面语言 (Toggle Language)', icon: 'translate', badge: 'i18n', action: () => { if (typeof I18nController !== 'undefined') I18nController.toggleLanguage(); } },
+    { title: '打开设置中心 (Open Settings)', icon: 'settings', badge: 'Modal', action: () => { const modal = document.getElementById('settings-modal'); if (modal) modal.classList.add('active'); } },
+    { title: '关于本站架构 (About Platform)', icon: 'info', badge: 'Link', action: () => { window.location.href = 'about.html'; } },
+    { title: '隐私政策与合规 (Privacy Policy)', icon: 'privacy_tip', badge: 'Link', action: () => { window.location.href = 'privacy.html'; } }
+  ],
+  filteredItems: [],
+
+  init() {
+    this.createDOM();
+    this.bindEvents();
+    this.filteredItems = [...this.items];
+  },
+
+  createDOM() {
+    if (document.getElementById('cmd-palette-backdrop')) return;
+
+    const el = document.createElement('div');
+    el.id = 'cmd-palette-backdrop';
+    el.className = 'cmd-palette-backdrop';
+    el.innerHTML = `
+      <div class="cmd-palette-modal glass-panel">
+        <div class="cmd-palette-header">
+          <span class="material-symbols-outlined" style="color: var(--color-secondary); font-size: 22px;">terminal</span>
+          <input type="text" id="cmd-palette-input" class="cmd-palette-input" placeholder="输入命令或工具名称 (按 ESC 退出)..." autocomplete="off" />
+          <span class="cmd-badge">ESC</span>
+        </div>
+        <div id="cmd-palette-results" class="cmd-palette-results"></div>
+        <div class="cmd-palette-footer">
+          <span>导航: <kbd class="cmd-badge">↑</kbd> <kbd class="cmd-badge">↓</kbd> 选择: <kbd class="cmd-badge">↵ Enter</kbd></span>
+          <span>825412.xyz Command Engine</span>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(el);
+
+    this.backdrop = el;
+    this.input = document.getElementById('cmd-palette-input');
+    this.results = document.getElementById('cmd-palette-results');
+  },
+
+  bindEvents() {
+    // 监听全局快捷键 Cmd+K / Ctrl+K
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        this.toggle();
+      } else if (e.key === 'Escape' && this.isOpen()) {
+        this.close();
+      }
+    });
+
+    // 遮罩点击关闭
+    this.backdrop.addEventListener('click', (e) => {
+      if (e.target === this.backdrop) this.close();
+    });
+
+    // 输入过滤
+    this.input.addEventListener('input', () => {
+      this.filter(this.input.value.trim().toLowerCase());
+    });
+
+    // 键盘导航
+    this.input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        this.selectedIndex = (this.selectedIndex + 1) % this.filteredItems.length;
+        this.renderResults();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        this.selectedIndex = (this.selectedIndex - 1 + this.filteredItems.length) % this.filteredItems.length;
+        this.renderResults();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        this.executeCurrent();
+      }
+    });
+  },
+
+  isOpen() {
+    return this.backdrop.classList.contains('active');
+  },
+
+  open() {
+    this.backdrop.classList.add('active');
+    this.input.value = '';
+    this.filteredItems = [...this.items];
+    this.selectedIndex = 0;
+    this.renderResults();
+    setTimeout(() => this.input.focus(), 50);
+  },
+
+  close() {
+    this.backdrop.classList.remove('active');
+  },
+
+  toggle() {
+    if (this.isOpen()) this.close();
+    else this.open();
+  },
+
+  filter(query) {
+    if (!query) {
+      this.filteredItems = [...this.items];
+    } else {
+      this.filteredItems = this.items.filter(item => 
+        item.title.toLowerCase().includes(query) || item.badge.toLowerCase().includes(query)
+      );
+    }
+    this.selectedIndex = 0;
+    this.renderResults();
+  },
+
+  renderResults() {
+    this.results.innerHTML = '';
+    if (this.filteredItems.length === 0) {
+      this.results.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">无匹配指令</div>`;
+      return;
+    }
+
+    this.filteredItems.forEach((item, idx) => {
+      const row = document.createElement('div');
+      row.className = `cmd-palette-item ${idx === this.selectedIndex ? 'active' : ''}`;
+      row.innerHTML = `
+        <div class="cmd-palette-item-left">
+          <span class="material-symbols-outlined" style="font-size: 18px; color: ${idx === this.selectedIndex ? 'var(--color-secondary)' : 'var(--text-muted)'};">${item.icon}</span>
+          <span style="font-size: 13px;">${item.title}</span>
+        </div>
+        <span class="cmd-badge">${item.badge}</span>
+      `;
+      row.addEventListener('click', () => {
+        this.selectedIndex = idx;
+        this.executeCurrent();
+      });
+      this.results.appendChild(row);
+    });
+
+    const activeEl = this.results.children[this.selectedIndex];
+    if (activeEl) activeEl.scrollIntoView({ block: 'nearest' });
+  },
+
+  executeCurrent() {
+    const current = this.filteredItems[this.selectedIndex];
+    if (current && current.action) {
+      this.close();
+      current.action();
+      Toast.info(`已执行: ${current.title}`);
+    }
+  }
+};
+
+// 注册 PWA Service Worker (离线可用与秒开加速)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.log('SW registration skipped:', err);
+    });
+  });
+}
+
+// 初始化全局增强组件
+document.addEventListener('DOMContentLoaded', () => {
+  Toast.init();
+  CommandPalette.init();
+});
+
 
