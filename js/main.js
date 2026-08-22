@@ -2,39 +2,57 @@
  * 825412-portal - 主逻辑控制器 (Main App Controller)
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // 0. 初始化国际化多语言
-  if (typeof I18nController !== 'undefined') {
-    I18nController.init();
-    const langBtn = document.getElementById('lang-switch-btn');
-    if (langBtn) {
-      langBtn.addEventListener('click', () => I18nController.toggleLanguage());
-    }
+  // 1. 优先初始化核心单页路由 (确保菜单与点击绝对可用)
+  try {
+    initRouting();
+  } catch (e) {
+    console.error('Init Routing Error:', e);
   }
 
-  // 1. 初始化各子模块
-  ToolboxController.init();
-  ClipboardController.init();
-  AiChatController.init();
-  if (typeof AirDropController !== 'undefined') AirDropController.init();
-  if (typeof WebhookController !== 'undefined') WebhookController.init();
+  // 2. 初始化国际化多语言
+  try {
+    if (typeof I18nController !== 'undefined') {
+      I18nController.init();
+      const langBtn = document.getElementById('lang-switch-btn');
+      if (langBtn) {
+        langBtn.addEventListener('click', () => I18nController.toggleLanguage());
+      }
+    }
+  } catch (e) {
+    console.error('Init I18n Error:', e);
+  }
 
-  // 2. 初始化单页路由 (Tab 切换)
-  initRouting();
+  // 3. 隔离初始化各功能子模块
+  const safeInit = (name, controller) => {
+    try {
+      if (typeof controller !== 'undefined' && controller.init) {
+        controller.init();
+      }
+    } catch (err) {
+      console.error(`Module ${name} init error:`, err);
+    }
+  };
 
-  // 3. 初始化设置模态框
-  initSettingsModal();
+  safeInit('Toolbox', typeof ToolboxController !== 'undefined' ? ToolboxController : undefined);
+  safeInit('Clipboard', typeof ClipboardController !== 'undefined' ? ClipboardController : undefined);
+  safeInit('AiChat', typeof AiChatController !== 'undefined' ? AiChatController : undefined);
+  safeInit('AirDrop', typeof AirDropController !== 'undefined' ? AirDropController : undefined);
+  safeInit('Webhook', typeof WebhookController !== 'undefined' ? WebhookController : undefined);
 
-  // 4. 模拟 Dashboard 系统资源监控
-  startSystemMetricsMonitor();
+  // 4. 初始化设置模态框
+  try { initSettingsModal(); } catch (e) { console.error(e); }
 
-  // 5. 自动检测 URL 参数与 Hash 分享码并深度直达目标功能
-  handleUrlRoutingAndDeepLinks();
+  // 5. 模拟 Dashboard 系统资源监控
+  try { startSystemMetricsMonitor(); } catch (e) { console.error(e); }
 
-  // 6. 初始化隐私政策、服务条款、关于本站及联系我们模态框
-  initLegalModals();
+  // 6. 自动检测 URL 参数与 Hash 分享码并深度直达目标功能
+  try { handleUrlRoutingAndDeepLinks(); } catch (e) { console.error(e); }
 
-  // 7. 初始化 Cookie 同意横幅
-  initCookieConsentBanner();
+  // 7. 初始化隐私政策、服务条款、关于本站及联系我们模态框
+  try { initLegalModals(); } catch (e) { console.error(e); }
+
+  // 8. 初始化 Cookie 同意横幅
+  try { initCookieConsentBanner(); } catch (e) { console.error(e); }
 });
 
 /**

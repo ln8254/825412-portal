@@ -722,6 +722,7 @@ const ToolboxController = {
       x[2] = add32(c, x[2]);
       x[3] = add32(d, x[3]);
     }
+
     function cmn(q, a, b, x, s, t) {
       a = add32(add32(a, q), add32(x, t));
       return add32((a << s) | (a >>> (32 - s)), b);
@@ -730,37 +731,39 @@ const ToolboxController = {
     function gg(a, b, c, d, x, s, t) { return cmn((b & d) | (c & (~d)), a, b, x, s, t); }
     function hh(a, b, c, d, x, s, t) { return cmn(b ^ c ^ d, a, b, x, s, t); }
     function ii(a, b, c, d, x, s, t) { return cmn(c ^ (b | (~d)), a, b, x, s, t); }
-      tail[i >> 2] |= 0x80 << ((i % 4) << 3);
-      if (i > 55) {
-        md5cycle(state, tail);
-        for (i = 0; i < 16; i++) tail[i] = 0;
+    function add32(a, b) { return (a + b) & 0xFFFFFFFF; }
+
+    var n = bytes.length;
+    var state = [1732584193, -271733879, -1732584194, 271733878];
+    var i;
+    for (i = 64; i <= bytes.length; i += 64) {
+      var blk = [];
+      for (var j = 0; j < 64; j += 4) {
+        blk[j >> 2] = bytes[i - 64 + j] + (bytes[i - 64 + j + 1] << 8) + (bytes[i - 64 + j + 2] << 16) + (bytes[i - 64 + j + 3] << 24);
       }
-      tail[14] = n * 8;
-      md5cycle(state, tail);
-      return state;
+      md5cycle(state, blk);
     }
 
-    function md5blk(s) {
-      var md5blks = [], i;
-      for (i = 0; i < 64; i += 4) {
-        md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24);
-      }
-      return md5blks;
+    var rem = bytes.subarray(i - 64);
+    var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    for (i = 0; i < rem.length; i++) tail[i >> 2] |= rem[i] << ((i % 4) << 3);
+    tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+    if (i > 55) {
+      md5cycle(state, tail);
+      for (i = 0; i < 16; i++) tail[i] = 0;
     }
+    var bits = n * 8;
+    tail[14] = bits & 0xFFFFFFFF;
+    tail[15] = Math.floor(bits / 0x100000000);
+    md5cycle(state, tail);
 
     var hex_chr = '0123456789abcdef'.split('');
-    function rhex(n) {
-      var s = '', j = 0;
-      for (; j < 4; j++) s += hex_chr[(n >> (j * 8 + 4)) & 0x0F] + hex_chr[(n >> (j * 8)) & 0x0F];
+    function rhex(num) {
+      var s = '';
+      for (var j = 0; j < 4; j++) s += hex_chr[(num >> (j * 8 + 4)) & 0x0F] + hex_chr[(num >> (j * 8)) & 0x0F];
       return s;
     }
-
-    function hex(x) {
-      for (var i = 0; i < x.length; i++) x[i] = rhex(x[i]);
-      return x.join('');
-    }
-
-    return hex(md51(unescape(encodeURIComponent(string))));
+    return state.map(rhex).join('');
   },
 
   // ==========================================
