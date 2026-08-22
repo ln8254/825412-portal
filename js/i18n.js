@@ -115,6 +115,18 @@ const I18nController = {
 
       // 哈希计算
       'hash_ph': '在此输入需要计算散列哈希的任意文本或密码字符串...',
+      'hash_mode_text': '文本字符计算',
+      'hash_mode_file': '上传文件附件计算',
+      'hash_uppercase_label': '大写输出 (A-F)',
+      'hash_drop_hint': '拖拽待校验文件至此 或 点击选择本地文件',
+      'hash_drop_sub': '纯前端本地瞬时计算，绝不上传至任何服务器，保障商业私密性 (支持大型固件/ISO/压缩包/安装包)',
+      'hash_verify_title': '哈希一致性比对校验 (Checksum Matcher)',
+      'hash_verify_ph': '在此粘贴官方提供的 MD5 / SHA-256 校验码，系统将自动进行毫秒级一致性比对...',
+      'hash_verify_match_md5': '✅ 校验成功！完全匹配 MD5 校验码',
+      'hash_verify_match_sha1': '✅ 校验成功！完全匹配 SHA-1 校验码',
+      'hash_verify_match_sha256': '✅ 校验成功！完全匹配 SHA-256 校验码 (安全推荐)',
+      'hash_verify_match_sha512': '✅ 校验成功！完全匹配 SHA-512 校验码',
+      'hash_verify_mismatch': '⚠️ 校验码不匹配 (文件可能被篡改或损坏)',
 
       // 时间戳
       'tool_time_curr': '当前本地时间',
@@ -335,10 +347,18 @@ const I18nController = {
 
       // Hash Calculator
       'hash_ph': 'Enter any string to calculate cryptographic hashes in real time...',
-      'hash_md5_label': 'MD5 (128-bit / Fast Checksum):',
-      'hash_sha1_label': 'SHA-1 (160-bit):',
-      'hash_sha256_label': 'SHA-256 (256-bit / Industry Standard):',
-      'hash_sha512_label': 'SHA-512 (512-bit / Military Grade):',
+      'hash_mode_text': 'Text String Hash',
+      'hash_mode_file': 'File / Binary Checksum',
+      'hash_uppercase_label': 'Uppercase (A-F)',
+      'hash_drop_hint': 'Drag & drop file here or click to choose',
+      'hash_drop_sub': '100% Client-side local computing, never uploaded to any server (Supports ISO, Zip, Exe, Firmware)',
+      'hash_verify_title': 'Checksum Integrity Matcher',
+      'hash_verify_ph': 'Paste official MD5 / SHA-256 checksum to auto-verify file integrity...',
+      'hash_verify_match_md5': '✅ Checksum Verified! Matches MD5',
+      'hash_verify_match_sha1': '✅ Checksum Verified! Matches SHA-1',
+      'hash_verify_match_sha256': '✅ Checksum Verified! Matches SHA-256 (Recommended)',
+      'hash_verify_match_sha512': '✅ Checksum Verified! Matches SHA-512',
+      'hash_verify_mismatch': '⚠️ Mismatch (File may be modified or corrupted)',
 
       // Time Converter
       'time_current_label': 'Current Timestamp:',

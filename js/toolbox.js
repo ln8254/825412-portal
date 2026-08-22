@@ -395,54 +395,258 @@ const ToolboxController = {
   },
 
   // ==========================================
-  // 4. 密码学哈希散列计算器 (Hash Engine)
+  // 4. 密码学哈希散列计算器 (Hash Engine: 文本与文件多模态)
   // ==========================================
   initHashCalculator() {
-    const input = document.getElementById('hash-input');
+    const textModeBtn = document.getElementById('hash-mode-text-btn');
+    const fileModeBtn = document.getElementById('hash-mode-file-btn');
+    const textContainer = document.getElementById('hash-text-container');
+    const fileContainer = document.getElementById('hash-file-container');
+    
+    const textInput = document.getElementById('hash-input');
+    const fileDropzone = document.getElementById('hash-file-dropzone');
+    const fileInput = document.getElementById('hash-file-input');
+    const fileInfoBox = document.getElementById('hash-file-info');
+    const fileNameSize = document.getElementById('hash-file-name-size');
+    const calcStatus = document.getElementById('hash-calc-status');
+
+    const uppercaseToggle = document.getElementById('hash-uppercase-toggle');
+    const verifyInput = document.getElementById('hash-verify-input');
+    const verifyResult = document.getElementById('hash-verify-result');
+
     const md5El = document.getElementById('hash-md5');
     const sha1El = document.getElementById('hash-sha1');
     const sha256El = document.getElementById('hash-sha256');
     const sha512El = document.getElementById('hash-sha512');
 
-    if (!input) return;
+    let currentHashes = { md5: '', sha1: '', sha256: '', sha512: '' };
+    let currentMode = 'text';
 
-    const calcWebCrypto = async (algo, text) => {
-      const msgBuffer = new TextEncoder().encode(text);
-      const hashBuffer = await crypto.subtle.digest(algo, msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    if (!md5El) return;
+
+    // 1. 模式切换
+    if (textModeBtn && fileModeBtn) {
+      textModeBtn.addEventListener('click', () => {
+        currentMode = 'text';
+        textModeBtn.classList.add('btn-primary');
+        textModeBtn.style.background = '';
+        fileModeBtn.classList.remove('btn-primary');
+        fileModeBtn.style.background = 'var(--surface-high)';
+        textContainer.style.display = 'block';
+        fileContainer.style.display = 'none';
+        updateTextHashes();
+      });
+
+      fileModeBtn.addEventListener('click', () => {
+        currentMode = 'file';
+        fileModeBtn.classList.add('btn-primary');
+        fileModeBtn.style.background = '';
+        textModeBtn.classList.remove('btn-primary');
+        textModeBtn.style.background = 'var(--surface-high)';
+        textContainer.style.display = 'none';
+        fileContainer.style.display = 'block';
+        if (!fileInput.files || fileInput.files.length === 0) {
+          clearOutputs();
+        }
+      });
+    }
+
+    const clearOutputs = () => {
+      currentHashes = { md5: '', sha1: '', sha256: '', sha512: '' };
+      md5El.textContent = '-';
+      sha1El.textContent = '-';
+      sha256El.textContent = '-';
+      sha512El.textContent = '-';
+      runVerification();
     };
 
-    const updateHashes = async () => {
-      const text = input.value;
+    const renderHashes = () => {
+      const isUpper = uppercaseToggle && uppercaseToggle.checked;
+      const fmt = (val) => {
+        if (!val || val === '-') return '-';
+        return isUpper ? val.toUpperCase() : val.toLowerCase();
+      };
+
+      md5El.textContent = fmt(currentHashes.md5);
+      sha1El.textContent = fmt(currentHashes.sha1);
+      sha256El.textContent = fmt(currentHashes.sha256);
+      sha512El.textContent = fmt(currentHashes.sha512);
+
+      runVerification();
+    };
+
+    if (uppercaseToggle) {
+      uppercaseToggle.addEventListener('change', renderHashes);
+    }
+
+    // 2. 文本哈希计算
+    const updateTextHashes = async () => {
+      const text = textInput ? textInput.value : '';
       if (!text) {
-        md5El.textContent = '-';
-        sha1El.textContent = '-';
-        sha256El.textContent = '-';
-        sha512El.textContent = '-';
+        clearOutputs();
         return;
       }
 
-      // MD5 (纯前端快速实现)
-      md5El.textContent = this.pureJsMd5(text);
+      const msgBuffer = new TextEncoder().encode(text);
+      currentHashes.md5 = this.pureJsMd5(msgBuffer);
 
-      // Web Crypto API 计算 SHA-1, SHA-256, SHA-512
-      try {
-        if (window.crypto && window.crypto.subtle) {
-          calcWebCrypto('SHA-1', text).then(res => sha1El.textContent = res);
-          calcWebCrypto('SHA-256', text).then(res => sha256El.textContent = res);
-          calcWebCrypto('SHA-512', text).then(res => sha512El.textContent = res);
+      if (window.crypto && window.crypto.subtle) {
+        try {
+          const [sha1Buf, sha256Buf, sha512Buf] = await Promise.all([
+            crypto.subtle.digest('SHA-1', msgBuffer),
+            crypto.subtle.digest('SHA-256', msgBuffer),
+            crypto.subtle.digest('SHA-512', msgBuffer)
+          ]);
+
+          currentHashes.sha1 = Array.from(new Uint8Array(sha1Buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+          currentHashes.sha256 = Array.from(new Uint8Array(sha256Buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+          currentHashes.sha512 = Array.from(new Uint8Array(sha512Buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        } catch (e) {
+          console.error(e);
         }
-      } catch (err) {
-        console.error(err);
+      }
+      renderHashes();
+    };
+
+    if (textInput) {
+      textInput.addEventListener('input', updateTextHashes);
+    }
+
+    // 3. 文件附件哈希计算引擎
+    const processFileHash = async (file) => {
+      if (!file) return;
+
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+      const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+
+      if (fileInfoBox && fileNameSize && calcStatus) {
+        fileInfoBox.style.display = 'flex';
+        fileNameSize.textContent = `📄 ${file.name} (${sizeMb} MB)`;
+        calcStatus.innerHTML = `<span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle; animation: spin 1s linear infinite;">sync</span> ${isEn ? 'Calculating...' : '正在计算散列...'}`;
+        calcStatus.style.color = 'var(--color-secondary)';
+      }
+
+      const startTime = performance.now();
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const arrayBuffer = e.target.result;
+
+        // 计算 MD5
+        currentHashes.md5 = this.pureJsMd5(arrayBuffer);
+
+        // 计算 SHA-1, SHA-256, SHA-512
+        if (window.crypto && window.crypto.subtle) {
+          try {
+            const [sha1Buf, sha256Buf, sha512Buf] = await Promise.all([
+              crypto.subtle.digest('SHA-1', arrayBuffer),
+              crypto.subtle.digest('SHA-256', arrayBuffer),
+              crypto.subtle.digest('SHA-512', arrayBuffer)
+            ]);
+
+            currentHashes.sha1 = Array.from(new Uint8Array(sha1Buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            currentHashes.sha256 = Array.from(new Uint8Array(sha256Buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            currentHashes.sha512 = Array.from(new Uint8Array(sha512Buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+          } catch (err) {
+            console.error('File Hash Error:', err);
+          }
+        }
+
+        const elapsed = Math.round(performance.now() - startTime);
+        if (calcStatus) {
+          calcStatus.innerHTML = `⚡ ${isEn ? `Done in ${elapsed}ms` : `计算完成 (耗时 ${elapsed}ms)`}`;
+          calcStatus.style.color = '#10b981';
+        }
+
+        renderHashes();
+        if (typeof Toast !== 'undefined') Toast.success(isEn ? `File checksum calculated: ${file.name}` : `文件散列校验码已生成: ${file.name}`);
+      };
+
+      reader.readAsArrayBuffer(file);
+    };
+
+    if (fileDropzone && fileInput) {
+      fileDropzone.addEventListener('click', () => fileInput.click());
+
+      fileDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileDropzone.style.borderColor = 'var(--color-secondary)';
+        fileDropzone.style.background = 'rgba(6, 182, 212, 0.08)';
+      });
+
+      fileDropzone.addEventListener('dragleave', () => {
+        fileDropzone.style.borderColor = 'var(--border-light)';
+        fileDropzone.style.background = 'var(--surface-low)';
+      });
+
+      fileDropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileDropzone.style.borderColor = 'var(--border-light)';
+        fileDropzone.style.background = 'var(--surface-low)';
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          processFileHash(e.dataTransfer.files[0]);
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+          processFileHash(e.target.files[0]);
+        }
+      });
+    }
+
+    // 4. 哈希一致性实时比对校验器 (Checksum Matcher)
+    const runVerification = () => {
+      if (!verifyInput || !verifyResult) return;
+      const expected = verifyInput.value.trim().toLowerCase();
+      const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+
+      if (!expected) {
+        verifyResult.textContent = '';
+        return;
+      }
+
+      const m5 = (currentHashes.md5 || '').toLowerCase();
+      const s1 = (currentHashes.sha1 || '').toLowerCase();
+      const s256 = (currentHashes.sha256 || '').toLowerCase();
+      const s512 = (currentHashes.sha512 || '').toLowerCase();
+
+      if (expected === s256 && s256) {
+        verifyResult.textContent = isEn ? '✅ Matches SHA-256 (High Security)' : '✅ 校验匹配！完全符合 SHA-256 (安全推荐)';
+        verifyResult.style.color = '#10b981';
+      } else if (expected === m5 && m5) {
+        verifyResult.textContent = isEn ? '✅ Matches MD5 Checksum' : '✅ 校验匹配！完全符合 MD5 校验码';
+        verifyResult.style.color = '#10b981';
+      } else if (expected === s1 && s1) {
+        verifyResult.textContent = isEn ? '✅ Matches SHA-1 Checksum' : '✅ 校验匹配！完全符合 SHA-1 校验码';
+        verifyResult.style.color = '#10b981';
+      } else if (expected === s512 && s512) {
+        verifyResult.textContent = isEn ? '✅ Matches SHA-512 Checksum' : '✅ 校验匹配！完全符合 SHA-512 校验码';
+        verifyResult.style.color = '#10b981';
+      } else {
+        verifyResult.textContent = isEn ? '❌ Checksum Mismatch' : '❌ 校验码不匹配 (文件可能被篡改或损坏)';
+        verifyResult.style.color = '#ef4444';
       }
     };
 
-    input.addEventListener('input', updateHashes);
+    if (verifyInput) {
+      verifyInput.addEventListener('input', runVerification);
+    }
   },
 
-  // 纯 JavaScript MD5 算法实现
-  pureJsMd5(string) {
+  // 纯 JavaScript 工业级 MD5 算法（支持 Unicode 字符串、TypedArray 与 ArrayBuffer）
+  pureJsMd5(input) {
+    let bytes;
+    if (typeof input === 'string') {
+      bytes = new TextEncoder().encode(input);
+    } else if (input instanceof ArrayBuffer) {
+      bytes = new Uint8Array(input);
+    } else if (input instanceof Uint8Array) {
+      bytes = input;
+    } else {
+      bytes = new Uint8Array(0);
+    }
+
     function md5cycle(x, k) {
       var a = x[0], b = x[1], c = x[2], d = x[3];
       a = ff(a, b, c, d, k[0], 7, -680876936);
@@ -518,7 +722,6 @@ const ToolboxController = {
       x[2] = add32(c, x[2]);
       x[3] = add32(d, x[3]);
     }
-
     function cmn(q, a, b, x, s, t) {
       a = add32(add32(a, q), add32(x, t));
       return add32((a << s) | (a >>> (32 - s)), b);
@@ -527,19 +730,6 @@ const ToolboxController = {
     function gg(a, b, c, d, x, s, t) { return cmn((b & d) | (c & (~d)), a, b, x, s, t); }
     function hh(a, b, c, d, x, s, t) { return cmn(b ^ c ^ d, a, b, x, s, t); }
     function ii(a, b, c, d, x, s, t) { return cmn(c ^ (b | (~d)), a, b, x, s, t); }
-
-    function add32(a, b) {
-      return (a + b) & 0xFFFFFFFF;
-    }
-
-    function md51(s) {
-      var n = s.length, state = [1732584193, -271733879, -1732584194, 271733878], i;
-      for (i = 64; i <= s.length; i += 64) {
-        md5cycle(state, md5blk(s.substring(i - 64, i)));
-      }
-      s = s.substring(i - 64);
-      var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      for (i = 0; i < s.length; i++) tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
       tail[i >> 2] |= 0x80 << ((i % 4) << 3);
       if (i > 55) {
         md5cycle(state, tail);

@@ -177,32 +177,81 @@
       </div>
     </div>
 
-    <!-- 4. 子视图：密码学哈希计算 -->
+    <!-- 4. 子视图：密码学哈希计算 (支持文本与附件文件) -->
     <div id="hash-tab" class="tool-view glass-card" style="display: none; margin-bottom: 30px;">
-      <div class="text-area-wrapper" style="min-height: 120px;">
+      <!-- 切换模式：文本 / 文件 -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-primary" id="hash-mode-text-btn" style="padding: 6px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">edit_note</span>
+            <span>文本字符计算</span>
+          </button>
+          <button class="btn" id="hash-mode-file-btn" style="background: var(--surface-high); padding: 6px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">upload_file</span>
+            <span>上传文件附件计算</span>
+          </button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-size: 12px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            <input type="checkbox" id="hash-uppercase-toggle">
+            <span>大写输出 (A-F)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 文本模式输入框 -->
+      <div id="hash-text-container" class="text-area-wrapper" style="min-height: 120px; margin-bottom: 16px;">
         <textarea class="custom-textarea" id="hash-input" placeholder="在此输入需要计算散列哈希的任意文本或密码字符串..."></textarea>
       </div>
-      <div class="hash-result-grid">
+
+      <!-- 文件附件模式拖拽区 -->
+      <div id="hash-file-container" style="display: none; margin-bottom: 16px;">
+        <div id="hash-file-dropzone" style="border: 2px dashed var(--border-light); border-radius: var(--radius-md); padding: 28px 20px; text-align: center; cursor: pointer; transition: var(--transition-smooth); background: var(--surface-low);">
+          <span class="material-symbols-outlined" style="font-size: 42px; color: var(--color-secondary); margin-bottom: 8px;">folder_zip</span>
+          <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">拖拽待校验文件至此 或 点击选择本地文件</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">纯前端本地瞬时计算，绝不上传至任何服务器，保障商业私密性 (支持大型固件/ISO/压缩包/安装包)</div>
+          <input type="file" id="hash-file-input" style="display: none;">
+        </div>
+        <div id="hash-file-info" style="display: none; margin-top: 10px; padding: 10px 14px; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-sm); font-size: 12px; color: var(--color-secondary); justify-content: space-between; align-items: center;">
+          <span id="hash-file-name-size">📄 文件信息</span>
+          <span id="hash-calc-status" style="font-weight: 700; color: #10b981;">⚡ 计算完成</span>
+        </div>
+      </div>
+
+      <!-- 哈希结果输出列表 -->
+      <div class="hash-result-grid" style="margin-bottom: 16px;">
         <div class="hash-row">
           <span class="hash-label">MD5</span>
           <span class="hash-val" id="hash-md5">-</span>
-          <button class="material-symbols-outlined" id="copy-hash-md5" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;">content_copy</button>
+          <button class="material-symbols-outlined" id="copy-hash-md5" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;" title="Copy">content_copy</button>
         </div>
         <div class="hash-row">
           <span class="hash-label">SHA-1</span>
           <span class="hash-val" id="hash-sha1">-</span>
-          <button class="material-symbols-outlined" id="copy-hash-sha1" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;">content_copy</button>
+          <button class="material-symbols-outlined" id="copy-hash-sha1" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;" title="Copy">content_copy</button>
         </div>
         <div class="hash-row">
           <span class="hash-label">SHA-256</span>
           <span class="hash-val" id="hash-sha256">-</span>
-          <button class="material-symbols-outlined" id="copy-hash-sha256" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;">content_copy</button>
+          <button class="material-symbols-outlined" id="copy-hash-sha256" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;" title="Copy">content_copy</button>
         </div>
         <div class="hash-row">
           <span class="hash-label">SHA-512</span>
           <span class="hash-val" id="hash-sha512">-</span>
-          <button class="material-symbols-outlined" id="copy-hash-sha512" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;">content_copy</button>
+          <button class="material-symbols-outlined" id="copy-hash-sha512" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;" title="Copy">content_copy</button>
         </div>
+      </div>
+
+      <!-- 哈希校验比对器 -->
+      <div style="padding: 12px 14px; background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--color-secondary);">fact_check</span>
+            <span>哈希一致性比对校验 (Checksum Matcher)</span>
+          </span>
+          <span id="hash-verify-result" style="font-size: 12px; font-weight: 700;"></span>
+        </div>
+        <input type="text" class="text-input" id="hash-verify-input" style="font-size: 12px; font-family: var(--font-mono);" placeholder="在此粘贴官方提供的 MD5 / SHA-256 校验码，系统将自动进行毫秒级一致性比对...">
       </div>
     </div>
     
