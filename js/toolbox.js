@@ -201,33 +201,45 @@ const ToolboxController = {
     const realCrackTime = this.calculateCrackTime(length, charsetSize, isEn);
     crackTimeEl.textContent = realCrackTime;
 
-    if (entropy < 40) {
+    // 针对单一字符集（如纯数字、纯小写）进行密码学多样性合规判定
+    const isSingleCharset = charsetSize <= 26;
+
+    if (entropy < 40 || length < 8) {
       textEl.textContent = isEn ? 'Weak (High Risk)' : '极弱 (高风险)';
       textEl.style.color = '#ef4444';
       barEl.style.background = '#ef4444';
       crackTimeEl.style.color = '#ef4444';
-      tipEl.textContent = isEn ? 'Length too short, please increase length' : '长度过短，建议增加至 12 位以上';
+      tipEl.textContent = isEn ? 'Length too short (< 8 chars), vulnerable to brute force' : '长度过短（低于 8 位），极易被高速彩虹表与字典秒破';
       tipEl.style.color = '#ef4444';
-    } else if (entropy < 60) {
-      textEl.textContent = isEn ? 'Medium' : '中等 (基础防范)';
+    } else if (charsetSize <= 10) {
+      // 纯数字特判：即便长度很长，也缺乏字符复杂度
+      textEl.textContent = isEn ? 'Medium (Pure Numbers)' : '中等 (单一纯数字)';
       textEl.style.color = '#f59e0b';
       barEl.style.background = '#f59e0b';
       crackTimeEl.style.color = '#f59e0b';
-      tipEl.textContent = isEn ? 'Add special symbols or uppercase letters' : '建议混入特殊符号与大写字母提升强度';
+      tipEl.textContent = isEn ? 'Pure numeric PIN lacks character diversity. Add letters & symbols.' : '纯数字极易被掩码攻击针对，合规规范要求必须混入字母与符号！';
+      tipEl.style.color = '#f59e0b';
+    } else if (isSingleCharset) {
+      // 纯字母特判
+      textEl.textContent = isEn ? 'Medium (Single Charset)' : '中等 (单一字符集)';
+      textEl.style.color = '#f59e0b';
+      barEl.style.background = '#f59e0b';
+      crackTimeEl.style.color = '#f59e0b';
+      tipEl.textContent = isEn ? 'Single character set lacks complexity. Add numbers and symbols.' : '单一字符集易受词典命中，建议添加数字与特殊符号提升安全级';
       tipEl.style.color = '#f59e0b';
     } else if (entropy < 80) {
-      textEl.textContent = isEn ? 'Strong' : '高强度 (非常安全)';
+      textEl.textContent = isEn ? 'Strong (Multi-Charset)' : '高强度 (多字符集混排)';
       textEl.style.color = '#06b6d4';
       barEl.style.background = 'linear-gradient(to right, #06b6d4, #10b981)';
       crackTimeEl.style.color = '#06b6d4';
-      tipEl.textContent = isEn ? 'Meets standard corporate password policy' : '符合绝大多数企业高安全密码合规要求';
+      tipEl.textContent = isEn ? 'Meets standard corporate password policy' : '符合绝大多数企业与金融系统的高安全密码合规要求';
       tipEl.style.color = '#06b6d4';
     } else {
-      textEl.textContent = isEn ? 'Military Grade' : '极高 (军事级安全)';
+      textEl.textContent = isEn ? 'Military Grade (NIST Compliant)' : '军工级 (抗量子/超级算力)';
       textEl.style.color = '#10b981';
       barEl.style.background = 'linear-gradient(to right, #10b981, #8b5cf6)';
       crackTimeEl.style.color = '#10b981';
-      tipEl.textContent = isEn ? 'Complies with NIST SP 800-63B standards' : '符合 NIST SP 800-63B 顶级密码安全规范';
+      tipEl.textContent = isEn ? 'Complies with NIST SP 800-63B standards' : '符合 NIST SP 800-63B 顶级密码安全与抗爆破规范';
       tipEl.style.color = '#10b981';
     }
   },
