@@ -140,6 +140,47 @@ const ToolboxController = {
     return { password: finalPwd, entropy, charsetSize };
   },
 
+  calculateCrackTime(length, charsetSize, isEn) {
+    if (!charsetSize || length <= 0) return isEn ? '< 0.001 Seconds' : '< 0.001 秒';
+    
+    // 算力基准：8卡 RTX 4090 矩阵 Hashcat，NTLM/MD5 破解速度约为 100 GHash/s (1e11 次/秒)
+    // 暴力破解平均搜索 50% 密钥空间：Total = (charsetSize ^ length) / 2
+    const HASHES_PER_SEC = 1e11;
+    const logCombinations = length * Math.log10(charsetSize) - Math.log10(2);
+    const logSeconds = logCombinations - Math.log10(HASHES_PER_SEC);
+
+    if (logSeconds < -3) {
+      return isEn ? '< 0.001 Seconds (Instant)' : '< 0.001 秒 (瞬间秒破)';
+    } else if (logSeconds < 0) {
+      const sec = Math.pow(10, logSeconds);
+      return isEn ? `${sec.toFixed(3)} Seconds` : `${sec.toFixed(3)} 秒`;
+    } else if (logSeconds < Math.log10(60)) {
+      const sec = Math.max(1, Math.round(Math.pow(10, logSeconds)));
+      return isEn ? `${sec} Seconds` : `${sec} 秒`;
+    } else if (logSeconds < Math.log10(3600)) {
+      const min = Math.round(Math.pow(10, logSeconds) / 60);
+      return isEn ? `~ ${min} Minutes` : `约 ${min} 分钟`;
+    } else if (logSeconds < Math.log10(86400)) {
+      const hr = Math.round(Math.pow(10, logSeconds) / 3600 * 10) / 10;
+      return isEn ? `~ ${hr} Hours` : `约 ${hr} 小时`;
+    } else if (logSeconds < Math.log10(86400 * 365.25)) {
+      const days = Math.round(Math.pow(10, logSeconds) / 86400);
+      return isEn ? `~ ${days} Days` : `约 ${days} 天`;
+    } else if (logSeconds < Math.log10(86400 * 365.25 * 10000)) {
+      const yrs = Math.round(Math.pow(10, logSeconds) / (86400 * 365.25));
+      return isEn ? `~ ${yrs.toLocaleString()} Years` : `约 ${yrs.toLocaleString()} 年`;
+    } else if (logSeconds < Math.log10(86400 * 365.25 * 1e8)) {
+      const wanYrs = Math.round((Math.pow(10, logSeconds) / (86400 * 365.25 * 10000)) * 10) / 10;
+      return isEn ? `~ ${(wanYrs * 10).toFixed(0)}k Years` : `约 ${wanYrs.toLocaleString()} 万年`;
+    } else if (logSeconds < Math.log10(86400 * 365.25 * 1e12)) {
+      const yiYrs = Math.round((Math.pow(10, logSeconds) / (86400 * 365.25 * 1e8)) * 10) / 10;
+      return isEn ? `~ ${yiYrs.toLocaleString()} 亿年` : `约 ${yiYrs.toLocaleString()} 亿年`;
+    } else {
+      const exponent = Math.floor(logSeconds - Math.log10(86400 * 365.25));
+      return isEn ? `> 10^${exponent} Years (Cosmic Scale)` : `超过 10^${exponent} 年 (超越宇宙寿命)`;
+    }
+  },
+
   updateEntropyDisplay(entropy, length, charsetSize) {
     const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
     const textEl = document.getElementById('pwd-strength-text');
@@ -157,11 +198,13 @@ const ToolboxController = {
     let percent = Math.min(100, Math.max(10, Math.floor((entropy / 100) * 100)));
     barEl.style.width = `${percent}%`;
 
+    const realCrackTime = this.calculateCrackTime(length, charsetSize, isEn);
+    crackTimeEl.textContent = realCrackTime;
+
     if (entropy < 40) {
       textEl.textContent = isEn ? 'Weak (High Risk)' : '极弱 (高风险)';
       textEl.style.color = '#ef4444';
       barEl.style.background = '#ef4444';
-      crackTimeEl.textContent = isEn ? '< 1 Second (Instant)' : '< 1 秒 (瞬间破解)';
       crackTimeEl.style.color = '#ef4444';
       tipEl.textContent = isEn ? 'Length too short, please increase length' : '长度过短，建议增加至 12 位以上';
       tipEl.style.color = '#ef4444';
@@ -169,7 +212,6 @@ const ToolboxController = {
       textEl.textContent = isEn ? 'Medium' : '中等 (基础防范)';
       textEl.style.color = '#f59e0b';
       barEl.style.background = '#f59e0b';
-      crackTimeEl.textContent = isEn ? '~ 3 Days (Hashcat)' : '约 3 天 (常规破解机)';
       crackTimeEl.style.color = '#f59e0b';
       tipEl.textContent = isEn ? 'Add special symbols or uppercase letters' : '建议混入特殊符号与大写字母提升强度';
       tipEl.style.color = '#f59e0b';
@@ -177,7 +219,6 @@ const ToolboxController = {
       textEl.textContent = isEn ? 'Strong' : '高强度 (非常安全)';
       textEl.style.color = '#06b6d4';
       barEl.style.background = 'linear-gradient(to right, #06b6d4, #10b981)';
-      crackTimeEl.textContent = isEn ? '~ 1,400 Years' : '约 1,400 年 (现代算力)';
       crackTimeEl.style.color = '#06b6d4';
       tipEl.textContent = isEn ? 'Meets standard corporate password policy' : '符合绝大多数企业高安全密码合规要求';
       tipEl.style.color = '#06b6d4';
@@ -185,7 +226,6 @@ const ToolboxController = {
       textEl.textContent = isEn ? 'Military Grade' : '极高 (军事级安全)';
       textEl.style.color = '#10b981';
       barEl.style.background = 'linear-gradient(to right, #10b981, #8b5cf6)';
-      crackTimeEl.textContent = isEn ? 'Over 300 Million Years' : '超过 3 亿年 (RTX 4090 集群)';
       crackTimeEl.style.color = '#10b981';
       tipEl.textContent = isEn ? 'Complies with NIST SP 800-63B standards' : '符合 NIST SP 800-63B 顶级密码安全规范';
       tipEl.style.color = '#10b981';
