@@ -69,7 +69,8 @@ const AirDropController = {
         const val = roomInput.value.trim().toUpperCase();
         if (val) {
           this.joinRoom(val);
-          if (typeof Toast !== 'undefined') Toast.success(`已切换至房间: #${val}`);
+          const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+          if (typeof Toast !== "undefined") Toast.success(isEn ? `Switched to Room: #${val}` : `已切换至房间: #${val}`);
         }
       });
     }
@@ -201,7 +202,8 @@ const AirDropController = {
     this.peer.on('open', (id) => {
       this.myPeerId = id;
       this.isHost = true;
-      this.appendSystemNotice(`已成为频道 #${this.roomId} 主机节点，正在等待对端设备接入...`);
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      this.appendSystemNotice(isEn ? `Acting as Host for Room #${this.roomId}. Awaiting peer connections...` : `已成为频道 #${this.roomId} 主机节点，正在等待对端设备接入...`);
     });
 
     this.peer.on('connection', (conn) => {
@@ -226,7 +228,8 @@ const AirDropController = {
         });
 
         this.peer.on('open', (id) => {
-          this.appendSystemNotice(`已作为客户端接入频道 #${this.roomId}，正在建立 WebRTC 直连...`);
+          const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+          this.appendSystemNotice(isEn ? `Connected as Client to Room #${this.roomId}. Establishing WebRTC link...` : `已作为客户端接入频道 #${this.roomId}，正在建立 WebRTC 直连...`);
           const conn = this.peer.connect(hostPeerId, { reliable: true });
           this.setupConnection(conn);
         });
@@ -260,11 +263,12 @@ const AirDropController = {
     });
 
     const handlePeerDisconnect = () => {
-      const peerName = this.peersInfo[conn.peer] ? this.peersInfo[conn.peer].name : '对端设备';
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      const peerName = this.peersInfo[conn.peer] ? this.peersInfo[conn.peer].name : (isEn ? "Remote Peer" : "对端设备");
       delete this.activeConnections[conn.peer];
       delete this.peersInfo[conn.peer];
       this.renderPeersList();
-      this.appendSystemNotice(`🔌 设备 [${peerName}] 连接已断开。`);
+      this.appendSystemNotice(isEn ? `🔌 Device [${peerName}] disconnected.` : `🔌 设备 [${peerName}] 连接已断开。`);
     };
 
     conn.on('close', handlePeerDisconnect);
@@ -307,7 +311,8 @@ const AirDropController = {
           const peerName = this.peersInfo[peerId].name;
           delete this.activeConnections[peerId];
           delete this.peersInfo[peerId];
-          this.appendSystemNotice(`⌛ 设备 [${peerName}] 心跳超时，已自动离线。`);
+          const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+          this.appendSystemNotice(isEn ? `⌛ Device [${peerName}] heartbeat timeout (offline).` : `⌛ 设备 [${peerName}] 心跳超时，已自动离线。`);
           changed = true;
         }
       });
@@ -327,7 +332,7 @@ const AirDropController = {
     if (payload.type === 'handshake') {
       const isNew = !this.peersInfo[peerKey];
       this.peersInfo[peerKey] = {
-        name: payload.senderName || '未知设备',
+        name: payload.senderName || (typeof I18nController !== "undefined" && I18nController.currentLang === "en-US" ? "Unknown Peer" : "未知设备"),
         platform: payload.platform || 'device',
         deviceId: payload.sender,
         lastSeen: Date.now()
@@ -335,7 +340,8 @@ const AirDropController = {
 
       this.renderPeersList();
       if (isNew) {
-        this.appendSystemNotice(`🎉 WebRTC P2P 直连成功！发现对端设备 [${payload.senderName}]，可秒发文件！`);
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        this.appendSystemNotice(isEn ? `🎉 WebRTC P2P connected! Found peer [${payload.senderName}]. Ready to transfer!` : `🎉 WebRTC P2P 直连成功！发现对端设备 [${payload.senderName}]，可秒发文件！`);
       }
       return;
     }
@@ -360,11 +366,12 @@ const AirDropController = {
 
     // 3. 对端主动离开 (Bye) 报文
     if (payload.type === 'bye') {
-      const peerName = this.peersInfo[peerKey] ? this.peersInfo[peerKey].name : '对端设备';
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      const peerName = this.peersInfo[peerKey] ? this.peersInfo[peerKey].name : (isEn ? "Remote Peer" : "对端设备");
       delete this.activeConnections[peerKey];
       delete this.peersInfo[peerKey];
       this.renderPeersList();
-      this.appendSystemNotice(`👋 设备 [${peerName}] 已主动关闭退出。`);
+      this.appendSystemNotice(isEn ? `👋 Device [${peerName}] has closed session.` : `👋 设备 [${peerName}] 已主动关闭退出。`);
       return;
     }
 
@@ -409,7 +416,8 @@ const AirDropController = {
 
       // 清理死连接并重新握手
       this.reconnectMesh();
-      this.appendSystemNotice('🔄 已触发设备雷达手动重扫与信令重连。');
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      this.appendSystemNotice(isEn ? "🔄 Radar rescan triggered and peer signaling reconnected." : "🔄 已触发设备雷达手动重扫与信令重连。");
     });
   },
 
@@ -444,7 +452,8 @@ const AirDropController = {
     const totalCount = peerKeys.length + 1;
 
     if (countBadge) {
-      countBadge.textContent = `${totalCount} 台设备在线`;
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      countBadge.textContent = isEn ? `${totalCount} Device(s) Online` : `${totalCount} 台设备在线`;
     }
 
     let html = `
@@ -452,10 +461,10 @@ const AirDropController = {
       <div style="display: flex; align-items: center; gap: 10px; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.4); padding: 10px 14px; border-radius: var(--radius-sm);">
         <div style="font-size: 22px;">${this.platform === 'mobile' ? '📱' : '💻'}</div>
         <div>
-          <div style="font-size: 13px; font-weight: 700; color: #fff;">${this.deviceName} <span style="font-size: 11px; color: var(--color-secondary);">(本机)</span></div>
+          <div style="font-size: 13px; font-weight: 700; color: #fff;">${this.deviceName} <span style="font-size: 11px; color: var(--color-secondary);">${isEn ? "(This Device)" : "(本机)"}</span></div>
           <div style="font-size: 11px; color: #10b981; display: flex; align-items: center; gap: 4px;">
             <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span>
-            ${this.isHost ? 'Host 节点就绪' : 'Client 节点就绪'}
+            ${this.isHost ? (isEn ? "Host Node Ready" : "Host 节点就绪") : (isEn ? "Client Node Ready" : "Client 节点就绪")}
           </div>
         </div>
       </div>
@@ -466,7 +475,7 @@ const AirDropController = {
         <!-- 等待对端加入状态 -->
         <div style="display: flex; align-items: center; gap: 8px; background: var(--surface-low); border: 1px dashed var(--border-light); padding: 10px 14px; border-radius: var(--radius-sm); color: var(--text-muted); font-size: 12px;">
           <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-secondary);">qr_code_scanner</span>
-          <span>等待对端手机或电脑连接... (手机打开上方链接秒连)</span>
+          <span>${isEn ? "Waiting for peer devices to connect... (Open URL on phone)" : "等待对端手机或电脑连接... (手机打开上方链接秒连)"}</span>
         </div>
       `;
     } else {
@@ -481,7 +490,7 @@ const AirDropController = {
               <div style="font-size: 13px; font-weight: 700; color: #fff;">${peer.name}</div>
               <div style="font-size: 11px; color: #10b981; display: flex; align-items: center; gap: 4px;">
                 <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span>
-                WebRTC P2P 已连通，可投送
+                ${isEn ? "WebRTC P2P Connected, Ready" : "WebRTC P2P 已连通，可投送"}
               </div>
             </div>
           </div>
@@ -512,7 +521,8 @@ const AirDropController = {
     this.renderSentItem(payload);
 
     if (!sentViaP2P && Object.keys(this.activeConnections).length === 0) {
-      this.appendSystemNotice(`⚠️ 当前频道暂无其他对端设备在线，已在本地广播。请确保手机也打开了相同频道 #${this.roomId}。`);
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      this.appendSystemNotice(isEn ? `⚠️ No peers online in room #${this.roomId}. Broadcast locally.` : `⚠️ 当前频道暂无其他对端设备在线，已在本地广播。请确保手机也打开了相同频道 #${this.roomId}。`);
     }
   },
 
@@ -578,7 +588,8 @@ const AirDropController = {
 
   processFileSend(file) {
     if (file.size > 50 * 1024 * 1024) {
-      if (typeof Toast !== 'undefined') Toast.warning('P2P 直传单次文件请限制在 50MB 以内。');
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      if (typeof Toast !== "undefined") Toast.warning(isEn ? "Please keep individual file transfers under 50MB." : "P2P 直传单次文件请限制在 50MB 以内。");
       return;
     }
 
@@ -617,31 +628,31 @@ const AirDropController = {
       item.innerHTML = `
         <div style="flex-grow: 1;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="color: #10b981; font-weight: 700; font-size: 12px;">📥 收到来自 [${payload.senderName}] 的文件</span>
+            <span style="color: #10b981; font-weight: 700; font-size: 12px;">${isEn ? `📥 Received file from [${payload.senderName}]` : `📥 收到来自 [${payload.senderName}] 的文件`}</span>
             <span style="font-size: 11px; color: var(--text-muted);">${new Date(payload.timestamp).toLocaleTimeString()}</span>
           </div>
           <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 6px;">📄 ${payload.fileName} (${payload.fileSize})</div>
           ${isImage ? `<img src="${payload.dataUrl}" style="max-height: 140px; border-radius: 6px; margin-bottom: 8px; display: block;" />` : ''}
           <a href="${payload.dataUrl}" download="${payload.fileName}" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-            <span class="material-symbols-outlined" style="font-size: 16px;">download</span> 下载接收文件
+            <span class="material-symbols-outlined" style="font-size: 16px;">download</span> ${isEn ? "Download File" : "下载接收文件"}
           </a>
         </div>
       `;
-      if (typeof Toast !== 'undefined') Toast.success(`收到新文件: ${payload.fileName}`);
+      if (typeof Toast !== "undefined") Toast.success(isEn ? `Received new file: ${payload.fileName}` : `收到新文件: ${payload.fileName}`);
     } else {
       item.innerHTML = `
         <div style="flex-grow: 1;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="color: #10b981; font-weight: 700; font-size: 12px;">💬 收到来自 [${payload.senderName}] 的文本</span>
+            <span style="color: #10b981; font-weight: 700; font-size: 12px;">${isEn ? `💬 Received text from [${payload.senderName}]` : `💬 收到来自 [${payload.senderName}] 的文本`}</span>
             <span style="font-size: 11px; color: var(--text-muted);">${new Date(payload.timestamp).toLocaleTimeString()}</span>
           </div>
           <div style="font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); white-space: pre-wrap; background: var(--surface-low); padding: 8px 12px; border-radius: 4px; margin-bottom: 6px;">${payload.content}</div>
           <button class="btn" onclick="navigator.clipboard.writeText('${payload.content.replace(/'/g, "\\'")}').then(() => { if (typeof Toast !== 'undefined') Toast.success('已复制接收内容！'); })" style="background: var(--surface-high); font-size: 11px; padding: 4px 10px;">
-            <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">content_copy</span> 复制文本
+            <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">content_copy</span> ${isEn ? "Copy Text" : "复制文本"}
           </button>
         </div>
       `;
-      if (typeof Toast !== 'undefined') Toast.info(`收到来自 ${payload.senderName} 的文本`);
+      if (typeof Toast !== "undefined") Toast.info(isEn ? `Received text from ${payload.senderName}` : `收到来自 ${payload.senderName} 的文本`);
     }
 
     list.prepend(item);
@@ -659,7 +670,7 @@ const AirDropController = {
       item.innerHTML = `
         <div style="flex-grow: 1;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="color: var(--color-secondary); font-weight: 700; font-size: 12px;">📤 已投送文件 (${payload.fileSize})</span>
+            <span style="color: var(--color-secondary); font-weight: 700; font-size: 12px;">${isEn ? `📤 Sent File (${payload.fileSize})` : `📤 已投送文件 (${payload.fileSize})`}</span>
             <span style="font-size: 11px; color: var(--text-muted);">${new Date(payload.timestamp).toLocaleTimeString()}</span>
           </div>
           <div style="font-size: 14px; color: var(--text-primary);">📄 ${payload.fileName}</div>
@@ -669,7 +680,7 @@ const AirDropController = {
       item.innerHTML = `
         <div style="flex-grow: 1;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="color: var(--color-secondary); font-weight: 700; font-size: 12px;">📤 已投送文本</span>
+            <span style="color: var(--color-secondary); font-weight: 700; font-size: 12px;">${isEn ? "📤 Sent Text" : "📤 已投送文本"}</span>
             <span style="font-size: 11px; color: var(--text-muted);">${new Date(payload.timestamp).toLocaleTimeString()}</span>
           </div>
           <div style="font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary); white-space: pre-wrap;">${payload.content}</div>

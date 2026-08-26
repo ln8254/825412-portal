@@ -83,7 +83,8 @@ const WebhookController = {
       copyUrlBtn.addEventListener('click', () => {
         const text = `https://echo.free.beeceptor.com/webhook/825412_${this.hookId}`;
         navigator.clipboard.writeText(text).then(() => {
-          if (typeof Toast !== 'undefined') Toast.success('专属 Webhook 接收地址已复制到剪贴板！');
+          const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+          if (typeof Toast !== "undefined") Toast.success(isEn ? "Dedicated Webhook URL copied to clipboard!" : "专属 Webhook 接收地址已复制到剪贴板！");
         });
       });
     }
@@ -93,7 +94,8 @@ const WebhookController = {
         const curlSnippet = document.getElementById('webhook-curl-snippet');
         if (curlSnippet) {
           navigator.clipboard.writeText(curlSnippet.textContent).then(() => {
-            if (typeof Toast !== 'undefined') Toast.success('cURL 快速测试命令已复制！可在终端中回车发送。');
+            const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+            if (typeof Toast !== "undefined") Toast.success(isEn ? "cURL command copied! Paste into terminal to send." : "cURL 快速测试命令已复制！可在终端中回车发送。");
           });
         }
       });
@@ -104,14 +106,16 @@ const WebhookController = {
         this.capturedRequests = [];
         localStorage.removeItem('webhook_captured_logs');
         this.renderRequestList();
-        if (typeof Toast !== 'undefined') Toast.info('捕获日志已清空。');
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        if (typeof Toast !== "undefined") Toast.info(isEn ? "Captured logs cleared." : "捕获日志已清空。");
       });
     }
 
     if (refreshBtn) {
       refreshBtn.addEventListener('click', () => {
         this.renderRequestList();
-        if (typeof Toast !== 'undefined') Toast.info('请求列表已刷新。');
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        if (typeof Toast !== "undefined") Toast.info(isEn ? "Request list refreshed." : "请求列表已刷新。");
       });
     }
   },
@@ -134,7 +138,8 @@ const WebhookController = {
       }
 
       sendBtn.disabled = true;
-      sendBtn.innerHTML = '<span class="material-symbols-outlined">sync</span> 正在模拟触发...';
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      sendBtn.innerHTML = `<span class="material-symbols-outlined">sync</span> ${isEn ? "Simulating trigger..." : "正在模拟触发..."}`;
 
       // 1. 构造捕获报文
       const newRequest = {
@@ -162,8 +167,8 @@ const WebhookController = {
       this.renderRequestList();
 
       sendBtn.disabled = false;
-      sendBtn.innerHTML = '<span class="material-symbols-outlined">send</span> 发送模拟请求';
-      if (typeof Toast !== 'undefined') Toast.success(`成功触发 ${method} Webhook 模拟报文！`);
+      sendBtn.innerHTML = `<span class="material-symbols-outlined">send</span> ${isEn ? "Send Mock Request" : "发送模拟请求"}`;
+      if (typeof Toast !== "undefined") Toast.success(isEn ? `Successfully triggered ${method} Webhook mock payload!` : `成功触发 ${method} Webhook 模拟报文！`);
     });
   },
 
@@ -194,7 +199,8 @@ const WebhookController = {
 
     if (!listEl) return;
 
-    if (countEl) countEl.textContent = `${this.capturedRequests.length} 条请求`;
+    const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+    if (countEl) countEl.textContent = isEn ? `${this.capturedRequests.length} Requests` : `${this.capturedRequests.length} 条请求`;
 
     if (this.capturedRequests.length === 0) {
       if (emptyEl) emptyEl.style.display = 'block';
@@ -206,7 +212,8 @@ const WebhookController = {
 
     listEl.innerHTML = this.capturedRequests.map((req, idx) => {
       const method = req.method || 'POST';
-      const timeStr = req.timestamp ? new Date(req.timestamp).toLocaleTimeString() : '刚刚';
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      const timeStr = req.timestamp ? new Date(req.timestamp).toLocaleTimeString() : (isEn ? "Just now" : "刚刚");
       const bodyJson = typeof req.body === 'object' ? JSON.stringify(req.body, null, 2) : (req.body || '{}');
 
       const methodColors = {
@@ -237,7 +244,7 @@ const WebhookController = {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
               <span style="font-weight: 600; color: #38bdf8;">JSON Payload Body:</span>
               <button class="btn copy-webhook-json-btn" data-json-idx="${idx}" style="padding: 2px 8px; font-size: 11px; background: var(--surface-high);">
-                <span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle;">content_copy</span> 复制 JSON
+                <span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle;">content_copy</span> ${isEn ? "Copy JSON" : "复制 JSON"}
               </button>
             </div>
             <pre style="background: var(--surface-low); padding: 8px 12px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px; color: #38bdf8; margin: 0; overflow-x: auto;">${bodyJson}</pre>
@@ -254,7 +261,8 @@ const WebhookController = {
         if (item && item.body) {
           const text = typeof item.body === 'object' ? JSON.stringify(item.body, null, 2) : item.body;
           navigator.clipboard.writeText(text).then(() => {
-            if (typeof Toast !== 'undefined') Toast.success('已成功复制 Payload JSON 数据！');
+            const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+            if (typeof Toast !== "undefined") Toast.success(isEn ? "Payload JSON copied to clipboard!" : "已成功复制 Payload JSON 数据！");
           });
         }
       });

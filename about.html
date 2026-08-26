@@ -85,6 +85,12 @@
 
   <script>
     function setLang(lang) {
+      localStorage.setItem("portal_language", lang === "en" ? "en-US" : "zh-CN");
+      const backLink = document.querySelector("a[href='/']");
+      if (backLink) {
+        backLink.textContent = lang === "en" ? "← Return to 825412.xyz Home" : "← 返回 825412.xyz 首页";
+      }
+      
       const zh = document.getElementById('content-zh');
       const en = document.getElementById('content-en');
       const btnZh = document.getElementById('btn-lang-zh');
@@ -105,8 +111,11 @@
         btnEn.style.color = '#fff';
       }
     }
-    if (navigator.language && !navigator.language.startsWith('zh')) {
-      setLang('en');
+    const savedLang = localStorage.getItem("portal_language");
+    if (savedLang === "en-US" || (!savedLang && navigator.language && !navigator.language.startsWith("zh"))) {
+      setLang("en");
+    } else {
+      setLang("zh");
     }
   </script>
 </body>

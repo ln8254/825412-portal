@@ -17,6 +17,73 @@ const I18nController = {
 
   translations: {
     'zh-CN': {
+
+      'clip_input_ph': '// 在这里粘贴你的文本或代码...',
+      'tool_json_ph': '在此粘贴待校验或格式化的 JSON 字符串...',
+      'tool_jwt_ph': '在此粘贴 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      'tool_hash_ph': '在此输入需要计算散列哈希的任意文本或密码字符串...',
+      'tool_hash_compare_ph': '在此粘贴官方提供的 MD5 / SHA-256 校验码，系统将自动进行毫秒级一致性比对...',
+      'airdrop_room_ph': '输入或切换自定义频道码...',
+
+
+      'pwd_strength_val': '极高 (Military Grade)',
+      'pwd_entropy_init': '熵值: 95.2 Bits',
+      'pwd_crack_init': '约 3.2 亿年 (RTX 4090 集群)',
+      'pwd_charset_init': '94 个可能字符 (N)',
+      'pwd_nist_init': '符合 NIST SP 800-63B 标准',
+      'hash_file_info_init': '📄 文件信息',
+      'hash_calc_status_init': '⚡ 计算完成',
+      'time_input_ts_ph': '输入10位时间戳',
+      'time_output_dt_ph': '转换结果',
+
+
+      'clip_opt_1h': '1 小时后失效',
+      'clip_opt_24h': '24 小时后失效',
+      'clip_opt_7d': '7 天后失效',
+      'clip_create_btn': '创建分享链接',
+      'clip_res_title': '分享结果',
+      'clip_res_link_label': '你的分享链接 (点击复制):',
+      'clip_history_title': '本地历史记录',
+      'clip_doc_title': '匿名剪贴板使用指南与隐私安全架构',
+      'clip_doc_sub': '了解端到端临时加密存储、自毁定时器与零用户痕迹模型。',
+      'clip_card1_body': '<h3><span class="material-symbols-outlined" style="font-size: 18px;">share</span> 1. 匿名剪贴板是如何工作的？</h3><p>您可以在输入框中粘贴任何代码片段、配置文件、SQL 语句或临时笔记，选择到期时间后点击“创建分享链接”。系统将生成唯一的 Hash 分享地址（如 <code>#paste=xxxx</code>）。收到链接的接收者直接打开网页即可在弹窗中一键阅读与复制。</p>',
+      'clip_card2_body': '<h3><span class="material-symbols-outlined" style="font-size: 18px;">timer_off</span> 2. 内容安全与过期自毁机制</h3><p>系统支持 1小时、24小时和 7天三种自毁期限。一旦超出设定时间，云端数据将被彻底清除并无法恢复。我们不强制要求用户注册或提交任何个人身份信息，保障匿名与隐私。</p>',
+
+
+      'search_placeholder': '指令搜索...',
+      'wifi_enc_wpa': 'WPA / WPA2 / WPA3 (通用)',
+      'wifi_enc_nopass': '无密码 (开放热点)',
+      'wifi_enc_wep': 'WEP (极老旧设备)',
+      'webhook_kb_title': 'Webhook 事件驱动架构与生产级安全规范',
+      'webhook_kb_sub': '涵盖反向 HTTP 回调设计模式、HMAC-SHA256 签名校验算法与幂等性消费最佳实践。',
+
+
+      // 模态框与通用
+      'set_lang_label': '界面语言 / System Language',
+      'privacy_modal_title': '隐私政策 (Privacy Policy)',
+      'privacy_modal_body': '<p><strong>生效日期：2026年6月5日</strong></p><p>825412.xyz（以下简称“本站”）极其重视用户的个人隐私与数据安全。本隐私政策旨在向您说明本站在您使用我们的工具服务时，如何收集、使用和保护您的信息。</p><h3>1. 信息收集与本地存储</h3><p>本站致力于提供无需注册、即开即用的前端在线工具。我们不强制收集用户的姓名、身份证号或手机号码。</p><ul><li><strong>API Key 与配置：</strong>您在“设置中心”输入的 Gemini API Key 仅保存在您本地浏览器的 LocalStorage 中，绝不上传至本站或任何非官方服务器。</li><li><strong>剪贴板内容：</strong>您在匿名剪贴板中提交的内容将以加密形式存储，并在您选定的到期时间后自动永久销毁。</li></ul><h3>2. Cookie 与第三方广告展示</h3><p>本站接入了 <strong>Google AdSense</strong> 及相关第三方广告服务商。请您了解以下关于 Cookie 的政策：</p><ul><li>第三方供应商（包括 Google）会使用 Cookie 根据用户在此网站或其他网站上的历史访问记录来展示个性化广告。</li><li>Google 使用广告 Cookie（包括 DART Cookie），使其及其合作伙伴能够根据用户对本网站和/或互联网上其他网站的访问情况向用户投放广告。</li><li>用户可以通过访问 <a href="https://adssettings.google.com" target="_blank" style="color: var(--color-secondary);">Google 广告设置</a> 随时停用个性化广告。</li></ul><h3>3. 日志与网络分析</h3><p>为了保障网络性能及防范恶意攻击，云端网络（如 Cloudflare）可能会自动记录访问者的标准 Web 日志（包括 IP 地址、浏览器类型、访问时间及请求 URL）。这些日志仅用于安全审计与网络优化。</p><h3>4. 隐私政策修改</h3><p>本站保留随时更新本隐私政策的权利。修改后的条款一旦公布即刻生效。</p><h3>5. 联系我们</h3><p>如果您对本隐私政策有任何疑问或建议，请通过电子邮箱与我们联系：<code>leen8254@gmail.com</code>。</p>',
+      'privacy_dismiss': '我知道了',
+      'about_modal_title': '关于 825412.xyz',
+      'about_modal_body': '<p><strong>825412.xyz</strong> 是一个专为开发者、极客及日常上网用户打造的开放式极客多功能工具箱。</p><p>我们秉承“极简、炫酷、安全、高效”的理念，打破传统工具网站繁琐的注册登录与弹窗限制。所有小工具均为纯前端响应式设计，搭配深邃的霓虹暗黑视觉体验。</p><h3>核心服务板块：</h3><ul><li><strong>控制台 (Dashboard)：</strong>实时感知网络节点与往返延迟，快速导航。</li><li><strong>匿名剪贴板：</strong>免登录的代码与文本临时中转站，支持设定定时销毁。</li><li><strong>极客工具箱：</strong>强密码生成、Unix 时间戳转换、Base64 编解码与字数统计。</li><li><strong>AI 智能助手：</strong>安全连接 Gemini 模型，提供私密强大的 AI 交互支持。</li></ul>',
+      'about_dismiss': '关闭',
+      'contact_modal_title': '联系我们 (Contact Us)',
+      'contact_modal_body': '<p>感谢您使用 825412.xyz！我们非常重视您的反馈与建议。</p><p>如果您在使用过程中遇到任何 Bug、有功能改进想法、或者需要商务合作/广告咨询，请随时通过以下方式与站长联系：</p><div class="alert-box" style="margin-top: 16px;"><span class="material-symbols-outlined" style="vertical-align: middle;">mail</span> 站长联系邮箱：<code>leen8254@gmail.com</code></div><p>我们通常会在 24-48 小时内给予回复。</p>',
+      'contact_dismiss': '确定',
+      'terms_modal_title': '服务条款 (Terms of Service)',
+      'terms_modal_body': '<p><strong>生效日期 / Effective Date：2026年6月5日</strong></p><p>欢迎访问并使用 <strong>825412.xyz</strong>（以下简称“本平台”或“本站”）。在使用本站提供的极客开发工具与相关服务前，请仔细阅读以下服务条款。</p><h3>1. 协议接受 (Acceptance of Terms)</h3><p>当您访问、浏览或使用本站提供的任何在线工具（包括匿名剪贴板、密码生成器、时间戳转换、文本工具与 AI 助手等），即表示您已阅读、理解并无条件接受本协议及我们的《隐私政策》。</p><h3>2. 用户行为规范与合法使用 (Acceptable Use)</h3><p>您同意仅将本站工具用于合法且合规的目的：</p><ul><li><strong>严禁有害内容：</strong>严禁在匿名剪贴板或 AI 对话中发布或传播包含木马病毒、恶意代码、侵犯他人知识产权或隐私的数据、以及违反法律法规的信息。</li><li><strong>网络安全准则：</strong>严禁针对本站发起任何自动化暴力请求、DDOS 拒绝服务攻击或恶意刷量。</li><li><strong>数据自毁提醒：</strong>匿名剪贴板具备定时自毁特性，请自行妥善留存重要数据副本。</li></ul><h3>3. 免责声明 (Disclaimer of Warranties)</h3><ul><li>本站所有工具与计算结果均按“现状 (AS IS)”提供，不提供任何明示或默示的适用性保证。</li><li>用户使用密码生成器生成的密码资产、AI 智能助手的对话建议等，均需由用户自行评估判断并承担使用风险。</li></ul><h3>4. 第三方广告与外链免责 (Third-Party Ads)</h3><p>本站接入了 Google AdSense 等合规广告投放网络。广告展示均由服务商算法动态匹配，本站不对任何第三方广告主提供的商品、服务或外部网站内容承担连带法律责任。</p><h3>5. 条款更新 (Modifications)</h3><p>我们保留在适当时机修订本条款的权利。修订版本一旦在网站发布即刻生效。</p>',
+      'terms_dismiss': '我已阅读并同意',
+      'media_opt_webp': 'WebP (推荐 · 极高压缩比)',
+      'media_opt_jpeg': 'JPEG / JPG (兼容性好)',
+      'media_opt_png': 'PNG (透明无损)',
+      'media_opt_favicon': 'Favicon 图标 (.ico 32x32)',
+      'media_max_width_ph': '例如：1920 (可选)',
+      'ai_model_flash': 'Gemini 2.5 Flash (推荐)',
+      'ai_model_pro': 'Gemini 2.5 Pro (深度推理)',
+      'ai_model_lite': 'Gemini 2.5 Flash Lite (极速)',
+      'airdrop_peer_count': '1 台设备在线',
+      'webhook_count_badge': '0 条请求',
+      'webhook_opt_post': 'POST (默认 JSON)',
+
       // 导航
       'nav_dashboard': '控制台',
       'nav_clipboard': '匿名剪贴板',
@@ -294,6 +361,73 @@ const I18nController = {
       'footer_rights': '© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利'
     },
     'en-US': {
+
+      'clip_input_ph': '// Paste your text or code snippet here...',
+      'tool_json_ph': 'Paste raw JSON payload to format or validate...',
+      'tool_jwt_ph': 'Paste JWT string (header.payload.signature)...',
+      'tool_hash_ph': 'Enter text or password to compute cryptographic hashes...',
+      'tool_hash_compare_ph': 'Paste expected MD5/SHA256 hash here to auto-compare integrity...',
+      'airdrop_room_ph': 'Enter or switch custom room code...',
+
+
+      'pwd_strength_val': 'Military Grade (Highest)',
+      'pwd_entropy_init': 'Entropy: 95.2 Bits',
+      'pwd_crack_init': '~320 Million Yrs (RTX 4090)',
+      'pwd_charset_init': '94 Possible Characters (N)',
+      'pwd_nist_init': 'Compliant with NIST SP 800-63B',
+      'hash_file_info_init': '📄 File Info',
+      'hash_calc_status_init': '⚡ Calculated',
+      'time_input_ts_ph': 'Enter 10-digit timestamp',
+      'time_output_dt_ph': 'Result',
+
+
+      'clip_opt_1h': 'Expires in 1 Hour',
+      'clip_opt_24h': 'Expires in 24 Hours',
+      'clip_opt_7d': 'Expires in 7 Days',
+      'clip_create_btn': 'Generate Share Link',
+      'clip_res_title': 'Share Result',
+      'clip_res_link_label': 'Your Share Link (Click to copy):',
+      'clip_history_title': 'Local History',
+      'clip_doc_title': 'Pastebin Architecture & Privacy Guide',
+      'clip_doc_sub': 'Learn about ephemeral encrypted storage, self-destruct timers, and zero user telemetry.',
+      'clip_card1_body': '<h3><span class="material-symbols-outlined" style="font-size: 18px;">share</span> 1. How Does the Anonymous Pastebin Work?</h3><p>Paste any source code, configs, SQL queries, or notes, select a TTL expiration window, and generate your share link. Recipients opening the hash link (e.g. <code>#paste=xxxx</code>) can inspect and copy the payload instantly without signing up.</p>',
+      'clip_card2_body': '<h3><span class="material-symbols-outlined" style="font-size: 18px;">timer_off</span> 2. Ephemeral Storage & Auto-Destruction</h3><p>We provide 1-hour, 24-hour, and 7-day auto-destruction policies. Once expired, objects are permanently erased from cache with zero server retention.</p>',
+
+
+      'search_placeholder': 'Search commands...',
+      'wifi_enc_wpa': 'WPA / WPA2 / WPA3 (Universal)',
+      'wifi_enc_nopass': 'No Password (Open Hotspot)',
+      'wifi_enc_wep': 'WEP (Legacy)',
+      'webhook_kb_title': 'Webhook Event Architecture & Production Security',
+      'webhook_kb_sub': 'Covers reverse HTTP callback patterns, HMAC-SHA256 signature verification, and idempotency.',
+
+
+      // Modals & General
+      'set_lang_label': 'System Language',
+      'privacy_modal_title': 'Privacy Policy',
+      'privacy_modal_body': '<p><strong>Effective Date: June 5, 2026</strong></p><p>825412.xyz ("we", "our", or "this portal") values user privacy and data security. This policy outlines how information is collected, processed, and shielded when using our services.</p><h3>1. Information Collection & Zero Cloud Storage</h3><p>We provide registration-free, client-side tools. We do not collect names, phone numbers, or identity information.</p><ul><li><strong>API Keys & Settings:</strong> Keys entered in Settings are saved solely in your browser LocalStorage and never sent to our servers.</li><li><strong>Clipboard Pastes:</strong> Ephemeral pastes are encrypted and destroyed upon expiration.</li></ul><h3>2. Cookies & Google AdSense Compliance</h3><p>We partner with Google AdSense for advertising:</p><ul><li>Third-party vendors (including Google) use cookies to serve personalized ads based on prior visits.</li><li>Google uses advertising cookies (including DART) to serve ads based on visits across the web.</li><li>Users may opt out of personalized ads via <a href="https://adssettings.google.com" target="_blank" style="color: var(--color-secondary);">Google Ad Settings</a>.</li></ul><h3>3. Server Logs & DDoS Defense</h3><p>Global CDN edge nodes (Cloudflare) record standard HTTP access logs for security audit and rate limiting purposes only.</p><h3>4. Policy Updates</h3><p>We reserve the right to revise this policy. Continued usage constitutes acceptance.</p><h3>5. Contact Us</h3><p>For inquiries, email: <code>leen8254@gmail.com</code>.</p>',
+      'privacy_dismiss': 'Got it',
+      'about_modal_title': 'About 825412.xyz',
+      'about_modal_body': '<p><strong>825412.xyz</strong> is an open-access developer and geek productivity toolbox.</p><p>We adhere to "Minimalist, Cyberpunk, Secure, and High-Performance" principles with zero login walls or paywalls. All tools run 100% in-browser with neon dark mode aesthetics.</p><h3>Core Suites:</h3><ul><li><strong>Dashboard:</strong> Real-time network node monitoring, latency ping, and global tools.</li><li><strong>Anonymous Clipboard:</strong> Ephemeral code sharing with auto-destruction timers.</li><li><strong>Geek Toolbox:</strong> Password generator, Unix timestamp, Base64, JSON and cryptographic hashing.</li><li><strong>AI Neural Assistant:</strong> Secure, private Gemini AI inference link.</li></ul>',
+      'about_dismiss': 'Close',
+      'contact_modal_title': 'Contact Us',
+      'contact_modal_body': '<p>Thank you for using 825412.xyz! We value your feedback and bug reports.</p><p>If you encounter bugs, feature requests, or partnership inquiries, reach out anytime:</p><div class="alert-box" style="margin-top: 16px;"><span class="material-symbols-outlined" style="vertical-align: middle;">mail</span> Admin Email: <code>leen8254@gmail.com</code></div><p>We typically reply within 24 to 48 business hours.</p>',
+      'contact_dismiss': 'Confirm',
+      'terms_modal_title': 'Terms of Service',
+      'terms_modal_body': '<p><strong>Effective Date: June 5, 2026</strong></p><p>Welcome to <strong>825412.xyz</strong>. By accessing or using our developer tools, you agree to these Terms of Service.</p><h3>1. Acceptance of Terms</h3><p>By visiting or utilizing our clipboard, hash calculator, time converter, or AI tools, you unconditionally accept this agreement and our Privacy Policy.</p><h3>2. Acceptable Use</h3><p>You agree to use these tools for lawful purposes only:</p><ul><li><strong>No Malicious Content:</strong> Transmitting malware, viruses, stolen credentials, or illegal content is strictly forbidden.</li><li><strong>Network Integrity:</strong> Automated DDoS attacks, brute-force spamming, or abuse is prohibited.</li><li><strong>Data Auto-Destruction:</strong> Ephemeral pastes self-destruct; please keep your own backups.</li></ul><h3>3. Disclaimer of Warranties</h3><ul><li>All utilities are provided "AS IS" without warranties of any kind.</li><li>Users bear sole responsibility for generated passwords, tokens, and AI responses.</li></ul><h3>4. Third-Party Advertisements</h3><p>We display third-party advertisements via Google AdSense. We do not endorse or assume liability for third-party products.</p><h3>5. Modifications</h3><p>We reserve the right to modify these terms at any time.</p>',
+      'terms_dismiss': 'I have read and agree',
+      'media_opt_webp': 'WebP (Recommended - Ultra High Compression)',
+      'media_opt_jpeg': 'JPEG / JPG (High Compatibility)',
+      'media_opt_png': 'PNG (Lossless / Transparent)',
+      'media_opt_favicon': 'Favicon Icon (.ico 32x32)',
+      'media_max_width_ph': 'e.g. 1920 (Optional)',
+      'ai_model_flash': 'Gemini 2.5 Flash (Recommended)',
+      'ai_model_pro': 'Gemini 2.5 Pro (Deep Reasoning)',
+      'ai_model_lite': 'Gemini 2.5 Flash Lite (Fast)',
+      'airdrop_peer_count': '1 Device Online',
+      'webhook_count_badge': '0 Requests',
+      'webhook_opt_post': 'POST (Default JSON)',
+
       // Navigation
       'nav_dashboard': 'Dashboard',
       'nav_clipboard': 'Pastebin',
@@ -663,3 +797,12 @@ const I18nController = {
 };
 
 window.I18nController = I18nController;
+
+// Auto-initialize i18n on DOM ready across all pages
+if (typeof document !== "undefined") {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => I18nController.init());
+  } else {
+    I18nController.init();
+  }
+}

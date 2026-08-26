@@ -56,8 +56,9 @@ const ClipboardController = {
     if (!modal) return;
 
     // 显示加载中状态
-    contentArea.value = '正在建立安全神经连接，读取加密数据...';
-    metaInfo.textContent = `剪贴板 #${code.substring(0, 8)}...：读取中...`;
+    const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+    contentArea.value = isEn ? "Establishing secure neural link, reading encrypted payload..." : "正在建立安全神经连接，读取加密数据...";
+    metaInfo.textContent = isEn ? `Clipboard #${code.substring(0, 8)}...: Reading...` : `剪贴板 #${code.substring(0, 8)}...：读取中...`;
     modal.classList.add('active');
 
     try {
@@ -66,8 +67,9 @@ const ClipboardController = {
 
       // 404 说明键不存在（已被销毁或从未创建）
       if (response.status === 404 || response.status === 400) {
-        contentArea.value = '该剪贴板已被自动销毁或从未创建。';
-        metaInfo.textContent = `剪贴板 #${code.substring(0, 8)}...：已销毁`;
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        contentArea.value = isEn ? "This paste was auto-destroyed or never created." : "该剪贴板已被自动销毁或从未创建。";
+        metaInfo.textContent = isEn ? `Clipboard #${code.substring(0, 8)}...: Destroyed` : `剪贴板 #${code.substring(0, 8)}...：已销毁`;
         return;
       }
 
@@ -79,8 +81,9 @@ const ClipboardController = {
       
       // 有些公共数据可能不包含我们的特定格式，做安全检查
       if (!resData.data || !resData.data.expiresAt) {
-        contentArea.value = '该数据不属于本匿名剪贴板系统。';
-        metaInfo.textContent = `剪贴板 #${code.substring(0, 8)}...：无效数据`;
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        contentArea.value = isEn ? "Data format is invalid for this clipboard system." : "该数据不属于本匿名剪贴板系统。";
+        metaInfo.textContent = isEn ? `Clipboard #${code.substring(0, 8)}...: Invalid` : `剪贴板 #${code.substring(0, 8)}...：无效数据`;
         return;
       }
 
@@ -88,8 +91,9 @@ const ClipboardController = {
 
       // 验证是否已过期
       if (Date.now() > data.expiresAt) {
-        contentArea.value = '该分享链接已超出设定的有效期，已被自动销毁。';
-        metaInfo.textContent = `剪贴板 #${code.substring(0, 8)}...：已过期`;
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        contentArea.value = isEn ? "This paste exceeded its TTL and has been automatically destroyed." : "该分享链接已超出设定的有效期，已被自动销毁。";
+        metaInfo.textContent = isEn ? `Clipboard #${code.substring(0, 8)}...: Expired` : `剪贴板 #${code.substring(0, 8)}...：已过期`;
         
         // 自动在云端执行彻底销毁 (DELETE)
         fetch(`${this.API_BASE}/${code}`, { method: 'DELETE' }).catch(console.error);
@@ -101,18 +105,21 @@ const ClipboardController = {
       
       const timeRemaining = Math.max(0, Math.floor((data.expiresAt - Date.now()) / (60 * 1000)));
       let expiryText = '';
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
       if (timeRemaining > 60) {
-        expiryText = `${Math.ceil(timeRemaining / 60)} 小时后自动销毁`;
+        expiryText = isEn ? `Expires in ${Math.ceil(timeRemaining / 60)} hrs` : `${Math.ceil(timeRemaining / 60)} 小时后自动销毁`;
       } else {
-        expiryText = `${timeRemaining} 分钟后自动销毁`;
+        expiryText = isEn ? `Expires in ${timeRemaining} mins` : `${timeRemaining} 分钟后自动销毁`;
       }
 
-      metaInfo.innerHTML = `剪贴板 <span style="color: var(--color-secondary); font-family: var(--font-mono); font-weight:600;">#${code.substring(0, 8)}...</span> (${expiryText})：`;
+      const labelPrefix = isEn ? "Clipboard" : "剪贴板";
+      metaInfo.innerHTML = `${labelPrefix} <span style="color: var(--color-secondary); font-family: var(--font-mono); font-weight:600;">#${code.substring(0, 8)}...</span> (${expiryText}):`;
 
     } catch (err) {
       console.error(err);
-      contentArea.value = '连接云端数据失败，请确认您的网络已连接。';
-      metaInfo.textContent = `剪贴板 #${code.substring(0, 8)}...：读取失败`;
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      contentArea.value = isEn ? "Failed to connect to cloud storage. Please check network connection." : "连接云端数据失败，请确认您的网络已连接。";
+      metaInfo.textContent = isEn ? `Clipboard #${code.substring(0, 8)}...: Read Failed` : `剪贴板 #${code.substring(0, 8)}...：读取失败`;
     }
   },
 
@@ -141,7 +148,8 @@ const ClipboardController = {
       const text = contentArea.value;
       if (text && !text.startsWith('正在') && !text.startsWith('该剪贴板')) {
         navigator.clipboard.writeText(text).then(() => {
-          if (typeof Toast !== 'undefined') Toast.success('文本内容已成功复制！');
+          if (typeof Toast !== 'undefined') const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+          Toast.success(isEn ? "Content copied to clipboard!" : "文本内容已成功复制！");
         });
       }
     });
@@ -162,12 +170,14 @@ const ClipboardController = {
     saveBtn.addEventListener('click', async () => {
       const text = contentText.value.trim();
       if (!text) {
-        if (typeof Toast !== 'undefined') Toast.warning('请输入需要分享的内容！');
+        if (typeof Toast !== 'undefined') const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        Toast.warning(isEn ? "Please enter content to share!" : "请输入需要分享的内容！");
         return;
       }
 
       saveBtn.disabled = true;
-      saveBtn.innerHTML = '<span class="material-symbols-outlined">sync</span> 创建中...';
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      saveBtn.innerHTML = `<span class="material-symbols-outlined">sync</span> ${isEn ? "Creating..." : "创建中..."}`;
 
       try {
         const expiryHours = parseInt(expirySelect.value);
@@ -215,14 +225,16 @@ const ClipboardController = {
 
         // 重置编辑器
         contentText.value = '';
-        if (typeof Toast !== 'undefined') Toast.success('匿名分享链接创建成功！');
+        if (typeof Toast !== 'undefined') Toast.success(isEn ? "Ephemeral share link created!" : "匿名分享链接创建成功！");
 
       } catch (err) {
         console.error(err);
-        if (typeof Toast !== 'undefined') Toast.error('创建匿名分享失败，请检查网络连接或稍后再试。');
+        if (typeof Toast !== 'undefined') const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        Toast.error(isEn ? "Failed to create share. Check network and try again." : "创建匿名分享失败，请检查网络连接或稍后再试。");
       } finally {
         saveBtn.disabled = false;
-        saveBtn.innerHTML = '<span class="material-symbols-outlined">publish</span> 创建分享链接';
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        saveBtn.innerHTML = `<span class="material-symbols-outlined">publish</span> ${isEn ? "Create Share Link" : "创建分享链接"}`;
       }
     });
 
@@ -231,7 +243,8 @@ const ClipboardController = {
       const url = shareUrlDiv.textContent;
       if (url) {
         navigator.clipboard.writeText(url).then(() => {
-          if (typeof Toast !== 'undefined') Toast.success('站内分享链接已复制到剪贴板！');
+          if (typeof Toast !== 'undefined') const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+          Toast.success(isEn ? "Share link copied to clipboard!" : "站内分享链接已复制到剪贴板！");
         });
       }
     });

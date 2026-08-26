@@ -27,14 +27,14 @@
           <span>825412.xyz</span>
         </a>
         <span style="color: #64748b;">/</span>
-        <span style="color: #06b6d4; font-size: 14px; font-weight: 600;">匿名剪贴板</span>
+        <span style="color: #06b6d4; font-size: 14px; font-weight: 600;" data-i18n="nav_clipboard">匿名剪贴板</span>
       </div>
       <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
-        <a href="/" style="color: var(--text-secondary); text-decoration: none;">控制台</a>
-        <a href="airdrop.html" style="color: var(--text-secondary); text-decoration: none;">隔空快传</a>
-        <a href="webhook.html" style="color: var(--text-secondary); text-decoration: none;">Webhook 调试</a>
-        <a href="clipboard.html" style="color: #06b6d4; text-decoration: none; font-weight: 700;">匿名剪贴板</a>
-        <a href="toolbox.html" style="color: var(--text-secondary); text-decoration: none;">极客工具箱</a>
+        <a href="/" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_dashboard">控制台</a>
+        <a href="airdrop.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_airdrop">隔空快传</a>
+        <a href="webhook.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_webhook">Webhook 调试</a>
+        <a href="clipboard.html" style="color: #06b6d4; text-decoration: none; font-weight: 700;" data-i18n="nav_clipboard">匿名剪贴板</a>
+        <a href="toolbox.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_toolbox">极客工具箱</a>
       </nav>
     </div>
   </header>
@@ -44,8 +44,8 @@
     
     <!-- 标题与介绍 -->
     <div style="margin-bottom: 24px;">
-      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px;">匿名剪贴板 (Anonymous Pastebin)</h1>
-      <p style="font-size: 14px; color: var(--text-secondary);">快速、临时的文本与代码分享工具。阅后即焚，过期自动销毁。</p>
+      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px;" data-i18n="clip_title">标题</h1>
+      <p style="font-size: 14px; color: var(--text-secondary);" data-i18n="clip_subtitle">介绍</p>
     </div>
 
     <div class="clipboard-container" style="margin-bottom: 30px;">
@@ -57,30 +57,30 @@
         <div class="action-row">
           <div>
             <select class="dropdown-select" id="paste-expiry">
-              <option value="1">1 小时后失效</option>
-              <option value="24" selected>24 小时后失效</option>
-              <option value="168">7 天后失效</option>
+              <option value="1" data-i18n="clip_opt_1h">1 小时后失效</option>
+              <option value="24" selected data-i18n="clip_opt_24h">24 小时后失效</option>
+              <option value="168" data-i18n="clip_opt_7d">7 天后失效</option>
             </select>
           </div>
           <button class="btn btn-primary" id="save-paste-btn">
             <span class="material-symbols-outlined">publish</span>
-            <span>创建分享链接</span>
+            <span data-i18n="clip_create_btn">创建分享链接</span>
           </button>
         </div>
       </div>
       
       <!-- 右侧：历史与链接面板 -->
       <div class="history-panel glass-card">
-        <h3 style="margin-bottom: 16px; font-weight: 700; color: var(--color-secondary);">分享结果</h3>
+        <h3 style="margin-bottom: 16px; font-weight: 700; color: var(--color-secondary);" data-i18n="clip_res_title">分享结果</h3>
         <div id="share-link-box" style="display: none; margin-bottom: 24px;">
-          <p class="form-label">你的分享链接 (点击复制):</p>
+          <p class="form-label" data-i18n="clip_res_link_label">你的分享链接 (点击复制):</p>
           <div class="pwd-result-box" style="padding: 12px; margin-bottom: 12px;">
             <div class="pwd-display" id="share-url" style="font-size: 15px;"></div>
             <button class="material-symbols-outlined" id="copy-share-btn" style="cursor: pointer; color: var(--color-secondary); background: none; border: none;">content_copy</button>
           </div>
         </div>
         
-        <h3 style="margin-bottom: 12px; font-weight: 700; color: var(--color-primary);">本地历史记录</h3>
+        <h3 style="margin-bottom: 12px; font-weight: 700; color: var(--color-primary);" data-i18n="clip_history_title">本地历史记录</h3>
         <div class="history-list" id="local-history-list"></div>
       </div>
     </div>
@@ -90,32 +90,24 @@
       <div class="doc-header">
         <span class="material-symbols-outlined doc-header-icon">help_outline</span>
         <div>
-          <h2 class="doc-header-title">匿名剪贴板使用指南与隐私安全架构</h2>
-          <p class="doc-header-subtitle">了解端到端临时加密存储、自毁定时器与零用户痕迹模型。</p>
+          <h2 class="doc-header-title" data-i18n="clip_doc_title">匿名剪贴板使用指南与隐私安全架构</h2>
+          <p class="doc-header-subtitle" data-i18n="clip_doc_sub">了解端到端临时加密存储、自毁定时器与零用户痕迹模型。</p>
         </div>
       </div>
-
       <div class="doc-grid">
-        <div class="doc-card">
-          <h3><span class="material-symbols-outlined" style="font-size: 18px;">share</span> 1. 匿名剪贴板是如何工作的？</h3>
-          <p>您可以在输入框中粘贴任何代码片段、配置文件、SQL 语句或临时笔记，选择到期时间后点击“创建分享链接”。系统将生成唯一的 Hash 分享地址（如 <code>#paste=xxxx</code>）。收到链接的接收者直接打开网页即可在弹窗中一键阅读与复制。</p>
-        </div>
-
-        <div class="doc-card">
-          <h3><span class="material-symbols-outlined" style="font-size: 18px;">timer_off</span> 2. 内容安全与过期自毁机制</h3>
-          <p>系统支持 1小时、24小时和 7天三种自毁期限。一旦超出设定时间，云端数据将被彻底清除并无法恢复。我们不强制要求用户注册或提交任何个人身份信息，保障匿名与隐私。</p>
-        </div>
+        <div class="doc-card" data-i18n="clip_card1_body"></div>
+        <div class="doc-card" data-i18n="clip_card2_body"></div>
       </div>
     </section>
 
     <!-- 页脚 -->
     <footer style="border-top: 1px solid rgba(255,255,255,0.08); padding: 24px 0; margin-top: 40px; text-align: center; font-size: 13px; color: var(--text-muted);">
-      <div style="margin-bottom: 10px;">© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利</div>
+      <div style="margin-bottom: 10px;"><span data-i18n="footer_rights">© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利</span></div>
       <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
-        <a href="about.html" style="color: var(--text-secondary); text-decoration: none;">关于本站</a>
-        <a href="privacy.html" style="color: var(--text-secondary); text-decoration: none;">隐私政策</a>
-        <a href="terms.html" style="color: var(--text-secondary); text-decoration: none;">服务条款</a>
-        <a href="contact.html" style="color: var(--text-secondary); text-decoration: none;">联系我们</a>
+        <a href="about.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_about">关于本站</a>
+        <a href="privacy.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_privacy">隐私政策</a>
+        <a href="terms.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_terms">服务条款</a>
+        <a href="contact.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_contact">联系我们</a>
       </div>
     </footer>
   </main>

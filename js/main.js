@@ -271,7 +271,8 @@ function initSettingsModal() {
     // 更新 AI 模块连接状态
     AiChatController.checkApiStatus();
     
-    alert('配置已成功保存！');
+    const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      alert(isEn ? "Settings saved successfully!" : "配置已成功保存！");
     closeModal();
   });
 }
@@ -482,7 +483,7 @@ function initDashboardNetworkCenter() {
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="ping-badge" id="ping-val-${node.name.replace(/[^a-zA-Z0-9]/g, '')}" style="font-size: 12px; font-weight: 700; font-family: var(--font-mono); color: var(--text-secondary);">- ms</span>
-          <span class="ping-status" id="ping-status-${node.name.replace(/[^a-zA-Z0-9]/g, '')}" style="font-size: 10px; font-weight: 600; color: var(--text-muted); padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05);">待测速</span>
+          <span class="ping-status" id="ping-status-${node.name.replace(/[^a-zA-Z0-9]/g, '')}" style="font-size: 10px; font-weight: 600; color: var(--text-muted); padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05);">${typeof I18nController !== "undefined" && I18nController.currentLang === "en-US" ? "Ready" : "待测速"}</span>
         </div>
       </div>
     `).join('');
@@ -525,7 +526,7 @@ function initDashboardNetworkCenter() {
       } catch (err) {
         valEl.textContent = 'Timeout';
         valEl.style.color = '#ef4444';
-        statusEl.textContent = '超时';
+        statusEl.textContent = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US" ? "Timeout" : "超时";
         statusEl.style.color = '#ef4444';
       }
     }
@@ -765,12 +766,12 @@ const CommandPalette = {
       <div class="cmd-palette-modal glass-panel">
         <div class="cmd-palette-header">
           <span class="material-symbols-outlined" style="color: var(--color-secondary); font-size: 22px;">terminal</span>
-          <input type="text" id="cmd-palette-input" class="cmd-palette-input" placeholder="输入命令或工具名称 (按 ESC 退出)..." autocomplete="off" />
+          <input type="text" id="cmd-palette-input" class="cmd-palette-input" placeholder="${typeof I18nController !== "undefined" && I18nController.currentLang === "en-US" ? "Search commands or tools (ESC to exit)..." : "输入命令或工具名称 (按 ESC 退出)..."}" autocomplete="off" />
           <span class="cmd-badge">ESC</span>
         </div>
         <div id="cmd-palette-results" class="cmd-palette-results"></div>
         <div class="cmd-palette-footer">
-          <span>导航: <kbd class="cmd-badge">↑</kbd> <kbd class="cmd-badge">↓</kbd> 选择: <kbd class="cmd-badge">↵ Enter</kbd></span>
+          <span>${typeof I18nController !== "undefined" && I18nController.currentLang === "en-US" ? "Navigate: <kbd class='cmd-badge'>↑</kbd> <kbd class='cmd-badge'>↓</kbd> Select: <kbd class='cmd-badge'>↵ Enter</kbd>" : "导航: <kbd class='cmd-badge'>↑</kbd> <kbd class='cmd-badge'>↓</kbd> 选择: <kbd class='cmd-badge'>↵ Enter</kbd>"}</span>
           <span>825412.xyz Command Engine</span>
         </div>
       </div>
@@ -857,7 +858,7 @@ const CommandPalette = {
   renderResults() {
     this.results.innerHTML = '';
     if (this.filteredItems.length === 0) {
-      this.results.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">无匹配指令</div>`;
+      this.results.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">${typeof I18nController !== "undefined" && I18nController.currentLang === "en-US" ? "No matching commands" : "无匹配指令"}</div>`;
       return;
     }
 
@@ -887,7 +888,8 @@ const CommandPalette = {
     if (current && current.action) {
       this.close();
       current.action();
-      Toast.info(`已执行: ${current.title}`);
+      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      Toast.info(isEn ? `Executed: ${current.title}` : `已执行: ${current.title}`);
     }
   }
 };

@@ -107,7 +107,7 @@
       <button class="btn" onclick="CommandPalette.open()" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; font-size: 12px; display: flex; align-items: center; justify-content: space-between; border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer;">
         <span style="display: flex; align-items: center; gap: 6px;">
           <span class="material-symbols-outlined" style="font-size: 16px; color: var(--color-secondary);">search</span>
-          <span>指令搜索...</span>
+          <span data-i18n="search_placeholder">指令搜索...</span>
         </span>
         <kbd class="cmd-badge">⌘K</kbd>
       </button>
@@ -187,7 +187,7 @@
             <div class="stat-header" style="margin-bottom: 12px;">
               <span class="stat-title" style="display: flex; align-items: center; gap: 6px;" data-i18n="dash_node_title">
                 <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-primary);">public</span>
-                <span>系统节点与访问监控</span>
+                <span data-i18n="dash_node_title">系统节点与访问监控</span>
               </span>
               <button class="btn btn-primary" id="net-ip-refresh-btn" style="padding: 3px 8px; font-size: 11px; display: inline-flex; align-items: center; gap: 3px;">
                 <span class="material-symbols-outlined" style="font-size: 13px;">refresh</span>
@@ -207,7 +207,7 @@
 
             <div style="margin-top: 8px;">
               <div id="net-webrtc-status" style="padding: 6px 10px; border-radius: var(--radius-sm); font-size: 11px; font-weight: 700; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981;">
-                🛡️ 安全：未检测到 WebRTC 穿透泄漏
+                <span data-i18n="net_webrtc_safe">🛡️ 安全：未检测到 WebRTC 穿透泄漏</span>
               </div>
               <div id="net-webrtc-candidates" style="font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); margin-top: 4px;"></div>
             </div>
@@ -215,7 +215,7 @@
 
           <div style="margin-top: 14px; border-top: 1px solid var(--border-light); padding-top: 8px;">
             <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">
-              <span>本地网络往返延迟 (Ping)</span>
+              <span data-i18n="dash_ping">往返延迟 (Ping)</span>
               <span id="network-ping" style="font-weight: 700; color: var(--color-secondary);">-- ms</span>
             </div>
             <div class="stat-progress-bar">
@@ -229,7 +229,7 @@
           <div class="stat-header" style="margin-bottom: 10px;">
             <span class="stat-title" style="display: flex; align-items: center; gap: 6px;" data-i18n="net_ping_title">
               <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-secondary);">speed</span>
-              <span>全球骨干 CDN 节点网络测速</span>
+              <span data-i18n="net_ping_title">全球骨干 CDN 节点网络测速</span>
             </span>
             <button class="btn btn-primary" id="net-ping-start-btn" style="padding: 3px 10px; font-size: 11px; display: inline-flex; align-items: center; gap: 3px;">
               <span class="material-symbols-outlined" style="font-size: 13px;">play_arrow</span>
@@ -301,9 +301,9 @@
                   <label class="form-label" data-i18n="wifi_enc_label" style="font-size: 11px;">加密类型:</label>
                   <select class="custom-select" id="wifi-enc-select" style="width: 100%; padding: 5px 8px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 12px;">
                     <option value="AUTO" selected data-i18n="wifi_enc_auto">⚡ 智能自动 (推荐)</option>
-                    <option value="WPA">WPA / WPA2 / WPA3 (通用)</option>
-                    <option value="nopass">无密码 (开放热点)</option>
-                    <option value="WEP">WEP (极老旧设备)</option>
+                    <option value="WPA" data-i18n="wifi_enc_wpa">WPA / WPA2 / WPA3 (通用)</option>
+                    <option value="nopass" data-i18n="wifi_enc_nopass">无密码 (开放热点)</option>
+                    <option value="WEP" data-i18n="wifi_enc_wep">WEP (极老旧设备)</option>
                   </select>
                 </div>
                 <div style="display: flex; align-items: center; margin-top: 16px;">
@@ -575,8 +575,8 @@
         <!-- 密码强度与熵值评估面板 -->
         <div class="pwd-entropy-card">
           <div class="entropy-header">
-            <span><strong data-i18n="pwd_strength_title">密码安全性评估：</strong><span id="pwd-strength-text" style="color: #10b981; font-weight:700;">极高 (Military Grade)</span></span>
-            <span id="pwd-entropy-val" style="color: var(--color-secondary); font-family: var(--font-mono);">熵值: 95.2 Bits</span>
+            <span><strong data-i18n="pwd_strength_title">密码安全性评估：</strong><span id="pwd-strength-text" style="color: #10b981; font-weight:700;" data-i18n="pwd_strength_val">极高 (Military Grade)</span></span>
+            <span id="pwd-entropy-val" style="color: var(--color-secondary); font-family: var(--font-mono);" data-i18n="pwd_entropy_init">熵值: 95.2 Bits</span>
           </div>
           <div class="strength-bar-bg">
             <div class="strength-bar-fill" id="pwd-strength-bar" style="width: 95%;"></div>
@@ -584,15 +584,15 @@
           <div class="entropy-details">
             <div class="entropy-tag">
               <span data-i18n="pwd_crack_time_label">暴力破解预估耗时：</span><br>
-              <b id="pwd-crack-time" style="color: #38bdf8;">约 3.2 亿年 (RTX 4090 集群)</b>
+              <b id="pwd-crack-time" style="color: #38bdf8;" data-i18n="pwd_crack_init">约 3.2 亿年 (RTX 4090 集群)</b>
             </div>
             <div class="entropy-tag">
               <span data-i18n="pwd_charset_size_label">可用字符集空间：</span><br>
-              <b id="pwd-charset-size">94 个可能字符 (N)</b>
+              <b id="pwd-charset-size" data-i18n="pwd_charset_init">94 个可能字符 (N)</b>
             </div>
             <div class="entropy-tag">
               <span data-i18n="pwd_rec_label">安全合规建议：</span><br>
-              <b id="pwd-security-tip" style="color: #10b981;">符合 NIST SP 800-63B 标准</b>
+              <b id="pwd-security-tip" style="color: #10b981;" data-i18n="pwd_nist_init">符合 NIST SP 800-63B 标准</b>
             </div>
           </div>
         </div>
@@ -721,8 +721,8 @@
             <input type="file" id="hash-file-input" style="display: none;">
           </div>
           <div id="hash-file-info" style="display: none; margin-top: 10px; padding: 10px 14px; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-sm); font-size: 12px; color: var(--color-secondary); justify-content: space-between; align-items: center;">
-            <span id="hash-file-name-size">📄 文件信息</span>
-            <span id="hash-calc-status" style="font-weight: 700; color: #10b981;">⚡ 计算完成</span>
+            <span id="hash-file-name-size" data-i18n="hash_file_info_init">📄 文件信息</span>
+            <span id="hash-calc-status" style="font-weight: 700; color: #10b981;" data-i18n="hash_calc_status_init">⚡ 计算完成</span>
           </div>
         </div>
 
@@ -782,10 +782,10 @@
             <div class="form-group">
               <label class="form-label" data-i18n="tool_time_conv_label">时间戳 (秒) -> 日期时间</label>
               <div class="time-row">
-                <input type="text" class="text-input" id="input-timestamp" placeholder="输入10位时间戳">
+                <input type="text" class="text-input" id="input-timestamp" data-i18n-ph="time_input_ts_ph" placeholder="输入10位时间戳">
                 <button class="btn btn-primary" id="convert-ts-btn" data-i18n="tool_time_conv_btn">转换</button>
               </div>
-              <input type="text" class="text-input" id="output-datetime" readonly placeholder="转换结果">
+              <input type="text" class="text-input" id="output-datetime" readonly data-i18n-ph="time_output_dt_ph" placeholder="转换结果">
             </div>
           </div>
         </div>
@@ -859,16 +859,16 @@
             <div>
               <label class="form-label" style="font-size: 12px;" data-i18n="media_format_label">输出格式:</label>
               <select class="custom-select" id="media-format-select" style="width: 100%; padding: 6px 10px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 13px;">
-                <option value="image/webp">WebP (推荐 · 极高压缩比)</option>
-                <option value="image/jpeg">JPEG / JPG (兼容性好)</option>
-                <option value="image/png">PNG (透明无损)</option>
-                <option value="favicon">Favicon 图标 (.ico 32x32)</option>
+                <option value="image/webp" data-i18n="media_opt_webp">WebP (推荐 · 极高压缩比)</option>
+                <option value="image/jpeg" data-i18n="media_opt_jpeg">JPEG / JPG (兼容性好)</option>
+                <option value="image/png" data-i18n="media_opt_png">PNG (透明无损)</option>
+                <option value="favicon" data-i18n="media_opt_favicon">Favicon 图标 (.ico 32x32)</option>
               </select>
             </div>
 
             <div>
               <label class="form-label" style="font-size: 12px;" data-i18n="media_max_width_label">最大宽度限制 (px, 留空保持原图):</label>
-              <input type="number" class="text-input" id="media-max-width" placeholder="例如：1920 (可选)" style="font-size: 13px; padding: 6px 10px;">
+              <input type="number" class="text-input" id="media-max-width" data-i18n-ph="media_max_width_ph" placeholder="例如：1920 (可选)" style="font-size: 13px; padding: 6px 10px;">
             </div>
           </div>
 
@@ -1024,9 +1024,9 @@
         <div style="display: flex; align-items: center; gap: 10px;">
           <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;" data-i18n="ai_model_label">AI 模型:</span>
           <select class="dropdown-select" id="ai-model-select" style="min-width: 200px; font-size: 13px; padding: 8px 12px;">
-            <option value="models/gemini-2.5-flash">Gemini 2.5 Flash (推荐)</option>
-            <option value="models/gemini-2.5-pro">Gemini 2.5 Pro (深度推理)</option>
-            <option value="models/gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (极速)</option>
+            <option value="models/gemini-2.5-flash" data-i18n="ai_model_flash">Gemini 2.5 Flash (推荐)</option>
+            <option value="models/gemini-2.5-pro" data-i18n="ai_model_pro">Gemini 2.5 Pro (深度推理)</option>
+            <option value="models/gemini-2.5-flash-lite" data-i18n="ai_model_lite">Gemini 2.5 Flash Lite (极速)</option>
             <option value="models/gemini-flash-latest">Gemini Flash Latest</option>
           </select>
         </div>
@@ -1081,7 +1081,7 @@
         </div>
 
         <div style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
-          <input type="text" class="text-input" id="airdrop-room-input" style="max-width: 260px;" placeholder="输入或切换自定义频道码...">
+          <input type="text" class="text-input" id="airdrop-room-input" style="max-width: 260px;" data-i18n-ph="airdrop_room_ph" placeholder="输入或切换自定义频道码...">
           <button class="btn" id="airdrop-join-btn" style="background: var(--surface-high);" data-i18n="airdrop_join_btn">切换频道</button>
         </div>
       </div>
@@ -1094,7 +1094,7 @@
             <span data-i18n="airdrop_peers_title">频道内在线设备 (Connected Peers)</span>
           </span>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span id="airdrop-peer-count" style="font-size: 12px; color: var(--text-muted); background: var(--surface-high); padding: 3px 10px; border-radius: 12px;">1 台设备在线</span>
+            <span id="airdrop-peer-count" style="font-size: 12px; color: var(--text-muted); background: var(--surface-high); padding: 3px 10px; border-radius: 12px;" data-i18n="airdrop_peer_count">1 台设备在线</span>
             <button class="btn" id="airdrop-rescan-btn" style="background: var(--surface-high); font-size: 12px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 4px;">
               <span class="material-symbols-outlined" style="font-size: 14px;" id="airdrop-rescan-icon">refresh</span>
               <span data-i18n="airdrop_rescan_btn">刷新对端设备</span>
@@ -1233,7 +1233,7 @@
           <div class="form-group">
             <label class="form-label" data-i18n="webhook_method_label">HTTP Method</label>
             <select class="dropdown-select" id="webhook-mock-method" style="width: 100%;">
-              <option value="POST">POST (默认 JSON)</option>
+              <option value="POST" data-i18n="webhook_opt_post">POST (默认 JSON)</option>
               <option value="GET">GET</option>
               <option value="PUT">PUT</option>
               <option value="DELETE">DELETE</option>
@@ -1264,7 +1264,7 @@
         <div class="glass-card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h3 style="font-weight: 700; color: var(--color-primary);" data-i18n="webhook_logs_title">📡 捕获到的请求报文</h3>
-            <span id="webhook-count-badge" style="font-size: 12px; color: var(--text-muted); background: var(--surface-high); padding: 4px 8px; border-radius: 12px;">0 条请求</span>
+            <span id="webhook-count-badge" style="font-size: 12px; color: var(--text-muted); background: var(--surface-high); padding: 4px 8px; border-radius: 12px;" data-i18n="webhook_count_badge">0 条请求</span>
           </div>
 
           <div id="webhook-empty-state" style="text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px;">
@@ -1367,7 +1367,7 @@ function verifyWebhook(rawPayload, signatureHeader, secret) {
       </div>
       
       <div class="form-group" style="margin-top: 10px;">
-        <label class="form-label">界面语言 / System Language</label>
+        <label class="form-label" data-i18n="set_lang_label">界面语言 / System Language</label>
         <select class="dropdown-select lang-selector" id="settings-lang-select" style="width: 100%; font-size: 14px; padding: 10px 14px;">
           <!-- 动态渲染全量语言 -->
         </select>
@@ -1406,39 +1406,12 @@ function verifyWebhook(rawPayload, signatureHeader, secret) {
   <div class="modal-overlay" id="privacy-modal">
     <div class="modal-content glass-panel" style="width: 750px; max-width: 95%;">
       <div class="modal-header">
-        <h2 class="modal-title" style="color: var(--color-secondary);">隐私政策 (Privacy Policy)</h2>
+        <h2 class="modal-title" style="color: var(--color-secondary);" data-i18n="privacy_modal_title">隐私政策 (Privacy Policy)</h2>
         <span class="material-symbols-outlined modal-close" id="close-privacy">close</span>
       </div>
-      <div class="legal-article">
-        <p><strong>生效日期：2026年6月5日</strong></p>
-        <p>825412.xyz（以下简称“本站”）极其重视用户的个人隐私与数据安全。本隐私政策旨在向您说明本站在您使用我们的工具服务时，如何收集、使用和保护您的信息。</p>
-        
-        <h3>1. 信息收集与本地存储</h3>
-        <p>本站致力于提供无需注册、即开即用的前端在线工具。我们不强制收集用户的姓名、身份证号或手机号码。</p>
-        <ul>
-          <li><strong>API Key 与配置：</strong>您在“设置中心”输入的 Gemini API Key 仅保存在您本地浏览器的 LocalStorage 中，绝不上传至本站或任何非官方服务器。</li>
-          <li><strong>剪贴板内容：</strong>您在匿名剪贴板中提交的内容将以加密形式存储，并在您选定的到期时间后自动永久销毁。</li>
-        </ul>
-
-        <h3>2. Cookie 与第三方广告展示</h3>
-        <p>本站接入了 <strong>Google AdSense</strong> 及相关第三方广告服务商。请您了解以下关于 Cookie 的政策：</p>
-        <ul>
-          <li>第三方供应商（包括 Google）会使用 Cookie 根据用户在此网站或其他网站上的历史访问记录来展示个性化广告。</li>
-          <li>Google 使用广告 Cookie（包括 DART Cookie），使其及其合作伙伴能够根据用户对本网站和/或互联网上其他网站的访问情况向用户投放广告。</li>
-          <li>用户可以通过访问 <a href="https://adssettings.google.com" target="_blank" style="color: var(--color-secondary);">Google 广告设置</a> 随时停用个性化广告。或者，您也可以访问 <a href="https://www.aboutads.info" target="_blank" style="color: var(--color-secondary);">aboutads.info</a> 停用第三方供应商用于个性化广告的 Cookie。</li>
-        </ul>
-
-        <h3>3. 日志与网络分析</h3>
-        <p>为了保障网络性能及防范恶意攻击，云端网络（如 Cloudflare）可能会自动记录访问者的标准 Web 日志（包括 IP 地址、浏览器类型、访问时间及请求 URL）。这些日志仅用于安全审计与网络优化。</p>
-
-        <h3>4. 隐私政策修改</h3>
-        <p>本站保留随时更新本隐私政策的权利。修改后的条款一旦公布即刻生效。</p>
-
-        <h3>5. 联系我们</h3>
-        <p>如果您对本隐私政策有任何疑问或建议，请通过电子邮箱与我们联系：<code>leen8254@gmail.com</code>。</p>
-      </div>
+      <div class="legal-article" data-i18n="privacy_modal_body"></div>
       <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-        <button class="btn btn-primary" id="dismiss-privacy">我知道了</button>
+        <button class="btn btn-primary" id="dismiss-privacy" data-i18n="privacy_dismiss">我知道了</button>
       </div>
     </div>
   </div>
@@ -1447,22 +1420,12 @@ function verifyWebhook(rawPayload, signatureHeader, secret) {
   <div class="modal-overlay" id="about-modal">
     <div class="modal-content glass-panel" style="width: 650px; max-width: 95%;">
       <div class="modal-header">
-        <h2 class="modal-title" style="color: var(--color-primary);">关于 825412.xyz</h2>
+        <h2 class="modal-title" style="color: var(--color-primary);" data-i18n="about_modal_title">关于 825412.xyz</h2>
         <span class="material-symbols-outlined modal-close" id="close-about">close</span>
       </div>
-      <div class="legal-article">
-        <p><strong>825412.xyz</strong> 是一个专为开发者、极客及日常上网用户打造的开放式极客多功能工具箱。</p>
-        <p>我们秉承“极简、炫酷、安全、高效”的理念，打破传统工具网站繁琐的注册登录与弹窗限制。所有小工具均为纯前端响应式设计，搭配深邃的霓虹暗黑视觉体验。</p>
-        <h3>核心服务板块：</h3>
-        <ul>
-          <li><strong>控制台 (Dashboard)：</strong>实时感知网络节点与往返延迟，快速导航。</li>
-          <li><strong>匿名剪贴板：</strong>免登录的代码与文本临时中转站，支持设定定时销毁。</li>
-          <li><strong>极客工具箱：</strong>强密码生成、Unix 时间戳转换、Base64 编解码与字数统计。</li>
-          <li><strong>AI 智能助手：</strong>安全连接 Gemini 模型，提供私密强大的 AI 交互支持。</li>
-        </ul>
-      </div>
+      <div class="legal-article" data-i18n="about_modal_body"></div>
       <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-        <button class="btn btn-primary" id="dismiss-about">关闭</button>
+        <button class="btn btn-primary" id="dismiss-about" data-i18n="about_dismiss">关闭</button>
       </div>
     </div>
   </div>
@@ -1471,20 +1434,12 @@ function verifyWebhook(rawPayload, signatureHeader, secret) {
   <div class="modal-overlay" id="contact-modal">
     <div class="modal-content glass-panel" style="width: 550px; max-width: 95%;">
       <div class="modal-header">
-        <h2 class="modal-title" style="color: var(--color-secondary);">联系我们 (Contact Us)</h2>
+        <h2 class="modal-title" style="color: var(--color-secondary);" data-i18n="contact_modal_title">联系我们 (Contact Us)</h2>
         <span class="material-symbols-outlined modal-close" id="close-contact">close</span>
       </div>
-      <div class="legal-article">
-        <p>感谢您使用 825412.xyz！我们非常重视您的反馈与建议。</p>
-        <p>如果您在使用过程中遇到任何 Bug、有功能改进想法、或者需要商务合作/广告咨询，请随时通过以下方式与站长联系：</p>
-        <div class="alert-box" style="margin-top: 16px;">
-          <span class="material-symbols-outlined" style="vertical-align: middle;">mail</span>
-          站长联系邮箱：<code>leen8254@gmail.com</code>
-        </div>
-        <p>我们通常会在 24-48 小时内给予回复。</p>
-      </div>
+      <div class="legal-article" data-i18n="contact_modal_body"></div>
       <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-        <button class="btn btn-primary" id="dismiss-contact">确定</button>
+        <button class="btn btn-primary" id="dismiss-contact" data-i18n="contact_dismiss">确定</button>
       </div>
     </div>
   </div>
@@ -1496,33 +1451,7 @@ function verifyWebhook(rawPayload, signatureHeader, secret) {
         <h2 class="modal-title" style="color: var(--color-primary);" data-i18n="terms_modal_title">服务条款 (Terms of Service)</h2>
         <span class="material-symbols-outlined modal-close" id="close-terms">close</span>
       </div>
-      <div class="legal-article">
-        <p><strong>生效日期 / Effective Date：2026年6月5日</strong></p>
-        <p>欢迎访问并使用 <strong>825412.xyz</strong>（以下简称“本平台”或“本站”）。在使用本站提供的极客开发工具与相关服务前，请仔细阅读以下服务条款。</p>
-        
-        <h3>1. 协议接受 (Acceptance of Terms)</h3>
-        <p>当您访问、浏览或使用本站提供的任何在线工具（包括匿名剪贴板、密码生成器、时间戳转换、文本工具与 AI 助手等），即表示您已阅读、理解并无条件接受本协议及我们的《隐私政策》。</p>
-
-        <h3>2. 用户行为规范与合法使用 (Acceptable Use)</h3>
-        <p>您同意仅将本站工具用于合法且合规的目的：</p>
-        <ul>
-          <li><strong>严禁有害内容：</strong>严禁在匿名剪贴板或 AI 对话中发布或传播包含木马病毒、恶意代码、侵犯他人知识产权或隐私的数据、以及违反法律法规的信息。</li>
-          <li><strong>网络安全准则：</strong>严禁针对本站发起任何自动化暴力请求、DDOS 拒绝服务攻击或恶意刷量。</li>
-          <li><strong>数据自毁提醒：</strong>匿名剪贴板具备定时自毁特性，请自行妥善留存重要数据副本。</li>
-        </ul>
-
-        <h3>3. 免责声明 (Disclaimer of Warranties)</h3>
-        <ul>
-          <li>本站所有工具与计算结果均按“现状 (AS IS)”提供，不提供任何明示或默示的适用性保证。</li>
-          <li>用户使用密码生成器生成的密码资产、AI 智能助手的对话建议等，均需由用户自行评估判断并承担使用风险。</li>
-        </ul>
-
-        <h3>4. 第三方广告与外链免责 (Third-Party Ads)</h3>
-        <p>本站接入了 Google AdSense 等合规广告投放网络。广告展示均由服务商算法动态匹配，本站不对任何第三方广告主提供的商品、服务或外部网站内容承担连带法律责任。</p>
-
-        <h3>5. 条款更新 (Modifications)</h3>
-        <p>我们保留在适当时机修订本条款的权利。修订版本一旦在网站发布即刻生效。</p>
-      </div>
+      <div class="legal-article" data-i18n="terms_modal_body"></div>
       <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
         <button class="btn btn-primary" id="dismiss-terms" data-i18n="terms_dismiss">我已阅读并同意</button>
       </div>

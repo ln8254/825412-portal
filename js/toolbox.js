@@ -1049,7 +1049,8 @@ const ToolboxController = {
 
     const handleFile = (file) => {
       if (!file || !file.type.startsWith('image/')) {
-        if (typeof Toast !== 'undefined') Toast.warning('请选择有效的图片文件 (PNG, JPG, WebP, BMP)');
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        if (typeof Toast !== "undefined") Toast.warning(isEn ? "Please select a valid image file (PNG, JPG, WebP, BMP)" : "请选择有效的图片文件 (PNG, JPG, WebP, BMP)");
         return;
       }
 
@@ -1109,7 +1110,8 @@ const ToolboxController = {
     if (downloadBtn) {
       downloadBtn.addEventListener('click', () => {
         if (!currentCompressedBlob) {
-          if (typeof Toast !== 'undefined') Toast.warning('请先选择待压缩的图片！');
+          const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      if (typeof Toast !== "undefined") Toast.warning(isEn ? "Please select an image first!" : "请先选择待压缩的图片！");
           return;
         }
 
@@ -1134,7 +1136,8 @@ const ToolboxController = {
     if (exifCleanBtn) {
       exifCleanBtn.addEventListener('click', () => {
         if (!currentImageElement) {
-          if (typeof Toast !== 'undefined') Toast.warning('请先拖入需要清洗 EXIF 隐私的照片！');
+          const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+      if (typeof Toast !== "undefined") Toast.warning(isEn ? "Please drop a photo to sanitize first!" : "请先拖入需要清洗 EXIF 隐私的照片！");
           return;
         }
 
