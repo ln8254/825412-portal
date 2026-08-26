@@ -542,11 +542,11 @@ input, button, textarea, select {
 }
 
 .tool-view {
-  display: none;
+  display: none !important;
 }
 
 .tool-view.active {
-  display: block;
+  display: block !important;
 }
 
 /* 密码生成器样式 */

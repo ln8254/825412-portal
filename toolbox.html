@@ -118,7 +118,7 @@
     </div>
 
     <!-- 2. 子视图：JSON 格式化、校验与压缩 -->
-    <div id="json-tab" class="tool-view glass-card" style="display: none; margin-bottom: 30px;">
+    <div id="json-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
       <div class="code-toolbar">
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <button class="btn btn-primary" id="json-format-2-btn" style="padding: 8px 14px; font-size: 13px;">
@@ -151,7 +151,7 @@
     </div>
 
     <!-- 3. 子视图：JWT 令牌解析与调试 -->
-    <div id="jwt-tab" class="tool-view glass-card" style="display: none; margin-bottom: 30px;">
+    <div id="jwt-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
       <div class="jwt-container">
         <div>
           <div class="jwt-section-card">
@@ -180,7 +180,7 @@
     </div>
 
     <!-- 4. 子视图：密码学哈希计算 (支持文本与附件文件) -->
-    <div id="hash-tab" class="tool-view glass-card" style="display: none; margin-bottom: 30px;">
+    <div id="hash-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
       <!-- 切换模式：文本 / 文件 -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; gap: 8px;">
@@ -258,7 +258,7 @@
     </div>
     
     <!-- 5. 子视图：时间戳转换与各语言代码 -->
-    <div id="time-tab" class="tool-view glass-card" style="display: none; margin-bottom: 30px;">
+    <div id="time-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
       <div class="time-tool-grid">
         <div>
           <h3 style="margin-bottom: 16px; font-size: 16px; color: var(--color-secondary);">当前本地时间</h3>
@@ -295,7 +295,7 @@
     </div>
     
     <!-- 6. 子视图：文本处理 -->
-    <div id="text-tab" class="tool-view glass-card" style="display: none; margin-bottom: 30px;">
+    <div id="text-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
       <div class="text-tool-container">
         <div class="text-area-wrapper" style="min-height: 180px;">
           <textarea class="custom-textarea" id="toolbox-text-input" placeholder="在这里输入你想处理的文本..."></textarea>
@@ -319,8 +319,10 @@
           </div>
         </div>
       </div>
+    </div>
+
     <!-- 7. 子视图：网络与隐私探测 (公网IP、WebRTC泄露探测、全球CDN测速、WiFi直连二维码) -->
-    <div id="net-tab" class="tool-view glass-card" style="display: none; margin-bottom: 30px;">
+    <div id="net-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
         <!-- IP 与地理位置卡片 -->
         <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px;">
@@ -433,7 +435,7 @@
     </div>
 
     <!-- 8. 子视图：图片与媒体隐私 (本地图片极限压缩、多格式互转、EXIF 隐私与 GPS 擦除) -->
-    <div id="media-tab" class="tool-view glass-card" style="display: none; margin-bottom: 30px;">
+    <div id="media-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
       <!-- 1. 图片压缩与格式转换 -->
       <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
         <h3 style="font-size: 15px; color: var(--color-primary); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
@@ -630,14 +632,35 @@
   </main>
 
   <!-- 脚本引入 -->
-  <script src="js/storage.js?v=2.5.0"></script>
-  <script src="js/i18n.js?v=2.5.0"></script>
-  <script src="js/toolbox.js?v=2.5.0"></script>
+  <script src="js/storage.js?v=2.6.0"></script>
+  <script src="js/i18n.js?v=2.6.0"></script>
+  <script src="js/toolbox.js?v=2.6.0"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof ToolboxController !== 'undefined') {
         ToolboxController.init();
       }
+
+      // 子 Tab 选项卡切换
+      const toolTabs = document.querySelectorAll('.toolbox-tab-btn');
+      const toolViews = document.querySelectorAll('.tool-view');
+      toolTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetTabId = tab.getAttribute('data-tab');
+          toolTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+
+          toolViews.forEach(view => {
+            view.classList.remove('active');
+            view.style.display = 'none';
+          });
+          const targetView = document.getElementById(targetTabId);
+          if (targetView) {
+            targetView.classList.add('active');
+            targetView.style.display = 'block';
+          }
+        });
+      });
     });
   </script>
 </body>
