@@ -825,17 +825,20 @@ const ToolboxController = {
       resultBox.style.display = 'block';
     };
 
-    if (!input) return;
+    const bindClick = (id, fn) => {
+      const btn = document.getElementById(id);
+      if (btn) btn.addEventListener('click', fn);
+    };
 
-    document.getElementById('text-upper-btn').addEventListener('click', () => {
+    bindClick('text-upper-btn', () => {
       showResult(input.value.toUpperCase());
     });
 
-    document.getElementById('text-lower-btn').addEventListener('click', () => {
+    bindClick('text-lower-btn', () => {
       showResult(input.value.toLowerCase());
     });
 
-    document.getElementById('text-count-btn').addEventListener('click', () => {
+    bindClick('text-count-btn', () => {
       const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
       const text = input.value;
       const chars = text.length;
@@ -852,7 +855,7 @@ const ToolboxController = {
       }
     });
 
-    document.getElementById('text-b64-enc-btn').addEventListener('click', () => {
+    bindClick('text-b64-enc-btn', () => {
       try {
         const encoded = btoa(encodeURIComponent(input.value).replace(/%([0-9A-F]{2})/g, (match, p1) => {
           return String.fromCharCode(parseInt(p1, 16));
@@ -863,7 +866,7 @@ const ToolboxController = {
       }
     });
 
-    document.getElementById('text-b64-dec-btn').addEventListener('click', () => {
+    bindClick('text-b64-dec-btn', () => {
       try {
         const decoded = decodeURIComponent(atob(input.value).split('').map((c) => {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
@@ -874,11 +877,11 @@ const ToolboxController = {
       }
     });
 
-    document.getElementById('text-url-enc-btn').addEventListener('click', () => {
+    bindClick('text-url-enc-btn', () => {
       showResult(encodeURIComponent(input.value));
     });
 
-    document.getElementById('text-url-dec-btn').addEventListener('click', () => {
+    bindClick('text-url-dec-btn', () => {
       try {
         showResult(decodeURIComponent(input.value));
       } catch (err) {
@@ -886,7 +889,7 @@ const ToolboxController = {
       }
     });
 
-    document.getElementById('text-clear-btn').addEventListener('click', () => {
+    bindClick('text-clear-btn', () => {
       input.value = '';
       output.value = '';
       resultBox.style.display = 'none';

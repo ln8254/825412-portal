@@ -118,9 +118,12 @@ function initRouting() {
     });
   }
 
-  document.getElementById('go-to-ai').addEventListener('click', () => {
-    triggerTabSwitch('ai-view');
-  });
+  const goToAi = document.getElementById('go-to-ai');
+  if (goToAi) {
+    goToAi.addEventListener('click', () => {
+      triggerTabSwitch('ai-view');
+    });
+  }
 
   // 快捷工具箱入口
   const shortcuts = document.querySelectorAll('.feature-shortcut');
@@ -142,8 +145,10 @@ function initRouting() {
         targetTabBtn.classList.add('active');
         targetTabView.classList.add('active');
       } else {
-        document.querySelector('[data-tab="password-tab"]').classList.add('active');
-        document.getElementById('password-tab').classList.add('active');
+        const defBtn = document.querySelector('[data-tab="password-tab"]');
+        const defView = document.getElementById('password-tab');
+        if (defBtn) defBtn.classList.add('active');
+        if (defView) defView.classList.add('active');
       }
     });
   });
@@ -159,7 +164,8 @@ function initRouting() {
       tab.classList.add('active');
 
       toolViews.forEach(view => view.classList.remove('active'));
-      document.getElementById(targetTabId).classList.add('active');
+      const targetView = document.getElementById(targetTabId);
+      if (targetView) targetView.classList.add('active');
     });
   });
 }
