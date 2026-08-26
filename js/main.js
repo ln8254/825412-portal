@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. 初始化设置模态框
   try { initSettingsModal(); } catch (e) { console.error(e); }
 
-  // 5. 模拟 Dashboard 系统资源监控
-  try { startSystemMetricsMonitor(); } catch (e) { console.error(e); }
+  // 5. 初始化控制台全景网络与系统节点监控中心 (Network Operations Center)
+  try { initDashboardNetworkCenter(); } catch (e) { console.error('Dashboard Network Center Error:', e); }
 
   // 6. 自动检测 URL 参数与 Hash 分享码并深度直达目标功能
   try { handleUrlRoutingAndDeepLinks(); } catch (e) { console.error(e); }
@@ -340,47 +340,206 @@ function initCookieConsentBanner() {
 }
 
 /**
- * 仪表盘访客连接网络监测器 (真实数据)
+ * 控制台全景网络枢纽与系统节点监控中心 (Network Operations Center)
  */
-function startSystemMetricsMonitor() {
+function initDashboardNetworkCenter() {
+  const publicIpEl = document.getElementById('net-public-ip');
+  const geoInfoEl = document.getElementById('net-geo-info');
+  const refreshIpBtn = document.getElementById('net-ip-refresh-btn');
+  const webrtcStatusEl = document.getElementById('net-webrtc-status');
+  const webrtcCandidatesEl = document.getElementById('net-webrtc-candidates');
+
   const pingText = document.getElementById('network-ping');
   const pingProgress = document.getElementById('ping-progress');
-  const ipText = document.getElementById('visitor-ip');
-  const locationText = document.getElementById('visitor-location');
 
-  if (!pingText) return;
+  const pingBtn = document.getElementById('net-ping-start-btn');
+  const pingGrid = document.getElementById('net-ping-grid');
 
-  // 1. 获取访客 IP 和地理位置
-  async function fetchVisitorGeo() {
+  const wifiSsid = document.getElementById('wifi-ssid-input');
+  const wifiPwd = document.getElementById('wifi-pwd-input');
+  const wifiEnc = document.getElementById('wifi-enc-select');
+  const wifiHidden = document.getElementById('wifi-hidden-toggle');
+  const wifiGenBtn = document.getElementById('wifi-gen-btn');
+  const wifiCopyBtn = document.getElementById('wifi-copy-btn');
+  const wifiDlBtn = document.getElementById('wifi-dl-btn');
+  const wifiQrContainer = document.getElementById('wifi-qr-container');
+  const wifiCardInfo = document.getElementById('wifi-qr-card-info');
+
+  // 1. 公网 IP 与地理位置探测
+  const detectPublicIp = async (isManual = false) => {
+    if (!publicIpEl || !geoInfoEl) return;
+    publicIpEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Detecting...' : '正在探测...';
+    geoInfoEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Resolving ISP & Region...' : '正在解析地理与运营商...';
+
+    let ipFound = false;
     try {
-      const response = await fetch('https://ipapi.co/json/');
-      if (response.ok) {
-        const data = await response.json();
-        ipText.textContent = `IP: ${data.ip}`;
-        locationText.textContent = `ISP: ${data.org} | ${data.city}, ${data.country_name}`;
-      } else {
-        throw new Error();
+      const res = await fetch('https://ipapi.co/json/');
+      if (res.ok) {
+        const data = await res.json();
+        publicIpEl.textContent = data.ip || 'Unknown';
+        geoInfoEl.textContent = `${data.country_name || ''} ${data.region || ''} ${data.city || ''} · ${data.org || data.asn || ''}`;
+        ipFound = true;
       }
-    } catch (err) {
-      ipText.textContent = 'IP: 未知/内网节点';
-      locationText.textContent = '无法获取归属网格';
+    } catch (e) {
+      // Fallback
     }
+
+    if (!ipFound) {
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        if (res.ok) {
+          const data = await res.json();
+          publicIpEl.textContent = data.ip || 'Unknown';
+          geoInfoEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Global Public Node' : '全球公网出口节点';
+          ipFound = true;
+        }
+      } catch (e) {
+        publicIpEl.textContent = '127.0.0.1 (Local / Protected)';
+        geoInfoEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Direct LAN / Proxy Active' : '本地局域网 / 代理模式';
+      }
+    }
+
+    if (isManual && typeof Toast !== 'undefined') {
+      Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Network diagnostics refreshed!' : '网络诊断信息已更新！');
+    }
+  };
+
+  if (refreshIpBtn) {
+    refreshIpBtn.addEventListener('click', () => detectPublicIp(true));
+  }
+  detectPublicIp();
+
+  // 2. WebRTC 本地真实 IP 泄露探测
+  const detectWebRtcLeak = () => {
+    if (!webrtcStatusEl) return;
+    const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+    const leakedIps = new Set();
+
+    try {
+      const pc = new (window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection)({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      });
+
+      pc.createDataChannel('leakDetectionChannel');
+
+      pc.onicecandidate = (event) => {
+        if (!event || !event.candidate) {
+          if (leakedIps.size === 0) {
+            webrtcStatusEl.textContent = isEn ? '🛡️ Safe: No WebRTC leak detected' : '🛡️ 安全：未检测到 WebRTC 穿透泄漏';
+            webrtcStatusEl.style.background = 'rgba(16, 185, 129, 0.1)';
+            webrtcStatusEl.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+            webrtcStatusEl.style.color = '#10b981';
+          }
+          return;
+        }
+
+        const cand = event.candidate.candidate;
+        const match = cand.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/);
+        if (match && match[1]) {
+          const ip = match[1];
+          if (ip !== '0.0.0.0' && !ip.startsWith('127.')) {
+            leakedIps.add(ip);
+            webrtcStatusEl.textContent = (isEn ? '⚠️ Warning: WebRTC leaked IP: ' : '⚠️ 警告：检测到 WebRTC 真实 IP 泄漏: ') + Array.from(leakedIps).join(', ');
+            webrtcStatusEl.style.background = 'rgba(245, 158, 11, 0.1)';
+            webrtcStatusEl.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+            webrtcStatusEl.style.color = '#f59e0b';
+            if (webrtcCandidatesEl) {
+              webrtcCandidatesEl.textContent = `Candidate Endpoints: ${Array.from(leakedIps).join(' | ')}`;
+            }
+          }
+        }
+      };
+
+      pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(() => {});
+    } catch (err) {
+      webrtcStatusEl.textContent = isEn ? '🛡️ WebRTC Disabled / Fully Shielded' : '🛡️ 浏览器已禁用 WebRTC，隐私防护极佳';
+    }
+  };
+  detectWebRtcLeak();
+
+  // 3. 全球骨干 CDN 网络测速 (Ping)
+  const cdnNodes = [
+    { name: 'Cloudflare (Anycast)', url: 'https://1.1.1.1/cdn-cgi/trace', region: 'Global' },
+    { name: 'Google Global Edge', url: 'https://www.google.com/favicon.ico', region: 'US/Global' },
+    { name: 'AWS CloudFront', url: 'https://aws.amazon.com/favicon.ico', region: 'Global' },
+    { name: 'Alibaba Cloud (阿里云)', url: 'https://www.aliyun.com/favicon.ico', region: 'APAC / CN' },
+    { name: 'Tencent Cloud (腾讯云)', url: 'https://cloud.tencent.com/favicon.ico', region: 'APAC / CN' }
+  ];
+
+  const renderPingGrid = () => {
+    if (!pingGrid) return;
+    pingGrid.innerHTML = cdnNodes.map(node => `
+      <div style="background: var(--surface-high); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <b style="font-size: 12px; color: var(--text-primary);">${node.name}</b>
+          <span style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">(${node.region})</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="ping-badge" id="ping-val-${node.name.replace(/[^a-zA-Z0-9]/g, '')}" style="font-size: 12px; font-weight: 700; font-family: var(--font-mono); color: var(--text-secondary);">- ms</span>
+          <span class="ping-status" id="ping-status-${node.name.replace(/[^a-zA-Z0-9]/g, '')}" style="font-size: 10px; font-weight: 600; color: var(--text-muted); padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05);">待测速</span>
+        </div>
+      </div>
+    `).join('');
+  };
+  renderPingGrid();
+
+  const startPingTest = async () => {
+    if (typeof Toast !== 'undefined') {
+      Toast.info(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Starting CDN latency test...' : '正在发起全球节点多轮 Ping 测速...');
+    }
+
+    for (const node of cdnNodes) {
+      const id = node.name.replace(/[^a-zA-Z0-9]/g, '');
+      const valEl = document.getElementById(`ping-val-${id}`);
+      const statusEl = document.getElementById(`ping-status-${id}`);
+      if (!valEl || !statusEl) continue;
+
+      valEl.textContent = '...';
+      statusEl.textContent = 'Testing...';
+
+      const startTime = performance.now();
+      try {
+        await fetch(`${node.url}?_t=${Date.now()}`, { mode: 'no-cors', cache: 'no-store' });
+        const latency = Math.round(performance.now() - startTime);
+        valEl.textContent = `${latency} ms`;
+
+        if (latency < 100) {
+          valEl.style.color = '#10b981';
+          statusEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Excellent' : '极佳';
+          statusEl.style.color = '#10b981';
+        } else if (latency < 250) {
+          valEl.style.color = 'var(--color-secondary)';
+          statusEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Good' : '良好';
+          statusEl.style.color = 'var(--color-secondary)';
+        } else {
+          valEl.style.color = '#f59e0b';
+          statusEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Moderate' : '延迟稍高';
+          statusEl.style.color = '#f59e0b';
+        }
+      } catch (err) {
+        valEl.textContent = 'Timeout';
+        valEl.style.color = '#ef4444';
+        statusEl.textContent = '超时';
+        statusEl.style.color = '#ef4444';
+      }
+    }
+  };
+
+  if (pingBtn) {
+    pingBtn.addEventListener('click', startPingTest);
   }
 
-  // 2. 测算实时网络延迟 (Ping)
-  function measurePing() {
+  // 4. 本地网页实时 Ping 测算
+  function measureLocalPing() {
+    if (!pingText || !pingProgress) return;
     const startTime = Date.now();
-    // 使用 HEAD 方法请求当前网页自身以测量延迟，防止缓存
     fetch(window.location.href, { method: 'HEAD', cache: 'no-store' })
       .then(() => {
         const latency = Date.now() - startTime;
         pingText.textContent = `${latency} ms`;
-        
-        // 渲染进度条：0ms ~ 300ms 对应 10% ~ 100% 进度
         const progressWidth = Math.min(100, Math.max(10, Math.floor((latency / 300) * 100)));
         pingProgress.style.width = `${progressWidth}%`;
 
-        // 动态根据延迟修改进度条颜色
         if (latency < 100) {
           pingProgress.style.background = 'linear-gradient(to right, var(--color-tertiary), var(--color-secondary))';
         } else if (latency < 250) {
@@ -394,13 +553,72 @@ function startSystemMetricsMonitor() {
         pingProgress.style.width = '0%';
       });
   }
+  measureLocalPing();
+  setInterval(measureLocalPing, 6000);
 
-  // 初始化调用
-  fetchVisitorGeo();
-  measurePing();
+  // 5. WiFi 扫码直连专属二维码生成器
+  let currentWifiString = '';
+  const generateWifiQr = () => {
+    const ssid = wifiSsid ? wifiSsid.value.trim() : '';
+    const pwd = wifiPwd ? wifiPwd.value : '';
+    const enc = wifiEnc ? wifiEnc.value : 'WPA';
+    const isHidden = wifiHidden && wifiHidden.checked;
 
-  // 每 5 秒重新测算一次 Ping 值
-  setInterval(measurePing, 5000);
+    if (!ssid) {
+      if (typeof Toast !== 'undefined') Toast.warning(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Please enter WiFi Name (SSID)!' : '请输入 WiFi 无线网络名称 (SSID)！');
+      return;
+    }
+
+    const escapeWifi = (str) => (str || '').replace(/([\\;,:\"])/g, '\\$1');
+    const hiddenStr = isHidden ? 'H:true;' : '';
+    const pwdStr = enc !== 'nopass' && pwd ? `P:${escapeWifi(pwd)};` : '';
+    currentWifiString = `WIFI:T:${enc};S:${escapeWifi(ssid)};${pwdStr}${hiddenStr};`;
+
+    if (wifiQrContainer) {
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentWifiString)}`;
+      wifiQrContainer.innerHTML = `<img id="wifi-qr-img" src="${qrUrl}" alt="WiFi QR Code" style="width: 150px; height: 150px; display: block;" />`;
+    }
+
+    if (wifiCardInfo) {
+      wifiCardInfo.textContent = `SSID: ${ssid} · [${enc}]`;
+    }
+
+    if (typeof Toast !== 'undefined') {
+      Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'WiFi QR Code generated! Scan with mobile camera to connect.' : 'WiFi 直连二维码已生成！手机相机扫码即可一键加入网络。');
+    }
+  };
+
+  if (wifiGenBtn) {
+    wifiGenBtn.addEventListener('click', generateWifiQr);
+  }
+
+  if (wifiCopyBtn) {
+    wifiCopyBtn.addEventListener('click', () => {
+      if (!currentWifiString) generateWifiQr();
+      if (currentWifiString) {
+        navigator.clipboard.writeText(currentWifiString).then(() => {
+          if (typeof Toast !== 'undefined') Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'WiFi string copied to clipboard!' : 'WiFi 直连字符串已复制！');
+        });
+      }
+    });
+  }
+
+  if (wifiDlBtn) {
+    wifiDlBtn.addEventListener('click', () => {
+      const qrImg = document.getElementById('wifi-qr-img');
+      if (!qrImg || !qrImg.src) {
+        generateWifiQr();
+      }
+      const img = document.getElementById('wifi-qr-img');
+      if (img && img.src) {
+        const a = document.createElement('a');
+        a.href = img.src;
+        a.download = `WiFi_${(wifiSsid ? wifiSsid.value : 'QR') || 'Connect'}.png`;
+        a.target = '_blank';
+        a.click();
+      }
+    });
+  }
 }
 
 // 辅助函数：收起移动端侧边抽屉

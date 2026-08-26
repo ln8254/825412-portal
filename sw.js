@@ -1,4 +1,4 @@
-const CACHE_NAME = 'geek-portal-v2.6.1';
+const CACHE_NAME = 'geek-portal-v2.6.2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -10,15 +10,15 @@ const STATIC_ASSETS = [
   '/privacy.html',
   '/terms.html',
   '/contact.html',
-  '/style.css?v=2.6.1',
-  '/js/storage.js?v=2.6.1',
-  '/js/i18n.js?v=2.6.1',
-  '/js/toolbox.js?v=2.6.1',
-  '/js/clipboard.js?v=2.6.1',
-  '/js/ai-chat.js?v=2.6.1',
-  '/js/airdrop.js?v=2.6.1',
-  '/js/webhook.js?v=2.6.1',
-  '/js/main.js?v=2.6.1',
+  '/style.css?v=2.6.2',
+  '/js/storage.js?v=2.6.2',
+  '/js/i18n.js?v=2.6.2',
+  '/js/toolbox.js?v=2.6.2',
+  '/js/clipboard.js?v=2.6.2',
+  '/js/ai-chat.js?v=2.6.2',
+  '/js/airdrop.js?v=2.6.2',
+  '/js/webhook.js?v=2.6.2',
+  '/js/main.js?v=2.6.2',
   '/manifest.json'
 ];
 

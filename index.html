@@ -179,67 +179,149 @@
         <p class="view-subtitle" data-i18n="dash_subtitle">实时感知网络节点，快速访问工具集合。</p>
       </div>
       
-      <!-- 卡片网格 -->
-      <div class="dashboard-grid">
-        <!-- 卡片 1: 访问端连接节点 (真实数据) -->
-        <div class="glass-card">
-          <div class="stat-header">
-            <span class="stat-title" data-i18n="dash_node_title">系统节点与访问监控</span>
-            <span class="material-symbols-outlined stat-icon">wifi_tethering</span>
+      <!-- 1. 全景网络枢纽与系统节点监控看板 (Network Operations & Node Hub) -->
+      <div class="dashboard-grid" style="margin-bottom: 24px;">
+        <!-- 卡片 1: 访问端公网节点与 WebRTC 隐私监控 (真实数据) -->
+        <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="stat-header" style="margin-bottom: 12px;">
+              <span class="stat-title" style="display: flex; align-items: center; gap: 6px;" data-i18n="dash_node_title">
+                <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-primary);">public</span>
+                <span>系统节点与访问监控</span>
+              </span>
+              <button class="btn btn-primary" id="net-ip-refresh-btn" style="padding: 3px 8px; font-size: 11px; display: inline-flex; align-items: center; gap: 3px;">
+                <span class="material-symbols-outlined" style="font-size: 13px;">refresh</span>
+                <span data-i18n="net_ip_refresh">刷新</span>
+              </button>
+            </div>
+            
+            <div style="margin-bottom: 8px;">
+              <span style="font-size: 11px; color: var(--text-secondary);" data-i18n="net_ip_label">公网 IPv4 / IPv6:</span>
+              <div id="net-public-ip" style="font-size: 18px; font-weight: 700; font-family: var(--font-mono); color: var(--color-secondary); margin-top: 2px;">-</div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+              <span style="font-size: 11px; color: var(--text-secondary);" data-i18n="net_geo_label">归属地理 / 运营商:</span>
+              <div id="net-geo-info" style="font-size: 12px; font-weight: 600; color: var(--text-primary); margin-top: 2px;">-</div>
+            </div>
+
+            <div style="margin-top: 8px;">
+              <div id="net-webrtc-status" style="padding: 6px 10px; border-radius: var(--radius-sm); font-size: 11px; font-weight: 700; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981;">
+                🛡️ 安全：未检测到 WebRTC 穿透泄漏
+              </div>
+              <div id="net-webrtc-candidates" style="font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); margin-top: 4px;"></div>
+            </div>
           </div>
-          <div class="stat-value" id="network-ping">-- ms</div>
-          <p class="form-label" style="margin-bottom: 4px; font-family: var(--font-mono); font-size: 13px; color: #fff;" id="visitor-ip">Detecting IP...</p>
-          <p class="form-label" style="margin-bottom: 8px; font-size: 12px; color: var(--text-secondary);" id="visitor-location">Locating Grid...</p>
-          <div class="stat-progress-bar">
-            <div class="stat-progress-fill" id="ping-progress" style="width: 0%"></div>
+
+          <div style="margin-top: 14px; border-top: 1px solid var(--border-light); padding-top: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">
+              <span>本地网络往返延迟 (Ping)</span>
+              <span id="network-ping" style="font-weight: 700; color: var(--color-secondary);">-- ms</span>
+            </div>
+            <div class="stat-progress-bar">
+              <div class="stat-progress-fill" id="ping-progress" style="width: 0%"></div>
+            </div>
           </div>
         </div>
         
-        <!-- 卡片 2: 最近粘贴列表预览 -->
+        <!-- 卡片 2: 全球骨干 CDN 节点网络测速 (Ping) -->
         <div class="glass-card">
-          <div class="stat-header">
-            <span class="stat-title" data-i18n="clip_title">匿名剪贴板</span>
-            <span class="material-symbols-outlined stat-icon">history</span>
+          <div class="stat-header" style="margin-bottom: 10px;">
+            <span class="stat-title" style="display: flex; align-items: center; gap: 6px;" data-i18n="net_ping_title">
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-secondary);">speed</span>
+              <span>全球骨干 CDN 节点网络测速</span>
+            </span>
+            <button class="btn btn-primary" id="net-ping-start-btn" style="padding: 3px 10px; font-size: 11px; display: inline-flex; align-items: center; gap: 3px;">
+              <span class="material-symbols-outlined" style="font-size: 13px;">play_arrow</span>
+              <span data-i18n="net_ping_btn">测速</span>
+            </button>
           </div>
-          <div style="font-family: var(--font-mono); font-size: 14px; margin-bottom: 16px; min-height: 50px;" id="dashboard-paste-preview" data-i18n="dash_no_pastes">
-            暂无最近分享的贴纸...
+          <div id="net-ping-grid" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Ping 节点动态生成 -->
           </div>
-          <button class="btn btn-primary" style="padding: 6px 14px; font-size: 13px;" id="go-to-clipboard" data-i18n="dash_go_clip">
-            进入剪贴板
-          </button>
-        </div>
-        
-        <!-- 卡片 3: 极客隔空快传快捷状态 -->
-        <div class="glass-card">
-          <div class="stat-header">
-            <span class="stat-title" data-i18n="airdrop_title">极客隔空快传</span>
-            <span class="material-symbols-outlined stat-icon">wifi_tethering</span>
-          </div>
-          <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; min-height: 50px;">
-            免登录跨设备局域网文件与文本传输
-          </div>
-          <button class="btn btn-primary" style="padding: 6px 14px; font-size: 13px;" onclick="triggerTabSwitch('airdrop-view')">
-            <span class="material-symbols-outlined" style="font-size: 16px;">send_to_mobile</span>
-            <span data-i18n="dash_go_airdrop">进入隔空快传</span>
-          </button>
         </div>
 
-        <!-- 卡片 4 (隐藏预留): AI 对话连接状态 -->
-        <div class="glass-card" style="display: none;">
-          <div class="stat-header">
-            <span class="stat-title" data-i18n="dash_ai_title">AI Neural Link</span>
-            <span class="material-symbols-outlined stat-icon">hub</span>
+        <!-- 卡片 3: 匿名剪贴板 & 极客隔空快传快捷状态 -->
+        <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="stat-header">
+              <span class="stat-title" data-i18n="clip_title">匿名剪贴板</span>
+              <span class="material-symbols-outlined stat-icon">history</span>
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 13px; margin-bottom: 12px; min-height: 40px;" id="dashboard-paste-preview" data-i18n="dash_no_pastes">
+              暂无最近分享的贴纸...
+            </div>
+            <button class="btn btn-primary" style="padding: 6px 14px; font-size: 12px; width: 100%; margin-bottom: 12px;" id="go-to-clipboard" data-i18n="dash_go_clip">
+              进入剪贴板
+            </button>
+
+            <div class="stat-header" style="margin-top: 8px; border-top: 1px solid var(--border-light); padding-top: 10px;">
+              <span class="stat-title" data-i18n="airdrop_title">极客隔空快传</span>
+              <span class="material-symbols-outlined stat-icon">wifi_tethering</span>
+            </div>
+            <button class="btn btn-primary" style="padding: 6px 14px; font-size: 12px; width: 100%;" onclick="triggerTabSwitch('airdrop-view')">
+              <span class="material-symbols-outlined" style="font-size: 14px;">send_to_mobile</span>
+              <span data-i18n="dash_go_airdrop">进入隔空快传</span>
+            </button>
           </div>
-          <div style="font-size: 15px; margin-bottom: 20px; line-height: 1.5;" id="ai-status-text" data-i18n="dash_ai_nokey">
-            未配置 API Key。请输入你的密钥以启用高级人工智能对话链路。
+        </div>
+      </div>
+
+      <!-- WiFi 扫码直连专属二维码生成器工作台 -->
+      <div class="glass-card" style="margin-bottom: 24px;">
+        <h3 style="font-size: 15px; color: var(--color-primary); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+          <span class="material-symbols-outlined" style="font-size: 18px;">wifi_tethering</span>
+          <span data-i18n="wifi_qr_title">WiFi 扫码一键直连二维码生成器</span>
+        </h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;" data-i18n="wifi_qr_sub">生成国际标准 WiFi 连接二维码，手机相机一扫即连，免去手动输入复杂密码。</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; align-items: start;">
+          <div>
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label" data-i18n="wifi_ssid_label" style="font-size: 12px;">WiFi 名称 (SSID):</label>
+              <input type="text" class="text-input" id="wifi-ssid-input" data-i18n-ph="wifi_ssid_ph" placeholder="例如：MyOffice_5G / Home_WiFi" style="font-size: 13px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label" data-i18n="wifi_pwd_label" style="font-size: 12px;">WiFi 密码:</label>
+              <input type="text" class="text-input" id="wifi-pwd-input" data-i18n-ph="wifi_pwd_ph" placeholder="请输入无线网络密码 (无密码请留空)" style="font-size: 13px;">
+            </div>
+            <div style="display: flex; gap: 14px; margin-bottom: 12px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 130px;">
+                <label class="form-label" data-i18n="wifi_enc_label" style="font-size: 12px;">加密类型:</label>
+                <select class="custom-select" id="wifi-enc-select" style="width: 100%; padding: 6px 10px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 13px;">
+                  <option value="WPA">WPA / WPA2 / WPA3</option>
+                  <option value="WEP">WEP</option>
+                  <option value="nopass">无密码 (Open)</option>
+                </select>
+              </div>
+              <div style="display: flex; align-items: center; margin-top: 20px;">
+                <label class="checkbox-label" style="font-size: 12px;">
+                  <input type="checkbox" id="wifi-hidden-toggle">
+                  <span data-i18n="wifi_hidden_label">隐藏网络 (Hidden SSID)</span>
+                </label>
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-primary" id="wifi-gen-btn" style="padding: 7px 16px; font-size: 13px;" data-i18n="wifi_gen_btn">生成 WiFi 二维码</button>
+              <button class="btn" id="wifi-copy-btn" style="background: var(--surface-high); padding: 7px 12px; font-size: 13px;" data-i18n="wifi_copy_str_btn">复制直连字符串</button>
+            </div>
           </div>
-          <button class="btn btn-primary" style="padding: 6px 14px; font-size: 13px;" id="go-to-ai" data-i18n="dash_ai_btn">
-            进入对话
-          </button>
+
+          <!-- 二维码与卡片预览 -->
+          <div style="text-align: center; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div id="wifi-qr-container" style="background: white; padding: 10px; border-radius: var(--radius-sm); display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+              <!-- QR 动态渲染 -->
+            </div>
+            <div id="wifi-qr-card-info" style="margin-top: 8px; font-size: 12px; font-weight: 600; color: var(--color-secondary);">WiFi Direct Connect</div>
+            <button class="btn btn-primary" id="wifi-dl-btn" style="margin-top: 10px; padding: 5px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 14px;">download</span>
+              <span data-i18n="wifi_dl_btn">下载二维码图片</span>
+            </button>
+          </div>
         </div>
       </div>
       
-      <!-- 快捷入口卡片组 (6大极客工具一键直达) -->
+      <!-- 快捷入口卡片组 (7大极客工具一键直达) -->
       <div class="glass-card">
         <h3 style="margin-bottom: 20px; font-weight: 700; color: var(--color-secondary);" data-i18n="dash_toolbox_title">快捷工具箱</h3>
         <div class="dashboard-features">
@@ -278,12 +360,6 @@
               <span class="material-symbols-outlined">edit_note</span>
             </div>
             <h4 data-i18n="dash_shortcut_text">文本处理</h4>
-          </div>
-          <div class="feature-shortcut" data-tool="net">
-            <div class="shortcut-icon">
-              <span class="material-symbols-outlined">public</span>
-            </div>
-            <h4 data-i18n="tool_net_tab">网络与隐私探测</h4>
           </div>
           <div class="feature-shortcut" data-tool="media">
             <div class="shortcut-icon">
@@ -472,7 +548,6 @@
         <div class="toolbox-tab-btn" data-tab="hash-tab" data-i18n="tool_hash_tab">哈希散列计算</div>
         <div class="toolbox-tab-btn" data-tab="time-tab" data-i18n="tool_time_tab">时间戳转换</div>
         <div class="toolbox-tab-btn" data-tab="text-tab" data-i18n="tool_text_tab">文本处理</div>
-        <div class="toolbox-tab-btn" data-tab="net-tab" data-i18n="tool_net_tab">网络与隐私探测</div>
         <div class="toolbox-tab-btn" data-tab="media-tab" data-i18n="tool_media_tab">图片与媒体隐私</div>
       </div>
       
@@ -739,120 +814,7 @@
         </div>
       </div>
 
-      <!-- 7. 子视图：网络与隐私探测 (公网IP、WebRTC泄露探测、全球CDN测速、WiFi直连二维码) -->
-      <div id="net-tab" class="tool-view glass-card">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
-          <!-- IP 与地理位置卡片 -->
-          <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-              <h3 style="font-size: 15px; color: var(--color-primary); display: flex; align-items: center; gap: 6px; margin: 0;">
-                <span class="material-symbols-outlined" style="font-size: 18px;">public</span>
-                <span data-i18n="net_ip_title">我的公网 IP 与地理网络分析</span>
-              </h3>
-              <button class="btn btn-primary" id="net-ip-refresh-btn" style="padding: 4px 10px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-                <span class="material-symbols-outlined" style="font-size: 14px;">refresh</span>
-                <span data-i18n="net_ip_refresh">刷新检测</span>
-              </button>
-            </div>
-            <div style="margin-bottom: 12px;">
-              <span style="font-size: 12px; color: var(--text-secondary);" data-i18n="net_ip_label">公网 IPv4 / IPv6:</span>
-              <div id="net-public-ip" style="font-size: 18px; font-weight: 700; font-family: var(--font-mono); color: var(--color-secondary); margin-top: 4px;">-</div>
-            </div>
-            <div style="margin-bottom: 12px;">
-              <span style="font-size: 12px; color: var(--text-secondary);" data-i18n="net_geo_label">归属地理 / 运营商:</span>
-              <div id="net-geo-info" style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-top: 4px;">-</div>
-            </div>
-          </div>
-
-          <!-- WebRTC 泄漏探测卡片 -->
-          <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <h3 style="font-size: 15px; color: var(--color-secondary); display: flex; align-items: center; gap: 6px; margin: 0;">
-                <span class="material-symbols-outlined" style="font-size: 18px;">shield_with_heart</span>
-                <span data-i18n="net_webrtc_title">WebRTC 本地 IP 穿透泄漏探测</span>
-              </h3>
-            </div>
-            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;" data-i18n="net_webrtc_desc">检测在使用代理或 VPN 情况下，浏览器 WebRTC 是否会穿透泄漏真实局域网/公网 IP。</p>
-            <div id="net-webrtc-status" style="padding: 10px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981;">
-              🛡️ 安全：未检测到 WebRTC 穿透泄漏
-            </div>
-            <div id="net-webrtc-candidates" style="font-size: 12px; font-family: var(--font-mono); color: var(--text-secondary); margin-top: 8px;"></div>
-          </div>
-        </div>
-
-        <!-- 全球骨干 CDN 测速 -->
-        <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
-            <h3 style="font-size: 15px; color: var(--text-primary); display: flex; align-items: center; gap: 6px; margin: 0;">
-              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-primary);">speed</span>
-              <span data-i18n="net_ping_title">全球骨干 CDN 节点网络测速 (Ping)</span>
-            </h3>
-            <button class="btn btn-primary" id="net-ping-start-btn" style="padding: 6px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-              <span class="material-symbols-outlined" style="font-size: 14px;">play_arrow</span>
-              <span data-i18n="net_ping_btn">开始网络测速</span>
-            </button>
-          </div>
-          <div id="net-ping-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-            <!-- Ping 节点动态生成 -->
-          </div>
-        </div>
-
-        <!-- WiFi 扫码直连专属二维码生成器 -->
-        <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px;">
-          <h3 style="font-size: 15px; color: var(--color-primary); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-            <span class="material-symbols-outlined" style="font-size: 18px;">wifi_tethering</span>
-            <span data-i18n="wifi_qr_title">WiFi 扫码一键直连二维码生成器</span>
-          </h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;" data-i18n="wifi_qr_sub">生成国际标准 WiFi 连接二维码，手机相机一扫即连，免去手动输入复杂密码。</p>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; align-items: start;">
-            <div>
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label class="form-label" data-i18n="wifi_ssid_label">WiFi 名称 (SSID):</label>
-                <input type="text" class="text-input" id="wifi-ssid-input" data-i18n-ph="wifi_ssid_ph" placeholder="例如：MyOffice_5G / Home_WiFi">
-              </div>
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label class="form-label" data-i18n="wifi_pwd_label">WiFi 密码:</label>
-                <input type="text" class="text-input" id="wifi-pwd-input" data-i18n-ph="wifi_pwd_ph" placeholder="请输入无线网络密码 (无密码请留空)">
-              </div>
-              <div style="display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 130px;">
-                  <label class="form-label" data-i18n="wifi_enc_label">加密类型:</label>
-                  <select class="custom-select" id="wifi-enc-select" style="width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary);">
-                    <option value="WPA">WPA / WPA2 / WPA3</option>
-                    <option value="WEP">WEP</option>
-                    <option value="nopass">无密码 (Open)</option>
-                  </select>
-                </div>
-                <div style="display: flex; align-items: center; margin-top: 24px;">
-                  <label class="checkbox-label" style="font-size: 13px;">
-                    <input type="checkbox" id="wifi-hidden-toggle">
-                    <span data-i18n="wifi_hidden_label">隐藏网络 (Hidden SSID)</span>
-                  </label>
-                </div>
-              </div>
-              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn btn-primary" id="wifi-gen-btn" style="padding: 8px 18px; font-size: 13px;" data-i18n="wifi_gen_btn">生成 WiFi 二维码</button>
-                <button class="btn" id="wifi-copy-btn" style="background: var(--surface-high); padding: 8px 14px; font-size: 13px;" data-i18n="wifi_copy_str_btn">复制直连字符串</button>
-              </div>
-            </div>
-
-            <!-- 二维码与卡片预览 -->
-            <div style="text-align: center; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 18px; min-height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-              <div id="wifi-qr-container" style="background: white; padding: 12px; border-radius: var(--radius-sm); display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                <!-- QR 动态渲染 -->
-              </div>
-              <div id="wifi-qr-card-info" style="margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--color-secondary);">WiFi Direct Connect</div>
-              <button class="btn btn-primary" id="wifi-dl-btn" style="margin-top: 12px; padding: 6px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-                <span class="material-symbols-outlined" style="font-size: 14px;">download</span>
-                <span data-i18n="wifi_dl_btn">下载二维码图片</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 8. 子视图：图片与媒体隐私 (本地图片极限压缩、多格式互转、EXIF 隐私与 GPS 擦除) -->
+      <!-- 7. 子视图：图片与媒体隐私 (本地图片极限压缩、多格式互转、EXIF 隐私与 GPS 擦除) -->
       <div id="media-tab" class="tool-view glass-card">
         <!-- 1. 图片压缩与格式转换 -->
         <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
