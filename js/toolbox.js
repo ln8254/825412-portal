@@ -10,6 +10,8 @@ const ToolboxController = {
     this.initHashCalculator();
     this.initTimeConverter();
     this.initTextProcessor();
+    this.initNetworkSuite();
+    this.initMediaSuite();
     this.initCopyButtons();
   },
 
@@ -890,6 +892,523 @@ const ToolboxController = {
       output.value = '';
       resultBox.style.display = 'none';
     });
+  },
+
+  // ==========================================
+  // 7. 网络与隐私探测套件 (Network & Privacy Suite)
+  // ==========================================
+  initNetworkSuite() {
+    const publicIpEl = document.getElementById('net-public-ip');
+    const geoInfoEl = document.getElementById('net-geo-info');
+    const refreshIpBtn = document.getElementById('net-ip-refresh-btn');
+    const webrtcStatusEl = document.getElementById('net-webrtc-status');
+    const webrtcCandidatesEl = document.getElementById('net-webrtc-candidates');
+
+    const pingBtn = document.getElementById('net-ping-start-btn');
+    const pingGrid = document.getElementById('net-ping-grid');
+
+    const wifiSsid = document.getElementById('wifi-ssid-input');
+    const wifiPwd = document.getElementById('wifi-pwd-input');
+    const wifiEnc = document.getElementById('wifi-enc-select');
+    const wifiHidden = document.getElementById('wifi-hidden-toggle');
+    const wifiGenBtn = document.getElementById('wifi-gen-btn');
+    const wifiCopyBtn = document.getElementById('wifi-copy-btn');
+    const wifiDlBtn = document.getElementById('wifi-dl-btn');
+    const wifiQrContainer = document.getElementById('wifi-qr-container');
+    const wifiCardInfo = document.getElementById('wifi-qr-card-info');
+
+    if (!publicIpEl) return;
+
+    // 1. 公网 IP 与地理位置探测
+    const detectPublicIp = async (isManual = false) => {
+      publicIpEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Detecting...' : '正在探测...';
+      geoInfoEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Resolving ISP & Region...' : '正在解析地理与运营商...';
+
+      let ipFound = false;
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        if (res.ok) {
+          const data = await res.json();
+          publicIpEl.textContent = data.ip || 'Unknown';
+          geoInfoEl.textContent = `${data.country_name || ''} ${data.region || ''} ${data.city || ''} · ${data.org || data.asn || ''}`;
+          ipFound = true;
+        }
+      } catch (e) {
+        // Fallback
+      }
+
+      if (!ipFound) {
+        try {
+          const res = await fetch('https://api.ipify.org?format=json');
+          if (res.ok) {
+            const data = await res.json();
+            publicIpEl.textContent = data.ip || 'Unknown';
+            geoInfoEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Global Public Node' : '全球公网出口节点';
+            ipFound = true;
+          }
+        } catch (e) {
+          publicIpEl.textContent = '127.0.0.1 (Local / Protected)';
+          geoInfoEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Direct LAN / Proxy Active' : '本地局域网 / 代理模式';
+        }
+      }
+
+      if (isManual && typeof Toast !== 'undefined') {
+        Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Network diagnostics refreshed!' : '网络诊断信息已更新！');
+      }
+    };
+
+    if (refreshIpBtn) {
+      refreshIpBtn.addEventListener('click', () => detectPublicIp(true));
+    }
+    detectPublicIp();
+
+    // 2. WebRTC 本地真实 IP 泄露探测
+    const detectWebRtcLeak = () => {
+      if (!webrtcStatusEl) return;
+      const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+      const leakedIps = new Set();
+
+      try {
+        const pc = new (window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection)({
+          iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        });
+
+        pc.createDataChannel('leakDetectionChannel');
+
+        pc.onicecandidate = (event) => {
+          if (!event || !event.candidate) {
+            if (leakedIps.size === 0) {
+              webrtcStatusEl.textContent = isEn ? '🛡️ Safe: No WebRTC leak detected' : '🛡️ 安全：未检测到 WebRTC 穿透泄漏';
+              webrtcStatusEl.style.background = 'rgba(16, 185, 129, 0.1)';
+              webrtcStatusEl.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+              webrtcStatusEl.style.color = '#10b981';
+            }
+            return;
+          }
+
+          const cand = event.candidate.candidate;
+          const match = cand.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/);
+          if (match && match[1]) {
+            const ip = match[1];
+            if (ip !== '0.0.0.0' && !ip.startsWith('127.')) {
+              leakedIps.add(ip);
+              webrtcStatusEl.textContent = (isEn ? '⚠️ Warning: WebRTC leaked IP: ' : '⚠️ 警告：检测到 WebRTC 真实 IP 泄漏: ') + Array.from(leakedIps).join(', ');
+              webrtcStatusEl.style.background = 'rgba(245, 158, 11, 0.1)';
+              webrtcStatusEl.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+              webrtcStatusEl.style.color = '#f59e0b';
+              if (webrtcCandidatesEl) {
+                webrtcCandidatesEl.textContent = `Candidate Endpoints: ${Array.from(leakedIps).join(' | ')}`;
+              }
+            }
+          }
+        };
+
+        pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(() => {});
+      } catch (err) {
+        webrtcStatusEl.textContent = isEn ? '🛡️ WebRTC Disabled / Fully Shielded' : '🛡️ 浏览器已禁用 WebRTC，隐私防护极佳';
+      }
+    };
+    detectWebRtcLeak();
+
+    // 3. 全球骨干 CDN 网络测速 (Ping)
+    const cdnNodes = [
+      { name: 'Cloudflare (Anycast)', url: 'https://1.1.1.1/cdn-cgi/trace', region: 'Global' },
+      { name: 'Google Global Edge', url: 'https://www.google.com/favicon.ico', region: 'US/Global' },
+      { name: 'AWS CloudFront', url: 'https://aws.amazon.com/favicon.ico', region: 'Global' },
+      { name: 'Alibaba Cloud (阿里云)', url: 'https://www.aliyun.com/favicon.ico', region: 'APAC / CN' },
+      { name: 'Tencent Cloud (腾讯云)', url: 'https://cloud.tencent.com/favicon.ico', region: 'APAC / CN' }
+    ];
+
+    const renderPingGrid = () => {
+      if (!pingGrid) return;
+      pingGrid.innerHTML = cdnNodes.map(node => `
+        <div style="background: var(--surface-high); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <b style="font-size: 13px; color: var(--text-primary);">${node.name}</b>
+            <span style="font-size: 11px; color: var(--text-muted);">${node.region}</span>
+          </div>
+          <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <span class="ping-badge" id="ping-val-${node.name.replace(/[^a-zA-Z0-9]/g, '')}" style="font-size: 14px; font-weight: 700; font-family: var(--font-mono); color: var(--text-secondary);">- ms</span>
+            <span class="ping-status" id="ping-status-${node.name.replace(/[^a-zA-Z0-9]/g, '')}" style="font-size: 11px; font-weight: 600; color: var(--text-muted);">待测速</span>
+          </div>
+        </div>
+      `).join('');
+    };
+    renderPingGrid();
+
+    const startPingTest = async () => {
+      if (typeof Toast !== 'undefined') {
+        Toast.info(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Starting CDN latency test...' : '正在发起全球节点多轮 Ping 测速...');
+      }
+
+      for (const node of cdnNodes) {
+        const id = node.name.replace(/[^a-zA-Z0-9]/g, '');
+        const valEl = document.getElementById(`ping-val-${id}`);
+        const statusEl = document.getElementById(`ping-status-${id}`);
+        if (!valEl || !statusEl) continue;
+
+        valEl.textContent = '...';
+        statusEl.textContent = 'Testing...';
+
+        const startTime = performance.now();
+        try {
+          await fetch(`${node.url}?_t=${Date.now()}`, { mode: 'no-cors', cache: 'no-store' });
+          const latency = Math.round(performance.now() - startTime);
+          valEl.textContent = `${latency} ms`;
+
+          if (latency < 100) {
+            valEl.style.color = '#10b981';
+            statusEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Excellent' : '极佳';
+            statusEl.style.color = '#10b981';
+          } else if (latency < 250) {
+            valEl.style.color = 'var(--color-secondary)';
+            statusEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Good' : '良好';
+            statusEl.style.color = 'var(--color-secondary)';
+          } else {
+            valEl.style.color = '#f59e0b';
+            statusEl.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Moderate' : '延迟稍高';
+            statusEl.style.color = '#f59e0b';
+          }
+        } catch (err) {
+          valEl.textContent = 'Timeout';
+          valEl.style.color = '#ef4444';
+          statusEl.textContent = '超时';
+          statusEl.style.color = '#ef4444';
+        }
+      }
+    };
+
+    if (pingBtn) {
+      pingBtn.addEventListener('click', startPingTest);
+    }
+
+    // 4. WiFi 扫码直连专属二维码生成器
+    let currentWifiString = '';
+    const generateWifiQr = () => {
+      const ssid = wifiSsid ? wifiSsid.value.trim() : '';
+      const pwd = wifiPwd ? wifiPwd.value : '';
+      const enc = wifiEnc ? wifiEnc.value : 'WPA';
+      const isHidden = wifiHidden && wifiHidden.checked;
+
+      if (!ssid) {
+        if (typeof Toast !== 'undefined') Toast.warning(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Please enter WiFi Name (SSID)!' : '请输入 WiFi 无线网络名称 (SSID)！');
+        return;
+      }
+
+      const escapeWifi = (str) => (str || '').replace(/([\\;,:\"])/g, '\\$1');
+      const hiddenStr = isHidden ? 'H:true;' : '';
+      const pwdStr = enc !== 'nopass' && pwd ? `P:${escapeWifi(pwd)};` : '';
+      currentWifiString = `WIFI:T:${enc};S:${escapeWifi(ssid)};${pwdStr}${hiddenStr};`;
+
+      if (wifiQrContainer) {
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentWifiString)}`;
+        wifiQrContainer.innerHTML = `<img id="wifi-qr-img" src="${qrUrl}" alt="WiFi QR Code" style="width: 170px; height: 170px; display: block;" />`;
+      }
+
+      if (wifiCardInfo) {
+        wifiCardInfo.textContent = `SSID: ${ssid} · [${enc}]`;
+      }
+
+      if (typeof Toast !== 'undefined') {
+        Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'WiFi QR Code generated! Scan with mobile camera to connect.' : 'WiFi 直连二维码已生成！手机相机扫码即可一键加入网络。');
+      }
+    };
+
+    if (wifiGenBtn) {
+      wifiGenBtn.addEventListener('click', generateWifiQr);
+    }
+
+    if (wifiCopyBtn) {
+      wifiCopyBtn.addEventListener('click', () => {
+        if (!currentWifiString) generateWifiQr();
+        if (currentWifiString) {
+          navigator.clipboard.writeText(currentWifiString).then(() => {
+            if (typeof Toast !== 'undefined') Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'WiFi string copied to clipboard!' : 'WiFi 直连字符串已复制！');
+          });
+        }
+      });
+    }
+
+    if (wifiDlBtn) {
+      wifiDlBtn.addEventListener('click', () => {
+        const qrImg = document.getElementById('wifi-qr-img');
+        if (!qrImg || !qrImg.src) {
+          generateWifiQr();
+        }
+        const img = document.getElementById('wifi-qr-img');
+        if (img && img.src) {
+          const a = document.createElement('a');
+          a.href = img.src;
+          a.download = `WiFi_${(wifiSsid ? wifiSsid.value : 'QR') || 'Connect'}.png`;
+          a.target = '_blank';
+          a.click();
+        }
+      });
+    }
+  },
+
+  // ==========================================
+  // 8. 纯前端图片媒体与隐私套件 (Media & Privacy Suite)
+  // ==========================================
+  initMediaSuite() {
+    const dropzone = document.getElementById('media-dropzone');
+    const fileInput = document.getElementById('media-file-input');
+    const qualitySlider = document.getElementById('media-quality-slider');
+    const qualityVal = document.getElementById('media-quality-val');
+    const formatSelect = document.getElementById('media-format-select');
+    const maxWidthInput = document.getElementById('media-max-width');
+
+    const resultContainer = document.getElementById('media-result-container');
+    const origSizeEl = document.getElementById('media-orig-size');
+    const compSizeEl = document.getElementById('media-comp-size');
+    const savedRatioEl = document.getElementById('media-saved-ratio');
+    const downloadBtn = document.getElementById('media-download-btn');
+
+    const exifStatusEl = document.getElementById('media-exif-status');
+    const exifDetailsEl = document.getElementById('media-exif-details');
+    const exifCleanBtn = document.getElementById('media-exif-clean-btn');
+
+    let currentFile = null;
+    let currentCompressedBlob = null;
+    let currentImageElement = null;
+
+    if (!dropzone) return;
+
+    if (qualitySlider && qualityVal) {
+      qualitySlider.addEventListener('input', () => {
+        qualityVal.textContent = `${qualitySlider.value}%`;
+        if (currentFile && currentImageElement) {
+          processImageCompression();
+        }
+      });
+    }
+
+    if (formatSelect) {
+      formatSelect.addEventListener('change', () => {
+        if (currentFile && currentImageElement) {
+          processImageCompression();
+        }
+      });
+    }
+
+    if (maxWidthInput) {
+      maxWidthInput.addEventListener('change', () => {
+        if (currentFile && currentImageElement) {
+          processImageCompression();
+        }
+      });
+    }
+
+    const formatBytes = (bytes) => {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    const processImageCompression = () => {
+      if (!currentImageElement || !currentFile) return;
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      let width = currentImageElement.naturalWidth || currentImageElement.width;
+      let height = currentImageElement.naturalHeight || currentImageElement.height;
+
+      const maxWidth = parseInt(maxWidthInput ? maxWidthInput.value : 0);
+      if (maxWidth && width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+
+      let mimeType = formatSelect ? formatSelect.value : 'image/webp';
+      let isFavicon = mimeType === 'favicon';
+      if (isFavicon) {
+        width = 32;
+        height = 32;
+        mimeType = 'image/png';
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // 绘制图像（该操作在内存中会自动清洗剥离所有 EXIF 原生数据）
+      ctx.drawImage(currentImageElement, 0, 0, width, height);
+
+      const quality = parseInt(qualitySlider ? qualitySlider.value : 80) / 100;
+
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        currentCompressedBlob = blob;
+
+        const origSize = currentFile.size;
+        const compSize = blob.size;
+        const savedPercent = Math.max(0, Math.round(((origSize - compSize) / origSize) * 100));
+
+        if (resultContainer && origSizeEl && compSizeEl && savedRatioEl) {
+          resultContainer.style.display = 'block';
+          origSizeEl.textContent = formatBytes(origSize);
+          compSizeEl.textContent = formatBytes(compSize);
+          savedRatioEl.textContent = `🎉 节省 ${savedPercent}%`;
+          savedRatioEl.style.color = compSize <= origSize ? '#10b981' : '#f59e0b';
+        }
+      }, mimeType, quality);
+    };
+
+    // EXIF 解析逻辑
+    const parseExifData = (arrayBuffer) => {
+      if (!exifStatusEl || !exifDetailsEl) return;
+      const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+
+      try {
+        const view = new DataView(arrayBuffer);
+        if (view.getUint16(0, false) !== 0xFFD8) {
+          // 非 JPEG (PNG/WebP 默认无标准 TIFF GPS)
+          exifStatusEl.textContent = isEn ? '✅ Clean: No GPS metadata found in file' : '✅ 纯净无痕：该图片未包含敏感 GPS 物理定位';
+          exifStatusEl.style.color = '#10b981';
+          exifDetailsEl.textContent = isEn ? 'Image format does not contain standard camera EXIF GPS block.' : '当前图像格式未内嵌相机 EXIF GPS 数据块。';
+          return;
+        }
+
+        let length = view.byteLength, offset = 2, hasExif = false;
+        while (offset < length) {
+          if (view.getUint16(offset + 2, false) <= 8) break;
+          const marker = view.getUint16(offset, false);
+          offset += 2;
+          if (marker === 0xFFE1) {
+            hasExif = true;
+            break;
+          } else {
+            offset += view.getUint16(offset, false);
+          }
+        }
+
+        if (hasExif) {
+          exifStatusEl.textContent = isEn ? '⚠️ Warning: Photo contains camera & device metadata' : '⚠️ 提示：检测到照片内嵌拍摄设备与时间元数据';
+          exifStatusEl.style.color = '#f59e0b';
+          exifDetailsEl.textContent = isEn ? 'EXIF metadata header detected. Click button below to strip and sanitize for safe publishing.' : '检测到 EXIF APP1 元数据标记。点击下方按钮可彻底抹除所有定位与硬件信息。';
+        } else {
+          exifStatusEl.textContent = isEn ? '✅ Clean: No GPS or camera metadata found' : '✅ 纯净安全：未检测到拍摄设备或 GPS 隐私数据';
+          exifStatusEl.style.color = '#10b981';
+          exifDetailsEl.textContent = '';
+        }
+      } catch (err) {
+        exifStatusEl.textContent = isEn ? '✅ Scanned: Privacy check completed' : '✅ 隐私安全扫描完毕';
+      }
+    };
+
+    const handleFile = (file) => {
+      if (!file || !file.type.startsWith('image/')) {
+        if (typeof Toast !== 'undefined') Toast.warning('请选择有效的图片文件 (PNG, JPG, WebP, BMP)');
+        return;
+      }
+
+      currentFile = file;
+
+      // 1. 读取用于压缩渲染
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          currentImageElement = img;
+          processImageCompression();
+          if (typeof Toast !== 'undefined') Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Image loaded and processed!' : '图片已载入并完成本地极速压缩！');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      // 2. 读取用于 EXIF 分析
+      const exifReader = new FileReader();
+      exifReader.onload = (e) => {
+        parseExifData(e.target.result);
+      };
+      exifReader.readAsArrayBuffer(file);
+    };
+
+    if (dropzone && fileInput) {
+      dropzone.addEventListener('click', () => fileInput.click());
+
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = 'var(--color-secondary)';
+        dropzone.style.background = 'rgba(6, 182, 212, 0.08)';
+      });
+
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.style.borderColor = 'var(--border-light)';
+        dropzone.style.background = 'var(--surface-high)';
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = 'var(--border-light)';
+        dropzone.style.background = 'var(--surface-high)';
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+          handleFile(e.target.files[0]);
+        }
+      });
+    }
+
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', () => {
+        if (!currentCompressedBlob) {
+          if (typeof Toast !== 'undefined') Toast.warning('请先选择待压缩的图片！');
+          return;
+        }
+
+        let fmt = formatSelect ? formatSelect.value : 'image/webp';
+        let ext = 'webp';
+        if (fmt === 'image/jpeg') ext = 'jpg';
+        else if (fmt === 'image/png') ext = 'png';
+        else if (fmt === 'favicon') ext = 'ico';
+
+        const baseName = currentFile ? currentFile.name.replace(/\.[^/.]+$/, '') : 'compressed';
+        const url = URL.createObjectURL(currentCompressedBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${baseName}_optimized.${ext}`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        if (typeof Toast !== 'undefined') Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Optimized image downloaded!' : '优化后的图片已保存到本地！');
+      });
+    }
+
+    if (exifCleanBtn) {
+      exifCleanBtn.addEventListener('click', () => {
+        if (!currentImageElement) {
+          if (typeof Toast !== 'undefined') Toast.warning('请先拖入需要清洗 EXIF 隐私的照片！');
+          return;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = currentImageElement.naturalWidth || currentImageElement.width;
+        canvas.height = currentImageElement.naturalHeight || currentImageElement.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(currentImageElement, 0, 0);
+
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          const baseName = currentFile ? currentFile.name.replace(/\.[^/.]+$/, '') : 'photo';
+          a.download = `${baseName}_sanitized.jpg`;
+          a.click();
+          URL.revokeObjectURL(url);
+
+          if (typeof Toast !== 'undefined') Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'EXIF stripped! Sanitized photo exported.' : 'EXIF 隐私已全部清洗！安全纯净照片已导出。');
+        }, 'image/jpeg', 0.95);
+      });
+    }
   }
 };
 

@@ -515,6 +515,7 @@ input, button, textarea, select {
    ========================================== */
 .toolbox-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   border-bottom: 1px solid var(--border-light);
   margin-bottom: 24px;
