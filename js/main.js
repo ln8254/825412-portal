@@ -558,15 +558,48 @@ function initDashboardNetworkCenter() {
 
   // 5. WiFi 扫码直连专属二维码生成器
   let currentWifiString = '';
+  const wifiHintEl = document.getElementById('wifi-auto-detect-hint');
+
+  const updateWifiHint = () => {
+    if (!wifiHintEl) return;
+    const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+    const pwd = wifiPwd ? wifiPwd.value : '';
+    const selectedEnc = wifiEnc ? wifiEnc.value : 'AUTO';
+
+    if (selectedEnc === 'AUTO') {
+      if (pwd.length > 0) {
+        wifiHintEl.innerHTML = `<span class="material-symbols-outlined" style="font-size: 13px;">lock</span><span>${isEn ? 'Auto-detected: WPA/WPA2/WPA3 (Standard secure WiFi)' : '智能识别：已输入密码，自动匹配标准 WPA/WPA2/WPA3 安全协议'}</span>`;
+        wifiHintEl.style.color = 'var(--color-primary)';
+      } else {
+        wifiHintEl.innerHTML = `<span class="material-symbols-outlined" style="font-size: 13px;">lock_open</span><span>${isEn ? 'Auto-detected: Open Network (No password required)' : '智能识别：密码留空，自动配置为无密码开放热点'}</span>`;
+        wifiHintEl.style.color = 'var(--text-muted)';
+      }
+    } else {
+      wifiHintEl.innerHTML = `<span class="material-symbols-outlined" style="font-size: 13px;">settings</span><span>${isEn ? `Manual Mode: [${selectedEnc}]` : `已手动指定加密类型: [${selectedEnc}]`}</span>`;
+      wifiHintEl.style.color = 'var(--color-secondary)';
+    }
+  };
+
+  if (wifiPwd) {
+    wifiPwd.addEventListener('input', updateWifiHint);
+  }
+  if (wifiEnc) {
+    wifiEnc.addEventListener('change', updateWifiHint);
+  }
+
   const generateWifiQr = () => {
     const ssid = wifiSsid ? wifiSsid.value.trim() : '';
     const pwd = wifiPwd ? wifiPwd.value : '';
-    const enc = wifiEnc ? wifiEnc.value : 'WPA';
+    let enc = wifiEnc ? wifiEnc.value : 'AUTO';
     const isHidden = wifiHidden && wifiHidden.checked;
 
     if (!ssid) {
       if (typeof Toast !== 'undefined') Toast.warning(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Please enter WiFi Name (SSID)!' : '请输入 WiFi 无线网络名称 (SSID)！');
       return;
+    }
+
+    if (enc === 'AUTO') {
+      enc = pwd ? 'WPA' : 'nopass';
     }
 
     const escapeWifi = (str) => (str || '').replace(/([\\;,:\"])/g, '\\$1');

@@ -281,26 +281,40 @@
               <label class="form-label" data-i18n="wifi_ssid_label" style="font-size: 12px;">WiFi 名称 (SSID):</label>
               <input type="text" class="text-input" id="wifi-ssid-input" data-i18n-ph="wifi_ssid_ph" placeholder="例如：MyOffice_5G / Home_WiFi" style="font-size: 13px;">
             </div>
-            <div class="form-group" style="margin-bottom: 10px;">
+            <div class="form-group" style="margin-bottom: 6px;">
               <label class="form-label" data-i18n="wifi_pwd_label" style="font-size: 12px;">WiFi 密码:</label>
               <input type="text" class="text-input" id="wifi-pwd-input" data-i18n-ph="wifi_pwd_ph" placeholder="请输入无线网络密码 (无密码请留空)" style="font-size: 13px;">
-            </div>
-            <div style="display: flex; gap: 14px; margin-bottom: 12px; flex-wrap: wrap;">
-              <div style="flex: 1; min-width: 130px;">
-                <label class="form-label" data-i18n="wifi_enc_label" style="font-size: 12px;">加密类型:</label>
-                <select class="custom-select" id="wifi-enc-select" style="width: 100%; padding: 6px 10px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 13px;">
-                  <option value="WPA">WPA / WPA2 / WPA3</option>
-                  <option value="WEP">WEP</option>
-                  <option value="nopass">无密码 (Open)</option>
-                </select>
-              </div>
-              <div style="display: flex; align-items: center; margin-top: 20px;">
-                <label class="checkbox-label" style="font-size: 12px;">
-                  <input type="checkbox" id="wifi-hidden-toggle">
-                  <span data-i18n="wifi_hidden_label">隐藏网络 (Hidden SSID)</span>
-                </label>
+              <div id="wifi-auto-detect-hint" style="font-size: 11px; color: var(--color-secondary); margin-top: 5px; display: flex; align-items: center; gap: 4px;">
+                <span class="material-symbols-outlined" style="font-size: 13px;">auto_awesome</span>
+                <span data-i18n="wifi_auto_hint_nopass">智能识别：密码留空，将自动配置为无密码开放热点</span>
               </div>
             </div>
+
+            <!-- 可选折叠高级设置 (默认收起，一般用户无需关心) -->
+            <details style="margin-bottom: 14px; margin-top: 8px;">
+              <summary style="cursor: pointer; user-select: none; color: var(--text-muted); font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 0;">
+                <span class="material-symbols-outlined" style="font-size: 13px;">tune</span>
+                <span data-i18n="wifi_adv_options">高级设置 (可选：手动指定加密/隐藏SSID)</span>
+              </summary>
+              <div style="display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+                <div style="flex: 1; min-width: 140px;">
+                  <label class="form-label" data-i18n="wifi_enc_label" style="font-size: 11px;">加密类型:</label>
+                  <select class="custom-select" id="wifi-enc-select" style="width: 100%; padding: 5px 8px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 12px;">
+                    <option value="AUTO" selected data-i18n="wifi_enc_auto">⚡ 智能自动 (推荐)</option>
+                    <option value="WPA">WPA / WPA2 / WPA3 (通用)</option>
+                    <option value="nopass">无密码 (开放热点)</option>
+                    <option value="WEP">WEP (极老旧设备)</option>
+                  </select>
+                </div>
+                <div style="display: flex; align-items: center; margin-top: 16px;">
+                  <label class="checkbox-label" style="font-size: 11px;">
+                    <input type="checkbox" id="wifi-hidden-toggle">
+                    <span data-i18n="wifi_hidden_label">隐藏网络 (Hidden SSID)</span>
+                  </label>
+                </div>
+              </div>
+            </details>
+
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
               <button class="btn btn-primary" id="wifi-gen-btn" style="padding: 7px 16px; font-size: 13px;" data-i18n="wifi_gen_btn">生成 WiFi 二维码</button>
               <button class="btn" id="wifi-copy-btn" style="background: var(--surface-high); padding: 7px 12px; font-size: 13px;" data-i18n="wifi_copy_str_btn">复制直连字符串</button>
