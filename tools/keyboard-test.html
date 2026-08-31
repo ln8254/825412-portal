@@ -124,7 +124,7 @@
           <div><span>最近按键:</span> <b id="kb-last-key" style="color: var(--color-primary); font-family: var(--font-mono); font-size: 14px;">等待按键...</b></div>
         </div>
         <div style="display: flex; gap: 10px;">
-          <button class="btn btn-primary" id="kb-reset-btn" data-i18n="tool_text_clear">重置测试</button>
+          <button class="btn btn-primary" id="kb-reset-btn" data-i18n="tool_text_clear">重置测试</button> <button class="btn" id="kb-lock-btn" style="background: var(--surface-high); font-size: 13px;">🎮 全屏锁定系统键</button>
         </div>
       </div>
 
@@ -186,7 +186,7 @@
 
   <script src="../js/storage.js?v=2.7.0"></script>
   <script src="../js/i18n.js?v=2.7.0"></script>
-  <script>
+    <script>
     document.addEventListener('DOMContentLoaded', function() {
       var select = document.getElementById('lang-select-header');
       if (select && typeof I18nController !== 'undefined') {
@@ -196,7 +196,7 @@
         });
       }
 
-      // 87-Key Layout Definitions
+      // 87-Key Standard Layout
       var mainRows = [
         [
           { code: 'Escape', label: 'ESC' }, { code: 'F1', label: 'F1' }, { code: 'F2', label: 'F2' }, { code: 'F3', label: 'F3' }, { code: 'F4', label: 'F4' },
@@ -284,16 +284,25 @@
         document.getElementById('kb-chatter-count').textContent = chatterCount;
       }
 
+      // 1. Prevent contextmenu popup when pressing Menu key or right clicking
+      window.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+      });
+
+      // 2. Comprehensive Keydown Interceptor
       window.addEventListener('keydown', function(e) {
-        // Prevent default for common test keys like F1-F12, Space, Tab, Backspace, Arrow keys
-        if (['Tab', 'Backspace', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].indexOf(e.code) !== -1 || e.code.startsWith('F')) {
-          e.preventDefault();
-        }
+        // Prevent all browser default hijackings: Quick Find (/ and '), Tab focus, F1-F12 shortcuts, Backspace navigation, Space scrolling
+        e.preventDefault();
 
         var code = e.code;
-        var now = performance.now();
+        // Fallback for special keys
+        if (!code) {
+          if (e.key === '/') code = 'Slash';
+          else if (e.key === "'") code = 'Quote';
+        }
 
-        document.getElementById('kb-last-key').textContent = code + ' (Key: ' + e.key + ')';
+        var now = performance.now();
+        document.getElementById('kb-last-key').textContent = (code || e.key) + ' (KeyCode: ' + (e.keyCode || e.which) + ')';
 
         if (lastPressTime[code] && (now - lastPressTime[code] < 35)) {
           chatterCount++;
@@ -310,16 +319,44 @@
           keyMap[code].classList.add('tested');
         }
         updateStats();
-      });
+      }, { passive: false });
 
+      // 3. Comprehensive Keyup Handler (Handles PrintScreen & Key Releases)
       window.addEventListener('keyup', function(e) {
+        e.preventDefault();
         var code = e.code;
+
+        // PrintScreen on Windows/Linux only fires keyup!
+        if (code === 'PrintScreen' || e.key === 'PrintScreen') {
+          code = 'PrintScreen';
+          document.getElementById('kb-last-key').textContent = 'PrintScreen (PrtSc Captured!)';
+          testedKeys.add('PrintScreen');
+          if (keyMap['PrintScreen']) {
+            keyMap['PrintScreen'].classList.add('tested');
+            keyMap['PrintScreen'].classList.add('pressed');
+            setTimeout(function() {
+              if (keyMap['PrintScreen']) keyMap['PrintScreen'].classList.remove('pressed');
+            }, 300);
+          }
+          updateStats();
+          return;
+        }
+
         activeKeys.delete(code);
         if (keyMap[code]) {
           keyMap[code].classList.remove('pressed');
         }
+      }, { passive: false });
+
+      // 4. Handle Window Blur (e.g. When Windows Start Menu opens via Win key)
+      window.addEventListener('blur', function() {
+        activeKeys.clear();
+        Object.values(keyMap).forEach(function(el) {
+          el.classList.remove('pressed');
+        });
       });
 
+      // 5. Reset Button
       document.getElementById('kb-reset-btn').addEventListener('click', function() {
         testedKeys.clear();
         activeKeys.clear();
@@ -331,6 +368,24 @@
         });
         updateStats();
       });
+
+      // 6. Optional Keyboard Lock API in Fullscreen
+      var lockBtn = document.getElementById('kb-lock-btn');
+      if (lockBtn) {
+        lockBtn.addEventListener('click', function() {
+          if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().then(function() {
+              if (navigator.keyboard && navigator.keyboard.lock) {
+                navigator.keyboard.lock().then(function() {
+                  console.log('Keyboard locked successfully');
+                }).catch(function(err) {
+                  console.warn('Keyboard lock failed', err);
+                });
+              }
+            }).catch(function() {});
+          }
+        });
+      }
     });
   </script>
 </body>
