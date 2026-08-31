@@ -26,14 +26,22 @@
         <span style="color: #64748b;">/</span>
         <a href="/sitemap.html" style="color: #06b6d4; font-size: 14px; font-weight: 600; text-decoration: none;" data-i18n="nav_articles">极客技术专栏</a>
       </div>
-      <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
-        <a href="/" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_dashboard">控制台</a>
-        <a href="/toolbox.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_toolbox">极客工具箱</a>
-        <a href="/airdrop.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_airdrop">隔空快传</a>
-        <a href="/webhook.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_webhook">Webhook 调试</a>
-        <a href="/clipboard.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_clipboard">匿名剪贴板</a>
-        <a href="/sitemap.html" style="color: var(--color-primary); font-weight: 700; text-decoration: none;" data-i18n="nav_sitemap">全站索引</a>
-      </nav>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
+          <a href="/" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_dashboard">控制台</a>
+          <a href="/toolbox.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_toolbox">极客工具箱</a>
+          <a href="/airdrop.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_airdrop">隔空快传</a>
+          <a href="/webhook.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_webhook">Webhook 调试</a>
+          <a href="/clipboard.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_clipboard">匿名剪贴板</a>
+          <a href="/sitemap.html" style="color: var(--color-primary); font-weight: 700; text-decoration: none;" data-i18n="nav_sitemap">全站索引</a>
+        </nav>
+        <div class="lang-toggle-wrapper">
+          <select id="lang-select-header" class="custom-select" style="padding: 4px 10px; font-size: 12px; border-radius: var(--radius-sm); background: var(--surface-high); color: var(--text-primary); border: 1px solid var(--border-light); cursor: pointer;">
+            <option value="zh-CN">🇨🇳 中文</option>
+            <option value="en-US">🇺🇸 English</option>
+          </select>
+        </div>
+      </div>
     </div>
   </header>
   <main style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
