@@ -303,27 +303,29 @@
         document.getElementById('kb-chatter-count').textContent = chatterCount;
       }
 
-      // Universal Key Normalizer (Fixed Meta/Win & PrtSc bug)
+            // Universal Key Normalizer (Full Linux X11/Wayland, Windows, macOS support)
       function normalizeKeyCode(e) {
         var code = e.code || '';
         var key = e.key || '';
         var keyCode = e.keyCode || e.which || 0;
 
-        // 1. PrintScreen / Snapshot
-        if (code === 'PrintScreen' || code === 'Snapshot' || key === 'PrintScreen' || key === 'Snapshot' || keyCode === 44) {
+        // 1. Linux / X11 / Wayland PrintScreen
+        if (code === 'PrintScreen' || code === 'Snapshot' || code === 'SysReq' || key === 'PrintScreen' || key === 'Snapshot' || key === 'SysReq' || keyCode === 44) {
           return 'PrintScreen';
         }
 
-        // 2. Windows / Super / Meta / OS
-        if (code === 'MetaRight' || code === 'OSRight' || (key === 'Meta' && e.location === 2) || keyCode === 92) {
+        // 2. Linux Super (Win) / Meta / Hyper / OS
+        if (code === 'MetaRight' || code === 'SuperRight' || code === 'OSRight' || (key === 'Meta' && e.location === 2) || (key === 'Super' && e.location === 2) || keyCode === 92) {
           return 'MetaRight';
         }
-        if (code === 'MetaLeft' || code === 'OSLeft' || key === 'Meta' || key === 'OS' || key === 'Win' || keyCode === 91 || keyCode === 93) {
-          return 'MetaLeft';
+        if (code === 'MetaLeft' || code === 'SuperLeft' || code === 'OSLeft' || key === 'Meta' || key === 'Super' || key === 'Hyper' || key === 'OS' || key === 'Win' || keyCode === 91 || keyCode === 93 || keyCode === 0) {
+          if (key === 'Super' || key === 'Meta' || code === 'MetaLeft' || code === 'SuperLeft') {
+            return 'MetaLeft';
+          }
         }
 
         // 3. Modifiers by Location
-        if (code === 'AltRight' || (key === 'Alt' && e.location === 2) || (keyCode === 18 && e.location === 2)) return 'AltRight';
+        if (code === 'AltRight' || (key === 'Alt' && e.location === 2) || (keyCode === 18 && e.location === 2) || key === 'AltGraph') return 'AltRight';
         if (code === 'AltLeft' || key === 'Alt' || keyCode === 18) return 'AltLeft';
         if (code === 'ControlRight' || (key === 'Control' && e.location === 2) || (keyCode === 17 && e.location === 2)) return 'ControlRight';
         if (code === 'ControlLeft' || key === 'Control' || keyCode === 17) return 'ControlLeft';
