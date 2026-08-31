@@ -122,12 +122,26 @@
     <!-- 交互工作台 -->
     <div class="glass-card" style="margin-bottom: 30px;">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
-        <div style="display: flex; gap: 20px; font-size: 13px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 16px; font-size: 13px; flex-wrap: wrap; align-items: center;">
+          <div style="background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-light);">
+            <span id="kb-detected-os" style="color: #38bdf8; font-weight: 700;">🐧 Linux 检测就绪</span>
+          </div>
           <div><span data-i18n="kb_stat_tested">已测按键:</span> <b id="kb-tested-count" style="color: #10b981; font-size: 15px;">0 / 87</b></div>
-          <div><span data-i18n="kb_stat_nkro">最大并发按下:</span> <b id="kb-max-concurrent" style="color: #38bdf8; font-size: 15px;">0</b></div>
+          <div><span data-i18n="kb_stat_nkro">最大并发:</span> <b id="kb-max-concurrent" style="color: #38bdf8; font-size: 15px;">0</b></div>
           <div><span data-i18n="kb_stat_chatter">连击/异常:</span> <b id="kb-chatter-count" style="color: #ef4444; font-size: 15px;">0</b></div>
-          <div><span>最近按键:</span> <b id="kb-last-key" style="color: var(--color-primary); font-family: var(--font-mono); font-size: 14px;">等待按键...</b></div>
+          <div><span>最近按键:</span> <b id="kb-last-key" style="color: var(--color-primary); font-family: var(--font-mono); font-size: 13px;">等待按键...</b></div>
         </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+          <select id="kb-os-mode-select" class="custom-select" style="padding: 4px 8px; font-size: 12px; border-radius: var(--radius-sm); background: var(--surface-high); color: var(--text-primary); border: 1px solid var(--border-light); cursor: pointer;">
+            <option value="AUTO" selected>⚡ 自动识别操作系统</option>
+            <option value="LINUX">🐧 Linux 模式 (Super/SysReq)</option>
+            <option value="WINDOWS">🪟 Windows 模式 (Win/PrtSc)</option>
+            <option value="MACOS">🍎 macOS 模式 (⌘ Cmd/⌥ Option)</option>
+          </select>
+          <button class="btn btn-primary" id="kb-reset-btn" data-i18n="tool_text_clear">重置测试</button>
+          <button class="btn" id="kb-lock-btn" style="background: var(--surface-high); font-size: 12px;">🎮 全屏独占锁定</button>
+        </div>
+      </div>
         <div style="display: flex; gap: 10px;">
           <button class="btn btn-primary" id="kb-reset-btn" data-i18n="tool_text_clear">重置测试</button> <button class="btn" id="kb-lock-btn" style="background: var(--surface-high); font-size: 13px;">🎮 全屏锁定系统键</button>
         </div>
@@ -191,8 +205,9 @@
 
   <script src="../js/storage.js?v=2.7.0"></script>
   <script src="../js/i18n.js?v=2.7.0"></script>
-        <script>
+          <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // 1. Language Toggle
       var select = document.getElementById('lang-select-header');
       if (select && typeof I18nController !== 'undefined') {
         select.value = I18nController.currentLang;
@@ -201,7 +216,23 @@
         });
       }
 
-      // 87-Key Standard Layout
+      // 2. OS Auto-Detection
+      var detectedOS = 'WINDOWS';
+      var ua = navigator.userAgent.toLowerCase();
+      var platform = (navigator.platform || '').toLowerCase();
+
+      if (ua.indexOf('linux') !== -1 || platform.indexOf('linux') !== -1) {
+        detectedOS = 'LINUX';
+        document.getElementById('kb-detected-os').innerHTML = '🐧 Linux (Wayland / X11 兼容模式)';
+      } else if (ua.indexOf('mac') !== -1 || platform.indexOf('mac') !== -1) {
+        detectedOS = 'MACOS';
+        document.getElementById('kb-detected-os').innerHTML = '🍎 macOS (Command / Option 兼容模式)';
+      } else {
+        detectedOS = 'WINDOWS';
+        document.getElementById('kb-detected-os').innerHTML = '🪟 Windows 兼容模式';
+      }
+
+      // 3. Layout Model (87-Key Universal)
       var mainRows = [
         [
           { code: 'Escape', label: 'ESC' }, { code: 'F1', label: 'F1' }, { code: 'F2', label: 'F2' }, { code: 'F3', label: 'F3' }, { code: 'F4', label: 'F4' },
@@ -229,9 +260,9 @@
           { code: 'Slash', label: '/ ?' }, { code: 'ShiftRight', label: 'Shift', w: 88 }
         ],
         [
-          { code: 'ControlLeft', label: 'Ctrl', w: 52 }, { code: 'MetaLeft', label: 'Win', w: 52 }, { code: 'AltLeft', label: 'Alt', w: 52 },
-          { code: 'Space', label: 'Spacebar', w: 260 },
-          { code: 'AltRight', label: 'Alt', w: 52 }, { code: 'MetaRight', label: 'Win', w: 52 }, { code: 'ContextMenu', label: 'Menu', w: 52 }, { code: 'ControlRight', label: 'Ctrl', w: 52 }
+          { code: 'ControlLeft', label: 'Ctrl', w: 52 }, { code: 'MetaLeft', label: 'Super / Win', w: 56 }, { code: 'AltLeft', label: 'Alt', w: 52 },
+          { code: 'Space', label: 'Spacebar', w: 252 },
+          { code: 'AltRight', label: 'Alt', w: 52 }, { code: 'MetaRight', label: 'Super / Win', w: 56 }, { code: 'ContextMenu', label: 'Menu', w: 50 }, { code: 'ControlRight', label: 'Ctrl', w: 52 }
         ]
       ];
 
@@ -251,88 +282,112 @@
       var chatterCount = 0;
       var lastPressTime = {};
 
-      mainRows.forEach(function(row, rIdx) {
-        var rowEl = document.getElementById('kb-row-' + rIdx);
-        row.forEach(function(k) {
-          var el = document.createElement('div');
-          el.className = 'kb-key';
-          el.id = 'k-' + k.code;
-          el.textContent = k.label;
-          if (k.w) el.style.minWidth = k.w + 'px';
-          rowEl.appendChild(el);
-          keyMap[k.code] = el;
-        });
-      });
-
-      navRows.forEach(function(row, rIdx) {
-        var rowEl = document.getElementById('kb-nav-' + rIdx);
-        row.forEach(function(k) {
-          var el = document.createElement('div');
-          el.className = 'kb-key';
-          if (k.empty) {
-            el.style.visibility = 'hidden';
-          } else {
+      function buildKeyboardDOM() {
+        mainRows.forEach(function(row, rIdx) {
+          var rowEl = document.getElementById('kb-row-' + rIdx);
+          rowEl.innerHTML = '';
+          row.forEach(function(k) {
+            var el = document.createElement('div');
+            el.className = 'kb-key';
             el.id = 'k-' + k.code;
-            el.textContent = k.label;
+            
+            // Dynamic Label by OS
+            var lbl = k.label;
+            if (detectedOS === 'MACOS') {
+              if (k.code === 'MetaLeft' || k.code === 'MetaRight') lbl = '⌘ Cmd';
+              if (k.code === 'AltLeft' || k.code === 'AltRight') lbl = '⌥ Opt';
+              if (k.code === 'Backspace') lbl = 'Delete';
+              if (k.code === 'Enter') lbl = 'Return';
+            } else if (detectedOS === 'LINUX') {
+              if (k.code === 'MetaLeft' || k.code === 'MetaRight') lbl = '❖ Super';
+            }
+            el.textContent = lbl;
+            if (k.w) el.style.minWidth = k.w + 'px';
+            rowEl.appendChild(el);
             keyMap[k.code] = el;
-          }
-          rowEl.appendChild(el);
+          });
         });
-      });
 
-      // Interactive Click on Visual Keys (Instant Test)
-      Object.keys(keyMap).forEach(function(code) {
-        var el = keyMap[code];
-        el.style.cursor = 'pointer';
-        el.addEventListener('mousedown', function(e) {
-          e.stopPropagation();
-          handleKeyHit(code, { keyCode: '-', which: '-', key: code });
+        navRows.forEach(function(row, rIdx) {
+          var rowEl = document.getElementById('kb-nav-' + rIdx);
+          rowEl.innerHTML = '';
+          row.forEach(function(k) {
+            var el = document.createElement('div');
+            el.className = 'kb-key';
+            if (k.empty) {
+              el.style.visibility = 'hidden';
+            } else {
+              el.id = 'k-' + k.code;
+              el.textContent = k.label;
+              keyMap[k.code] = el;
+            }
+            rowEl.appendChild(el);
+          });
         });
-        el.addEventListener('mouseup', function(e) {
-          e.stopPropagation();
-          handleKeyRelease(code);
-        });
-      });
 
-      var totalKeyCount = Object.keys(keyMap).length;
-      document.getElementById('kb-tested-count').textContent = '0 / ' + totalKeyCount;
+        // Click-to-test fallback for all keys
+        Object.keys(keyMap).forEach(function(code) {
+          var el = keyMap[code];
+          el.style.cursor = 'pointer';
+          el.addEventListener('mousedown', function(e) {
+            e.stopPropagation();
+            handleKeyHit(code, { keyCode: '-', which: '-', key: code });
+          });
+          el.addEventListener('mouseup', function(e) {
+            e.stopPropagation();
+            handleKeyRelease(code);
+          });
+        });
+
+        updateStats();
+      }
+
+      buildKeyboardDOM();
+
+      document.getElementById('kb-os-mode-select').addEventListener('change', function(e) {
+        if (e.target.value !== 'AUTO') {
+          detectedOS = e.target.value;
+        } else {
+          detectedOS = (ua.indexOf('linux') !== -1) ? 'LINUX' : (ua.indexOf('mac') !== -1 ? 'MACOS' : 'WINDOWS');
+        }
+        buildKeyboardDOM();
+      });
 
       function updateStats() {
+        var totalKeyCount = Object.keys(keyMap).length;
         document.getElementById('kb-tested-count').textContent = testedKeys.size + ' / ' + totalKeyCount;
         document.getElementById('kb-max-concurrent').textContent = maxConcurrent;
         document.getElementById('kb-chatter-count').textContent = chatterCount;
       }
 
-            // Universal Key Normalizer (Full Linux X11/Wayland, Windows, macOS support)
+      // 4. Multi-OS Universal Key Normalizer
       function normalizeKeyCode(e) {
         var code = e.code || '';
         var key = e.key || '';
         var keyCode = e.keyCode || e.which || 0;
 
-        // 1. Linux / X11 / Wayland PrintScreen
+        // PrintScreen & Linux SysReq
         if (code === 'PrintScreen' || code === 'Snapshot' || code === 'SysReq' || key === 'PrintScreen' || key === 'Snapshot' || key === 'SysReq' || keyCode === 44) {
           return 'PrintScreen';
         }
 
-        // 2. Linux Super (Win) / Meta / Hyper / OS
+        // Linux Super / Windows Win / macOS Command
         if (code === 'MetaRight' || code === 'SuperRight' || code === 'OSRight' || (key === 'Meta' && e.location === 2) || (key === 'Super' && e.location === 2) || keyCode === 92) {
           return 'MetaRight';
         }
-        if (code === 'MetaLeft' || code === 'SuperLeft' || code === 'OSLeft' || key === 'Meta' || key === 'Super' || key === 'Hyper' || key === 'OS' || key === 'Win' || keyCode === 91 || keyCode === 93 || keyCode === 0) {
-          if (key === 'Super' || key === 'Meta' || code === 'MetaLeft' || code === 'SuperLeft') {
-            return 'MetaLeft';
-          }
+        if (code === 'MetaLeft' || code === 'SuperLeft' || code === 'OSLeft' || key === 'Meta' || key === 'Super' || key === 'Hyper' || key === 'OS' || key === 'Win' || keyCode === 91 || keyCode === 93 || (key === 'Meta' && e.location === 1) || (key === 'Super' && e.location === 1)) {
+          return 'MetaLeft';
         }
 
-        // 3. Modifiers by Location
-        if (code === 'AltRight' || (key === 'Alt' && e.location === 2) || (keyCode === 18 && e.location === 2) || key === 'AltGraph') return 'AltRight';
+        // Modifiers (Alt / Option / AltGr / Control / Shift)
+        if (code === 'AltRight' || (key === 'Alt' && e.location === 2) || (keyCode === 18 && e.location === 2) || key === 'AltGraph' || key === 'ModeSwitch') return 'AltRight';
         if (code === 'AltLeft' || key === 'Alt' || keyCode === 18) return 'AltLeft';
         if (code === 'ControlRight' || (key === 'Control' && e.location === 2) || (keyCode === 17 && e.location === 2)) return 'ControlRight';
         if (code === 'ControlLeft' || key === 'Control' || keyCode === 17) return 'ControlLeft';
         if (code === 'ShiftRight' || (key === 'Shift' && e.location === 2) || (keyCode === 16 && e.location === 2)) return 'ShiftRight';
         if (code === 'ShiftLeft' || key === 'Shift' || keyCode === 16) return 'ShiftLeft';
 
-        // 4. Special Characters
+        // Punctuation & Quotes
         if (key === '/') return 'Slash';
         if (key === "'") return 'Quote';
         if (key === '`' || key === '~') return 'Backquote';
@@ -343,7 +398,7 @@
 
       function handleKeyHit(code, e) {
         var now = performance.now();
-        var label = code + ' (Key: ' + (e.key || '-') + ' | KeyCode: ' + (e.keyCode || e.which || '-') + ')';
+        var label = code + ' (Key: "' + (e.key || '-') + '" | Code: ' + (e.code || '-') + ' | KeyCode: ' + (e.keyCode || e.which || '-') + ')';
         document.getElementById('kb-last-key').textContent = label;
 
         if (lastPressTime[code] && (now - lastPressTime[code] < 35)) {
@@ -373,19 +428,18 @@
       // Suppress right-click / context menu
       window.addEventListener('contextmenu', function(e) { e.preventDefault(); }, true);
 
-      // Keydown capturing on document and window
+      // DOM Capture Listeners on document and window
       document.addEventListener('keydown', function(e) {
         var code = normalizeKeyCode(e);
         e.preventDefault();
         handleKeyHit(code, e);
       }, true);
 
-      // Keyup capturing (Vital for PrintScreen & Win key releases)
       document.addEventListener('keyup', function(e) {
         var code = normalizeKeyCode(e);
         e.preventDefault();
 
-        // PrintScreen only fires keyup on Windows, trigger hit & release animation
+        // Special handling for PrintScreen / SysReq
         if (code === 'PrintScreen') {
           handleKeyHit('PrintScreen', e);
           setTimeout(function() {
@@ -399,11 +453,11 @@
 
       // Clipboard Paste Event Listener (Fallback for Screenshot)
       window.addEventListener('paste', function(e) {
-        handleKeyHit('PrintScreen', { keyCode: 44, which: 44, key: 'PrintScreen' });
+        handleKeyHit('PrintScreen', { keyCode: 44, which: 44, key: 'PrintScreen', code: 'PrintScreen' });
         setTimeout(function() { handleKeyRelease('PrintScreen'); }, 400);
       });
 
-      // Handle Window Blur: unpress active keys but keep tested green!
+      // Window Blur: Release active pressed state while preserving tested status
       window.addEventListener('blur', function() {
         activeKeys.clear();
         Object.keys(keyMap).forEach(function(code) {
@@ -432,7 +486,7 @@
             document.documentElement.requestFullscreen().then(function() {
               if (navigator.keyboard && navigator.keyboard.lock) {
                 navigator.keyboard.lock(['Escape', 'MetaLeft', 'MetaRight', 'Tab', 'AltLeft', 'AltRight', 'PrintScreen']).then(function() {
-                  console.log('Deep keyboard lock engaged');
+                  console.log('Cross-platform keyboard lock engaged');
                 }).catch(function() {});
               }
             }).catch(function() {});
