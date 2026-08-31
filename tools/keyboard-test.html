@@ -139,7 +139,7 @@
             <option value="MACOS">🍎 macOS 模式 (⌘ Cmd/⌥ Option)</option>
           </select>
           <button class="btn btn-primary" id="kb-reset-btn" data-i18n="tool_text_clear">重置测试</button>
-          <button class="btn" id="kb-lock-btn" style="background: var(--surface-high); font-size: 12px;">🎮 全屏独占锁定</button>
+          <button class="btn" id="kb-fullscreen-btn" style="background: var(--surface-high); font-size: 12px;">⛶ 全屏界面</button>
         </div>
       
       </div>
@@ -173,9 +173,7 @@
         <div>🟦 <span data-i18n="kb_legend_pressing">青色: 当前正处于按下状态</span></div>
         <div>🟥 <span data-i18n="kb_legend_chatter">红色: 捕捉到物理微动双击/弹跳连击</span></div>
       </div>
-      <div style="margin-top: 12px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: var(--radius-sm); padding: 10px 16px; font-size: 12px; color: #38bdf8;">
-        🐧 <strong>Linux 极客提示：</strong> Linux (GNOME / KDE) 桌面默认会在系统层全局拦截单按 <code>Super(Win)</code> 与 <code>PrtSc</code>。您可以通过 <strong>按住 Super 键再按任意键</strong>、点击右上角 <strong>【🎮 全屏独占锁定】</strong>、或 <strong>直接鼠标点击键位</strong> 完成快速测试！
-      </div>
+      
     </div>
 
     <!-- 深度技术专栏与规范 -->
@@ -205,7 +203,7 @@
 
   <script src="../js/storage.js?v=2.7.0"></script>
   <script src="../js/i18n.js?v=2.7.0"></script>
-            <script>
+              <script>
     document.addEventListener('DOMContentLoaded', function() {
       // 1. Language Toggle
       var select = document.getElementById('lang-select-header');
@@ -232,7 +230,7 @@
         document.getElementById('kb-detected-os').innerHTML = '🪟 Windows';
       }
 
-      // 3. Universal 87-Key Layout
+      // 3. Standard 87-Key Layout
       var mainRows = [
         [
           { code: 'Escape', label: 'ESC' }, { code: 'F1', label: 'F1' }, { code: 'F2', label: 'F2' }, { code: 'F3', label: 'F3' }, { code: 'F4', label: 'F4' },
@@ -260,9 +258,9 @@
           { code: 'Slash', label: '/ ?' }, { code: 'ShiftRight', label: 'Shift', w: 88 }
         ],
         [
-          { code: 'ControlLeft', label: 'Ctrl', w: 52 }, { code: 'MetaLeft', label: 'Super / Win', w: 56 }, { code: 'AltLeft', label: 'Alt', w: 52 },
+          { code: 'ControlLeft', label: 'Ctrl', w: 52 }, { code: 'MetaLeft', label: 'Win / Super', w: 56 }, { code: 'AltLeft', label: 'Alt', w: 52 },
           { code: 'Space', label: 'Spacebar', w: 252 },
-          { code: 'AltRight', label: 'Alt', w: 52 }, { code: 'MetaRight', label: 'Super / Win', w: 56 }, { code: 'ContextMenu', label: 'Menu', w: 50 }, { code: 'ControlRight', label: 'Ctrl', w: 52 }
+          { code: 'AltRight', label: 'Alt', w: 52 }, { code: 'MetaRight', label: 'Win / Super', w: 56 }, { code: 'ContextMenu', label: 'Menu', w: 50 }, { code: 'ControlRight', label: 'Ctrl', w: 52 }
         ]
       ];
 
@@ -280,7 +278,7 @@
       var activeKeys = new Set();
       var maxConcurrent = 0;
       var chatterCount = 0;
-      var lastPressTime = {};
+      var lastReleaseTime = {};
 
       function buildKeyboardDOM() {
         mainRows.forEach(function(row, rIdx) {
@@ -303,7 +301,6 @@
             el.textContent = lbl;
             if (k.w) el.style.minWidth = k.w + 'px';
 
-            // RESTORE TESTED & PRESSED STATE ON DOM REBUILD!
             if (testedKeys.has(k.code)) el.classList.add('tested');
             if (activeKeys.has(k.code)) el.classList.add('pressed');
 
@@ -352,109 +349,92 @@
         document.getElementById('kb-chatter-count').textContent = chatterCount;
       }
 
-      // 4. Universal Key Normalizer
-      function normalizeKeyCode(e) {
-        var code = e.code || '';
+      // 4. Strict 1:1 Hardware Key Code Normalizer
+      function getHardwareCode(e) {
+        var code = e.code;
         var key = e.key || '';
         var keyCode = e.keyCode || e.which || 0;
 
-        // PrintScreen / SysReq / Snapshot
-        if (code === 'PrintScreen' || code === 'Snapshot' || code === 'SysReq' || key === 'PrintScreen' || key === 'Snapshot' || key === 'SysReq' || keyCode === 44) {
+        // Direct code match (Precise physical position)
+        if (code && keyMap[code]) {
+          return code;
+        }
+
+        // PrintScreen / SysReq
+        if (code === 'PrintScreen' || code === 'SysReq' || key === 'PrintScreen' || key === 'SysReq' || keyCode === 44) {
           return 'PrintScreen';
         }
 
-        // Super / Meta / Win / Hyper
-        if (code === 'MetaRight' || code === 'SuperRight' || code === 'OSRight' || (key === 'Meta' && e.location === 2) || (key === 'Super' && e.location === 2) || keyCode === 92) {
-          return 'MetaRight';
-        }
-        if (code === 'MetaLeft' || code === 'SuperLeft' || code === 'OSLeft' || key === 'Meta' || key === 'Super' || key === 'Hyper' || key === 'OS' || key === 'Win' || keyCode === 91 || keyCode === 93) {
-          return 'MetaLeft';
+        // Exact Left vs Right Modifiers by location
+        if (e.location === 2) {
+          if (key === 'Alt' || code === 'AltRight' || keyCode === 18) return 'AltRight';
+          if (key === 'Control' || code === 'ControlRight' || keyCode === 17) return 'ControlRight';
+          if (key === 'Shift' || code === 'ShiftRight' || keyCode === 16) return 'ShiftRight';
+          if (key === 'Meta' || key === 'Super' || code === 'MetaRight' || keyCode === 92) return 'MetaRight';
+        } else if (e.location === 1) {
+          if (key === 'Alt' || code === 'AltLeft' || keyCode === 18) return 'AltLeft';
+          if (key === 'Control' || code === 'ControlLeft' || keyCode === 17) return 'ControlLeft';
+          if (key === 'Shift' || code === 'ShiftLeft' || keyCode === 16) return 'ShiftLeft';
+          if (key === 'Meta' || key === 'Super' || code === 'MetaLeft' || keyCode === 91) return 'MetaLeft';
         }
 
-        // Modifiers
-        if (code === 'AltRight' || (key === 'Alt' && e.location === 2) || (keyCode === 18 && e.location === 2) || key === 'AltGraph') return 'AltRight';
-        if (code === 'AltLeft' || key === 'Alt' || keyCode === 18) return 'AltLeft';
-        if (code === 'ControlRight' || (key === 'Control' && e.location === 2) || (keyCode === 17 && e.location === 2)) return 'ControlRight';
-        if (code === 'ControlLeft' || key === 'Control' || keyCode === 17) return 'ControlLeft';
-        if (code === 'ShiftRight' || (key === 'Shift' && e.location === 2) || (keyCode === 16 && e.location === 2)) return 'ShiftRight';
-        if (code === 'ShiftLeft' || key === 'Shift' || keyCode === 16) return 'ShiftLeft';
+        // General Meta/Super
+        if (key === 'Meta' || key === 'Super' || key === 'OS' || keyCode === 91) return 'MetaLeft';
 
         // Symbols
         if (key === '/') return 'Slash';
         if (key === "'") return 'Quote';
         if (key === '`' || key === '~') return 'Backquote';
 
-        if (code && keyMap[code]) return code;
         return code || key;
       }
 
-      function checkModifiers(e) {
-        if (e.metaKey || (e.getModifierState && (e.getModifierState('Meta') || e.getModifierState('Super') || e.getModifierState('OS')))) {
-          if (!testedKeys.has('MetaLeft')) {
-            handleKeyHit('MetaLeft', { key: 'Super', code: 'MetaLeft', keyCode: 91 });
-          }
-        }
-        if (e.altKey || (e.getModifierState && e.getModifierState('Alt'))) {
-          if (!testedKeys.has('AltLeft') && !testedKeys.has('AltRight')) {
-            handleKeyHit('AltLeft', { key: 'Alt', code: 'AltLeft', keyCode: 18 });
-          }
-        }
-        if (e.ctrlKey || (e.getModifierState && e.getModifierState('Control'))) {
-          if (!testedKeys.has('ControlLeft') && !testedKeys.has('ControlRight')) {
-            handleKeyHit('ControlLeft', { key: 'Control', code: 'ControlLeft', keyCode: 17 });
-          }
-        }
-        if (e.shiftKey || (e.getModifierState && e.getModifierState('Shift'))) {
-          if (!testedKeys.has('ShiftLeft') && !testedKeys.has('ShiftRight')) {
-            handleKeyHit('ShiftLeft', { key: 'Shift', code: 'ShiftLeft', keyCode: 16 });
-          }
-        }
-      }
-
       function handleKeyHit(code, e) {
+        if (!code || !keyMap[code]) return;
+
         var now = performance.now();
         var label = code + ' (Key: "' + (e.key || '-') + '" | Code: ' + (e.code || '-') + ' | KeyCode: ' + (e.keyCode || e.which || '-') + ')';
         document.getElementById('kb-last-key').textContent = label;
 
-        if (lastPressTime[code] && (now - lastPressTime[code] < 35)) {
-          chatterCount++;
-          if (keyMap[code]) keyMap[code].classList.add('chattered');
+        // Accurate Chattering / Bouncing Detection:
+        // Only trigger if user released key and pressed again within < 30ms (Physical contact bounce), ignoring OS key auto-repeat
+        if (!e.repeat) {
+          if (lastReleaseTime[code] && (now - lastReleaseTime[code] < 30)) {
+            chatterCount++;
+            keyMap[code].classList.add('chattered');
+          }
         }
-        lastPressTime[code] = now;
 
         activeKeys.add(code);
         if (activeKeys.size > maxConcurrent) maxConcurrent = activeKeys.size;
         testedKeys.add(code);
 
-        if (keyMap[code]) {
-          keyMap[code].classList.add('pressed');
-          keyMap[code].classList.add('tested');
-        }
+        keyMap[code].classList.add('pressed');
+        keyMap[code].classList.add('tested');
+
         updateStats();
       }
 
       function handleKeyRelease(code) {
+        if (!code || !keyMap[code]) return;
+        lastReleaseTime[code] = performance.now();
         activeKeys.delete(code);
-        if (keyMap[code]) {
-          keyMap[code].classList.remove('pressed');
-        }
+        keyMap[code].classList.remove('pressed');
       }
 
       window.addEventListener('contextmenu', function(e) { e.preventDefault(); }, true);
 
+      // Single Unified Keydown Listener
       document.addEventListener('keydown', function(e) {
-        if (checkPrintScreenEvent(e)) return;
-        checkModifiers(e);
-        var code = normalizeKeyCode(e);
         e.preventDefault();
+        var code = getHardwareCode(e);
         handleKeyHit(code, e);
       }, true);
 
+      // Single Unified Keyup Listener
       document.addEventListener('keyup', function(e) {
-        if (checkPrintScreenEvent(e)) return;
-        checkModifiers(e);
-        var code = normalizeKeyCode(e);
         e.preventDefault();
+        var code = getHardwareCode(e);
 
         if (code === 'PrintScreen') {
           handleKeyHit('PrintScreen', e);
@@ -465,64 +445,21 @@
         handleKeyRelease(code);
       }, true);
 
-      
-      // Dedicated PrintScreen Multi-Vector Detection Engine
-      var blurTimestamp = 0;
-
-      // Vector 1: Direct Raw Event (Works in KDE, XFCE, Windows, and X11 without global grab)
-      function checkPrintScreenEvent(e) {
-        var code = e.code || '';
-        var key = e.key || '';
-        var keyCode = e.keyCode || e.which || 0;
-
-        if (code === 'PrintScreen' || code === 'Snapshot' || code === 'SysReq' || 
-            key === 'PrintScreen' || key === 'Snapshot' || key === 'SysReq' || 
-            keyCode === 44) {
-          handleKeyHit('PrintScreen', { key: 'PrintScreen', code: 'PrintScreen', keyCode: 44 });
-          setTimeout(function() { handleKeyRelease('PrintScreen'); }, 400);
-          return true;
-        }
-        return false;
-      }
-
-      // Vector 2: Linux GNOME Screenshot UI Overlay Blur/Focus Interception
+      // Window Blur: Release active keys without clearing tested status
       window.addEventListener('blur', function() {
-        blurTimestamp = performance.now();
         activeKeys.clear();
         Object.keys(keyMap).forEach(function(code) {
           keyMap[code].classList.remove('pressed');
         });
       });
 
-      window.addEventListener('focus', function() {
-        // If window regained focus after a brief system overlay (e.g. GNOME Screenshot UI)
-        if (blurTimestamp > 0 && (performance.now() - blurTimestamp < 8000)) {
-          // If the user was testing and system screenshot overlay was active
-          if (navigator.clipboard && navigator.clipboard.read) {
-            navigator.clipboard.read().then(function(items) {
-              for (var i = 0; i < items.length; i++) {
-                if (items[i].types.some(function(t) { return t.startsWith('image/'); })) {
-                  handleKeyHit('PrintScreen', { key: 'PrintScreen', code: 'PrintScreen', keyCode: 44 });
-                  setTimeout(function() { handleKeyRelease('PrintScreen'); }, 400);
-                  break;
-                }
-              }
-            }).catch(function() {});
-          }
-        }
-      });
-
-      // Vector 3: Clipboard Paste Listener (Pasting the captured screenshot)
-      window.addEventListener('paste', function(e) {
-        handleKeyHit('PrintScreen', { key: 'PrintScreen', code: 'PrintScreen', keyCode: 44 });
-        setTimeout(function() { handleKeyRelease('PrintScreen'); }, 400);
-      });
-
+      // Reset
       document.getElementById('kb-reset-btn').addEventListener('click', function() {
         testedKeys.clear();
         activeKeys.clear();
         maxConcurrent = 0;
         chatterCount = 0;
+        lastReleaseTime = {};
         document.getElementById('kb-last-key').textContent = '等待按键...';
         Object.values(keyMap).forEach(function(el) {
           el.className = 'kb-key';
@@ -530,15 +467,16 @@
         updateStats();
       });
 
-      var lockBtn = document.getElementById('kb-lock-btn');
-      if (lockBtn) {
-        lockBtn.addEventListener('click', function() {
-          if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen().then(function() {
-              if (navigator.keyboard && navigator.keyboard.lock) {
-                navigator.keyboard.lock(['Escape', 'MetaLeft', 'MetaRight', 'Tab', 'AltLeft', 'AltRight', 'PrintScreen']).catch(function() {});
-              }
-            }).catch(function() {});
+      // Clean Fullscreen Toggle
+      var fsBtn = document.getElementById('kb-fullscreen-btn');
+      if (fsBtn) {
+        fsBtn.addEventListener('click', function() {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(function() {});
+            fsBtn.textContent = '⛶ 退出全屏';
+          } else {
+            document.exitFullscreen().catch(function() {});
+            fsBtn.textContent = '⛶ 全屏界面';
           }
         });
       }
