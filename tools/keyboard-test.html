@@ -205,7 +205,7 @@
 
   <script src="../js/storage.js?v=2.7.0"></script>
   <script src="../js/i18n.js?v=2.7.0"></script>
-          <script>
+            <script>
     document.addEventListener('DOMContentLoaded', function() {
       // 1. Language Toggle
       var select = document.getElementById('lang-select-header');
@@ -223,16 +223,16 @@
 
       if (ua.indexOf('linux') !== -1 || platform.indexOf('linux') !== -1) {
         detectedOS = 'LINUX';
-        document.getElementById('kb-detected-os').innerHTML = '🐧 Linux (Wayland / X11 兼容模式)';
+        document.getElementById('kb-detected-os').innerHTML = '🐧 Linux (Wayland / X11)';
       } else if (ua.indexOf('mac') !== -1 || platform.indexOf('mac') !== -1) {
         detectedOS = 'MACOS';
-        document.getElementById('kb-detected-os').innerHTML = '🍎 macOS (Command / Option 兼容模式)';
+        document.getElementById('kb-detected-os').innerHTML = '🍎 macOS';
       } else {
         detectedOS = 'WINDOWS';
-        document.getElementById('kb-detected-os').innerHTML = '🪟 Windows 兼容模式';
+        document.getElementById('kb-detected-os').innerHTML = '🪟 Windows';
       }
 
-      // 3. Layout Model (87-Key Universal)
+      // 3. Universal 87-Key Layout
       var mainRows = [
         [
           { code: 'Escape', label: 'ESC' }, { code: 'F1', label: 'F1' }, { code: 'F2', label: 'F2' }, { code: 'F3', label: 'F3' }, { code: 'F4', label: 'F4' },
@@ -291,7 +291,6 @@
             el.className = 'kb-key';
             el.id = 'k-' + k.code;
             
-            // Dynamic Label by OS
             var lbl = k.label;
             if (detectedOS === 'MACOS') {
               if (k.code === 'MetaLeft' || k.code === 'MetaRight') lbl = '⌘ Cmd';
@@ -303,6 +302,11 @@
             }
             el.textContent = lbl;
             if (k.w) el.style.minWidth = k.w + 'px';
+
+            // RESTORE TESTED & PRESSED STATE ON DOM REBUILD!
+            if (testedKeys.has(k.code)) el.classList.add('tested');
+            if (activeKeys.has(k.code)) el.classList.add('pressed');
+
             rowEl.appendChild(el);
             keyMap[k.code] = el;
           });
@@ -319,23 +323,11 @@
             } else {
               el.id = 'k-' + k.code;
               el.textContent = k.label;
+              if (testedKeys.has(k.code)) el.classList.add('tested');
+              if (activeKeys.has(k.code)) el.classList.add('pressed');
               keyMap[k.code] = el;
             }
             rowEl.appendChild(el);
-          });
-        });
-
-        // Click-to-test fallback for all keys
-        Object.keys(keyMap).forEach(function(code) {
-          var el = keyMap[code];
-          el.style.cursor = 'pointer';
-          el.addEventListener('mousedown', function(e) {
-            e.stopPropagation();
-            handleKeyHit(code, { keyCode: '-', which: '-', key: code });
-          });
-          el.addEventListener('mouseup', function(e) {
-            e.stopPropagation();
-            handleKeyRelease(code);
           });
         });
 
@@ -360,34 +352,34 @@
         document.getElementById('kb-chatter-count').textContent = chatterCount;
       }
 
-      // 4. Multi-OS Universal Key Normalizer
+      // 4. Universal Key Normalizer
       function normalizeKeyCode(e) {
         var code = e.code || '';
         var key = e.key || '';
         var keyCode = e.keyCode || e.which || 0;
 
-        // PrintScreen & Linux SysReq
+        // PrintScreen / SysReq / Snapshot
         if (code === 'PrintScreen' || code === 'Snapshot' || code === 'SysReq' || key === 'PrintScreen' || key === 'Snapshot' || key === 'SysReq' || keyCode === 44) {
           return 'PrintScreen';
         }
 
-        // Linux Super / Windows Win / macOS Command
+        // Super / Meta / Win / Hyper
         if (code === 'MetaRight' || code === 'SuperRight' || code === 'OSRight' || (key === 'Meta' && e.location === 2) || (key === 'Super' && e.location === 2) || keyCode === 92) {
           return 'MetaRight';
         }
-        if (code === 'MetaLeft' || code === 'SuperLeft' || code === 'OSLeft' || key === 'Meta' || key === 'Super' || key === 'Hyper' || key === 'OS' || key === 'Win' || keyCode === 91 || keyCode === 93 || (key === 'Meta' && e.location === 1) || (key === 'Super' && e.location === 1)) {
+        if (code === 'MetaLeft' || code === 'SuperLeft' || code === 'OSLeft' || key === 'Meta' || key === 'Super' || key === 'Hyper' || key === 'OS' || key === 'Win' || keyCode === 91 || keyCode === 93) {
           return 'MetaLeft';
         }
 
-        // Modifiers (Alt / Option / AltGr / Control / Shift)
-        if (code === 'AltRight' || (key === 'Alt' && e.location === 2) || (keyCode === 18 && e.location === 2) || key === 'AltGraph' || key === 'ModeSwitch') return 'AltRight';
+        // Modifiers
+        if (code === 'AltRight' || (key === 'Alt' && e.location === 2) || (keyCode === 18 && e.location === 2) || key === 'AltGraph') return 'AltRight';
         if (code === 'AltLeft' || key === 'Alt' || keyCode === 18) return 'AltLeft';
         if (code === 'ControlRight' || (key === 'Control' && e.location === 2) || (keyCode === 17 && e.location === 2)) return 'ControlRight';
         if (code === 'ControlLeft' || key === 'Control' || keyCode === 17) return 'ControlLeft';
         if (code === 'ShiftRight' || (key === 'Shift' && e.location === 2) || (keyCode === 16 && e.location === 2)) return 'ShiftRight';
         if (code === 'ShiftLeft' || key === 'Shift' || keyCode === 16) return 'ShiftLeft';
 
-        // Punctuation & Quotes
+        // Symbols
         if (key === '/') return 'Slash';
         if (key === "'") return 'Quote';
         if (key === '`' || key === '~') return 'Backquote';
@@ -396,43 +388,25 @@
         return code || key;
       }
 
-      
-      // Check modifier states on EVERY event (Handles Linux GNOME eating standalone Super/Win tap)
-      function checkModifierStates(e) {
-        // 1. Meta / Super / Win Modifier State
+      function checkModifiers(e) {
         if (e.metaKey || (e.getModifierState && (e.getModifierState('Meta') || e.getModifierState('Super') || e.getModifierState('OS')))) {
           if (!testedKeys.has('MetaLeft')) {
             handleKeyHit('MetaLeft', { key: 'Super', code: 'MetaLeft', keyCode: 91 });
           }
         }
-        // 2. Alt / Option
         if (e.altKey || (e.getModifierState && e.getModifierState('Alt'))) {
           if (!testedKeys.has('AltLeft') && !testedKeys.has('AltRight')) {
             handleKeyHit('AltLeft', { key: 'Alt', code: 'AltLeft', keyCode: 18 });
           }
         }
-        // 3. Control
         if (e.ctrlKey || (e.getModifierState && e.getModifierState('Control'))) {
           if (!testedKeys.has('ControlLeft') && !testedKeys.has('ControlRight')) {
             handleKeyHit('ControlLeft', { key: 'Control', code: 'ControlLeft', keyCode: 17 });
           }
         }
-        // 4. Shift
         if (e.shiftKey || (e.getModifierState && e.getModifierState('Shift'))) {
           if (!testedKeys.has('ShiftLeft') && !testedKeys.has('ShiftRight')) {
             handleKeyHit('ShiftLeft', { key: 'Shift', code: 'ShiftLeft', keyCode: 16 });
-          }
-        }
-        // 5. CapsLock
-        if (e.getModifierState && e.getModifierState('CapsLock')) {
-          if (!testedKeys.has('CapsLock')) {
-            handleKeyHit('CapsLock', { key: 'CapsLock', code: 'CapsLock', keyCode: 20 });
-          }
-        }
-        // 6. ScrollLock
-        if (e.getModifierState && e.getModifierState('ScrollLock')) {
-          if (!testedKeys.has('ScrollLock')) {
-            handleKeyHit('ScrollLock', { key: 'ScrollLock', code: 'ScrollLock', keyCode: 145 });
           }
         }
       }
@@ -466,41 +440,29 @@
         }
       }
 
-      // Suppress right-click / context menu
       window.addEventListener('contextmenu', function(e) { e.preventDefault(); }, true);
 
-      // DOM Capture Listeners on document and window
       document.addEventListener('keydown', function(e) {
-        checkModifierStates(e);
+        checkModifiers(e);
         var code = normalizeKeyCode(e);
         e.preventDefault();
         handleKeyHit(code, e);
       }, true);
 
       document.addEventListener('keyup', function(e) {
-        checkModifierStates(e);
+        checkModifiers(e);
         var code = normalizeKeyCode(e);
         e.preventDefault();
 
-        // Special handling for PrintScreen / SysReq
         if (code === 'PrintScreen') {
           handleKeyHit('PrintScreen', e);
-          setTimeout(function() {
-            handleKeyRelease('PrintScreen');
-          }, 400);
+          setTimeout(function() { handleKeyRelease('PrintScreen'); }, 400);
           return;
         }
 
         handleKeyRelease(code);
       }, true);
 
-      // Clipboard Paste Event Listener (Fallback for Screenshot)
-      window.addEventListener('paste', function(e) {
-        handleKeyHit('PrintScreen', { keyCode: 44, which: 44, key: 'PrintScreen', code: 'PrintScreen' });
-        setTimeout(function() { handleKeyRelease('PrintScreen'); }, 400);
-      });
-
-      // Window Blur: Release active pressed state while preserving tested status
       window.addEventListener('blur', function() {
         activeKeys.clear();
         Object.keys(keyMap).forEach(function(code) {
@@ -508,7 +470,6 @@
         });
       });
 
-      // Reset Button
       document.getElementById('kb-reset-btn').addEventListener('click', function() {
         testedKeys.clear();
         activeKeys.clear();
@@ -521,16 +482,13 @@
         updateStats();
       });
 
-      // Fullscreen Keyboard Lock Mode
       var lockBtn = document.getElementById('kb-lock-btn');
       if (lockBtn) {
         lockBtn.addEventListener('click', function() {
           if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen().then(function() {
               if (navigator.keyboard && navigator.keyboard.lock) {
-                navigator.keyboard.lock(['Escape', 'MetaLeft', 'MetaRight', 'Tab', 'AltLeft', 'AltRight', 'PrintScreen']).then(function() {
-                  console.log('Cross-platform keyboard lock engaged');
-                }).catch(function() {});
+                navigator.keyboard.lock(['Escape', 'MetaLeft', 'MetaRight', 'Tab', 'AltLeft', 'AltRight', 'PrintScreen']).catch(function() {});
               }
             }).catch(function() {});
           }
