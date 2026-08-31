@@ -191,7 +191,7 @@
 
   <script src="../js/storage.js?v=2.7.0"></script>
   <script src="../js/i18n.js?v=2.7.0"></script>
-      <script>
+        <script>
     document.addEventListener('DOMContentLoaded', function() {
       var select = document.getElementById('lang-select-header');
       if (select && typeof I18nController !== 'undefined') {
@@ -280,24 +280,18 @@
         });
       });
 
-            // Click to test support for any key
+      // Interactive Click on Visual Keys (Instant Test)
       Object.keys(keyMap).forEach(function(code) {
         var el = keyMap[code];
         el.style.cursor = 'pointer';
         el.addEventListener('mousedown', function(e) {
           e.stopPropagation();
-          handleKeyHit(code, { keyCode: '-', which: '-' });
+          handleKeyHit(code, { keyCode: '-', which: '-', key: code });
         });
         el.addEventListener('mouseup', function(e) {
           e.stopPropagation();
           handleKeyRelease(code);
         });
-      });
-
-      // If user presses PrtSc and then pastes or pastes a screenshot
-      window.addEventListener('paste', function(e) {
-        handleKeyHit('PrintScreen', { keyCode: 44, which: 44 });
-        setTimeout(function() { handleKeyRelease('PrintScreen'); }, 300);
       });
 
       var totalKeyCount = Object.keys(keyMap).length;
@@ -309,29 +303,46 @@
         document.getElementById('kb-chatter-count').textContent = chatterCount;
       }
 
-      // Universal Normalizer for Win (Meta/OS) and PrintScreen keys
+      // Universal Key Normalizer (Fixed Meta/Win & PrtSc bug)
       function normalizeKeyCode(e) {
-        // 1. PrintScreen detection across all browsers & OS
-        if (e.code === 'PrintScreen' || e.key === 'PrintScreen' || e.keyCode === 44 || e.which === 44) {
+        var code = e.code || '';
+        var key = e.key || '';
+        var keyCode = e.keyCode || e.which || 0;
+
+        // 1. PrintScreen / Snapshot
+        if (code === 'PrintScreen' || code === 'Snapshot' || key === 'PrintScreen' || key === 'Snapshot' || keyCode === 44) {
           return 'PrintScreen';
         }
-        // 2. Windows / Command key detection
-        if (e.code === 'MetaLeft' || e.code === 'OSLeft' || e.keyCode === 91 || (e.key === 'Meta' && e.location === 1) || (e.key === 'OS' && e.location === 1)) {
-          return 'MetaLeft';
-        }
-        if (e.code === 'MetaRight' || e.code === 'OSRight' || e.keyCode === 92 || (e.key === 'Meta' && e.location === 2) || (e.key === 'OS' && e.location === 2)) {
+
+        // 2. Windows / Super / Meta / OS
+        if (code === 'MetaRight' || code === 'OSRight' || (key === 'Meta' && e.location === 2) || keyCode === 92) {
           return 'MetaRight';
         }
-        // 3. Fallbacks for standard keys
-        if (e.code) return e.code;
-        if (e.key === '/') return 'Slash';
-        if (e.key === "'") return 'Quote';
-        return e.key;
+        if (code === 'MetaLeft' || code === 'OSLeft' || key === 'Meta' || key === 'OS' || key === 'Win' || keyCode === 91 || keyCode === 93) {
+          return 'MetaLeft';
+        }
+
+        // 3. Modifiers by Location
+        if (code === 'AltRight' || (key === 'Alt' && e.location === 2) || (keyCode === 18 && e.location === 2)) return 'AltRight';
+        if (code === 'AltLeft' || key === 'Alt' || keyCode === 18) return 'AltLeft';
+        if (code === 'ControlRight' || (key === 'Control' && e.location === 2) || (keyCode === 17 && e.location === 2)) return 'ControlRight';
+        if (code === 'ControlLeft' || key === 'Control' || keyCode === 17) return 'ControlLeft';
+        if (code === 'ShiftRight' || (key === 'Shift' && e.location === 2) || (keyCode === 16 && e.location === 2)) return 'ShiftRight';
+        if (code === 'ShiftLeft' || key === 'Shift' || keyCode === 16) return 'ShiftLeft';
+
+        // 4. Special Characters
+        if (key === '/') return 'Slash';
+        if (key === "'") return 'Quote';
+        if (key === '`' || key === '~') return 'Backquote';
+
+        if (code && keyMap[code]) return code;
+        return code || key;
       }
 
       function handleKeyHit(code, e) {
         var now = performance.now();
-        document.getElementById('kb-last-key').textContent = code + ' (KeyCode: ' + (e.keyCode || e.which || '-') + ')';
+        var label = code + ' (Key: ' + (e.key || '-') + ' | KeyCode: ' + (e.keyCode || e.which || '-') + ')';
+        document.getElementById('kb-last-key').textContent = label;
 
         if (lastPressTime[code] && (now - lastPressTime[code] < 35)) {
           chatterCount++;
@@ -360,15 +371,15 @@
       // Suppress right-click / context menu
       window.addEventListener('contextmenu', function(e) { e.preventDefault(); }, true);
 
-      // Keydown capturing on window & document in capture phase
-      window.addEventListener('keydown', function(e) {
+      // Keydown capturing on document and window
+      document.addEventListener('keydown', function(e) {
         var code = normalizeKeyCode(e);
         e.preventDefault();
         handleKeyHit(code, e);
       }, true);
 
       // Keyup capturing (Vital for PrintScreen & Win key releases)
-      window.addEventListener('keyup', function(e) {
+      document.addEventListener('keyup', function(e) {
         var code = normalizeKeyCode(e);
         e.preventDefault();
 
@@ -377,14 +388,20 @@
           handleKeyHit('PrintScreen', e);
           setTimeout(function() {
             handleKeyRelease('PrintScreen');
-          }, 300);
+          }, 400);
           return;
         }
 
         handleKeyRelease(code);
       }, true);
 
-      // When Start Menu opens on Win press, browser loses focus. Keep key marked tested!
+      // Clipboard Paste Event Listener (Fallback for Screenshot)
+      window.addEventListener('paste', function(e) {
+        handleKeyHit('PrintScreen', { keyCode: 44, which: 44, key: 'PrintScreen' });
+        setTimeout(function() { handleKeyRelease('PrintScreen'); }, 400);
+      });
+
+      // Handle Window Blur: unpress active keys but keep tested green!
       window.addEventListener('blur', function() {
         activeKeys.clear();
         Object.keys(keyMap).forEach(function(code) {
@@ -392,7 +409,7 @@
         });
       });
 
-      // Reset
+      // Reset Button
       document.getElementById('kb-reset-btn').addEventListener('click', function() {
         testedKeys.clear();
         activeKeys.clear();
@@ -412,7 +429,7 @@
           if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen().then(function() {
               if (navigator.keyboard && navigator.keyboard.lock) {
-                navigator.keyboard.lock(['Escape', 'MetaLeft', 'MetaRight', 'Tab', 'AltLeft', 'AltRight']).then(function() {
+                navigator.keyboard.lock(['Escape', 'MetaLeft', 'MetaRight', 'Tab', 'AltLeft', 'AltRight', 'PrintScreen']).then(function() {
                   console.log('Deep keyboard lock engaged');
                 }).catch(function() {});
               }
