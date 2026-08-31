@@ -443,6 +443,7 @@
       window.addEventListener('contextmenu', function(e) { e.preventDefault(); }, true);
 
       document.addEventListener('keydown', function(e) {
+        if (checkPrintScreenEvent(e)) return;
         checkModifiers(e);
         var code = normalizeKeyCode(e);
         e.preventDefault();
@@ -450,6 +451,7 @@
       }, true);
 
       document.addEventListener('keyup', function(e) {
+        if (checkPrintScreenEvent(e)) return;
         checkModifiers(e);
         var code = normalizeKeyCode(e);
         e.preventDefault();
@@ -463,11 +465,57 @@
         handleKeyRelease(code);
       }, true);
 
+      
+      // Dedicated PrintScreen Multi-Vector Detection Engine
+      var blurTimestamp = 0;
+
+      // Vector 1: Direct Raw Event (Works in KDE, XFCE, Windows, and X11 without global grab)
+      function checkPrintScreenEvent(e) {
+        var code = e.code || '';
+        var key = e.key || '';
+        var keyCode = e.keyCode || e.which || 0;
+
+        if (code === 'PrintScreen' || code === 'Snapshot' || code === 'SysReq' || 
+            key === 'PrintScreen' || key === 'Snapshot' || key === 'SysReq' || 
+            keyCode === 44) {
+          handleKeyHit('PrintScreen', { key: 'PrintScreen', code: 'PrintScreen', keyCode: 44 });
+          setTimeout(function() { handleKeyRelease('PrintScreen'); }, 400);
+          return true;
+        }
+        return false;
+      }
+
+      // Vector 2: Linux GNOME Screenshot UI Overlay Blur/Focus Interception
       window.addEventListener('blur', function() {
+        blurTimestamp = performance.now();
         activeKeys.clear();
         Object.keys(keyMap).forEach(function(code) {
           keyMap[code].classList.remove('pressed');
         });
+      });
+
+      window.addEventListener('focus', function() {
+        // If window regained focus after a brief system overlay (e.g. GNOME Screenshot UI)
+        if (blurTimestamp > 0 && (performance.now() - blurTimestamp < 8000)) {
+          // If the user was testing and system screenshot overlay was active
+          if (navigator.clipboard && navigator.clipboard.read) {
+            navigator.clipboard.read().then(function(items) {
+              for (var i = 0; i < items.length; i++) {
+                if (items[i].types.some(function(t) { return t.startsWith('image/'); })) {
+                  handleKeyHit('PrintScreen', { key: 'PrintScreen', code: 'PrintScreen', keyCode: 44 });
+                  setTimeout(function() { handleKeyRelease('PrintScreen'); }, 400);
+                  break;
+                }
+              }
+            }).catch(function() {});
+          }
+        }
+      });
+
+      // Vector 3: Clipboard Paste Listener (Pasting the captured screenshot)
+      window.addEventListener('paste', function(e) {
+        handleKeyHit('PrintScreen', { key: 'PrintScreen', code: 'PrintScreen', keyCode: 44 });
+        setTimeout(function() { handleKeyRelease('PrintScreen'); }, 400);
       });
 
       document.getElementById('kb-reset-btn').addEventListener('click', function() {
