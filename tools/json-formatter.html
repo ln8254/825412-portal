@@ -31,7 +31,7 @@
         <a href="/airdrop.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_airdrop">隔空快传</a>
         <a href="/webhook.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_webhook">Webhook 调试</a>
         <a href="/clipboard.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_clipboard">匿名剪贴板</a>
-        <a href="/sitemap.html" style="color: var(--text-secondary); text-decoration: none;">全站索引</a>
+        <a href="/sitemap.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_sitemap">全站索引</a>
       </nav>
     </div>
   </header>
@@ -61,21 +61,12 @@
       <div class="doc-header">
         <span class="material-symbols-outlined doc-header-icon">auto_stories</span>
         <div>
-          <h2 class="doc-header-title">JSON 规范 (RFC 8259) 与现代微服务数据序列化最佳实践</h2>
-          <p class="doc-header-subtitle">掌握 JSON 语法树解析机制、大整数精度丢失问题、循环引用解决与序列化性能调优。</p>
+          <h2 class="doc-header-title" data-i18n="tool_card_json_doc_title">JSON 规范 (RFC 8259) 与现代微服务数据序列化最佳实践</h2>
+          <p class="doc-header-subtitle" data-i18n="tool_card_json_doc_sub">掌握 JSON 语法树解析机制、大整数精度丢失问题、循环引用解决与序列化性能调优。</p>
         </div>
       </div>
 
-      <div class="doc-card" style="margin-bottom: 20px;">
-        <h3><span class="material-symbols-outlined" style="font-size: 18px;">terminal</span> 1. JavaScript 64 位双精度浮点数与 19 位雪花算法 ID 丢失陷阱</h3>
-        <p>在前后端交互中，最容易引发灾难性生产 Bug 的是后端生成的 64 位雪花算法（Snowflake ID）长整数（如 <code>1787219372183921823</code>）：</p>
-        <ul>
-          <li><strong>根因分析</strong>：JavaScript 中的所有 <code>Number</code> 均为 IEEE 754 双精度浮点数，其能够安全表示的最大整数为 <code>Number.MAX_SAFE_INTEGER</code> (即 2<sup>53</sup> - 1，即 <code>9007199254740991</code>，约 16 位)；</li>
-          <li><strong>灾难现象</strong>：当后端返回超过 16 位的长整型 ID 时，前端 <code>JSON.parse()</code> 会自动将末尾几位数截断进位变异（如 <code>...823</code> 变成 <code>...800</code>），导致后续更新与查询无法命中目标记录；</li>
-          <li><strong>企业级解决方案</strong>：后端必须将所有超过 15 位的 ID（Long 类型）在序列化阶段显式转换为 <strong>String 字符串格式</strong>（例如在 Java Jackson 中配置 <code>@JsonSerialize(using = ToStringSerializer.class)</code>，或在 Go 中使用 <code>json:",string"</code>）。</li>
-        </ul>
-      </div>
-
+      <div class="doc-card" style="margin-bottom: 20px;" data-i18n="tool_card_json_doc_body"></div>
       <div class="doc-card">
         <h3><span class="material-symbols-outlined" style="font-size: 18px;">code</span> 生产级多语言高性能 JSON 处理指南</h3>
         <div style="font-size: 13px; font-weight: 700; color: #38bdf8; margin-top: 10px; margin-bottom: 6px;">Go 语言 (sonic / standard json.Unmarshal 最佳实践):</div>
@@ -107,7 +98,7 @@ func main() {
       <a href="/privacy.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_privacy">隐私政策</a>
       <a href="/terms.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_terms">服务条款</a>
       <a href="/contact.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_contact">联系我们</a>
-      <a href="/sitemap.html" style="color: var(--text-secondary); text-decoration: none;">HTML 网站地图</a>
+      <a href="/sitemap.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_sitemap_html">HTML 网站地图</a>
     </div>
   </footer>
   <script src="../js/storage.js?v=2.7.0"></script>

