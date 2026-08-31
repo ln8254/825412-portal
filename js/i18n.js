@@ -18,6 +18,72 @@ const I18nController = {
   translations: {
     'zh-CN': {
 
+      "dash_shortcut_screen": "屏幕坏点检测",
+      "dash_shortcut_kb": "机械键盘测试",
+      "dash_shortcut_mouse": "鼠标双击测速",
+
+
+      "tool_screen_title": "在线显示器坏点/漏光/残影与色阶检测",
+      "tool_screen_sub": "买新机与验屏必备：支持全屏纯色坏点检测、IPS 漏光诊断、256 级灰阶对比度与高刷残影测试。",
+      "screen_mode1_title": "1. 纯色坏点/亮点检测",
+      "screen_mode1_desc": "黑、白、红、绿、蓝、青、洋红、黄纯色全屏快速切屏，寻找像素坏点与暗点。",
+      "screen_btn_start_solid": "进入纯色坏点检测 (全屏)",
+      "screen_mode2_title": "2. 256 级灰阶与色阶测试",
+      "screen_mode2_desc": "评估面板色彩过渡平滑度、暗部细节与高光层次，检测色彩断层。",
+      "screen_btn_start_grad": "进入灰阶过渡测试",
+      "screen_mode3_title": "3. 高刷动态残影 (Ghosting)",
+      "screen_mode3_desc": "以不同速度渲染高速运动色块，肉眼观察像素响应时间与拖影情况。",
+      "screen_btn_start_ghost": "进入动态残影测试",
+      "screen_tip_title": "操作提示:",
+      "screen_tip_text": "进入全屏后，点击鼠标左键或按键盘【空格键】/【方向键】切换下一个测试图样，按【ESC】随时退出全屏。",
+      "tool_screen_doc_title": "显示器面板技术（IPS / OLED / Mini-LED）与 ISO 9241 像素缺陷等级规范",
+      "tool_screen_doc_sub": "深入了解液晶排列、背光漏光成因、GtG 与 MPRT 响应时间差异及国家三包坏点判定标准。",
+      "tool_screen_doc_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">tv</span> 1. 坏点、亮点、暗点判定标准 (ISO 9241-307 Class II)</h3>
+        <p>国际 ISO 9241 标准将屏幕像素缺陷分为三类：</p>
+        <ul>
+          <li><strong>亮点 (Hot Pixel)</strong>：在纯黑背景下持续发光的异常像素点（子像素晶体管短路无法关闭）；</li>
+          <li><strong>暗点/死点 (Dead Pixel)</strong>：在纯白或纯色背景下完全不发光的黑点（驱动电路断路损坏）；</li>
+          <li><strong>行业三包退换标准</strong>：通常 Class II 等级面板允许全屏不多于 2 个亮点或 5 个暗点；电竞级“完美屏 (Perfect Panel)”承诺 0 亮点。</li>
+        </ul>
+        <h3><span class="material-symbols-outlined" style="font-size: 18px;">speed</span> 2. GtG 灰阶响应时间与 MPRT 动态清晰度差异</h3>
+        <p>很多商家宣传的 1ms 响应时间通常指 MPRT 插黑帧技术，而非真实的物理灰阶切换时间（GtG）。GtG 越慢，高刷下快速转动视角的拖影（Ghosting / Smearing）越严重。</p>`,
+
+      "tool_kb_title": "机械键盘全键无冲与连击/延迟在线测试仪",
+      "tool_kb_sub": "支持标准 87/104 键位实时点亮、NKRO 全键无冲最大并发数统计、轴体物理双击连击检测。",
+      "kb_stat_tested": "已测按键:",
+      "kb_stat_nkro": "最大并发按下:",
+      "kb_stat_chatter": "连击/异常:",
+      "kb_legend_tested": "绿色: 已通过测试",
+      "kb_legend_pressing": "青色: 当前正处于按下状态",
+      "kb_legend_chatter": "红色: 捕捉到物理微动双击/弹跳连击",
+      "tool_kb_doc_title": "机械键盘防鬼键矩阵电路 (Anti-Ghosting) 与微动消抖算法 (Debounce)",
+      "tool_kb_doc_sub": "深入解析全键无冲二极管矩阵原理、USB HID 报文描述符与机械轴体触点氧化引发的双击连击机制。",
+      "tool_kb_doc_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">keyboard</span> 1. 为什么普通薄膜键盘容易“鬼键 (Ghosting)”与冲突？</h3>
+        <p>传统键盘采用行-列扫描矩阵。当用户同时按下 3 个形成矩形顶点的按键时，电流会倒灌触发第 4 个未被按下的虚假按键（称为鬼键）。机械键盘通过在每个轴体串联一个单向导通二极管（Diode），物理级隔绝电流回流，实现真正的全键无冲 (N-Key Rollover)。</p>
+        <h3><span class="material-symbols-outlined" style="font-size: 18px;">timer</span> 2. 机械轴体双击连击（Chattering）的物理成因</h3>
+        <p>轴体内部金属弹片在长期击打氧化或积灰后，闭合瞬间会产生多次异常机械抖动（Bouncing）。若主控消抖算法（Debounce Time）时间过短（<10ms），抖动会被识别为两次独立按压，即“连击双击”。</p>`,
+
+      "tool_mouse_title": "鼠标微动双击检测与回报率 (Hz) 在线测试仪",
+      "tool_mouse_sub": "支持毫秒级检测左/右/中键微动连击故障、实时捕获鼠标回报率轮询速度（125Hz~8000Hz）与滚轮平滑度。",
+      "mouse_card1_title": "1. 微动双击/连击故障检测",
+      "mouse_pad_hint": "在此区域连续快速点击鼠标（左键/右键/中键）",
+      "mouse_pad_sub": "若检测到低于 80ms 的非预期快速连击，将触发双击警报",
+      "mouse_btn_left": "左键点击:",
+      "mouse_btn_right": "右键点击:",
+      "mouse_fault_count": "异常双击:",
+      "mouse_card2_title": "2. 鼠标回报率 (Polling Rate Hz) 实时测速",
+      "mouse_hz_hint": "在此区域内持续划圆快速移动鼠标",
+      "mouse_hz_sub": "实时捕捉 mousemove 事件间隔推算 USB 轮询频率",
+      "mouse_curr_hz": "实时频率:",
+      "mouse_peak_hz": "峰值频率:",
+      "tool_mouse_doc_title": "鼠标机械微动老化接触氧化与 USB 轮询率 (Polling Rate) 原理解析",
+      "tool_mouse_doc_sub": "深入解析传统金属簧片微动双击成因、光微动优势、1000Hz~8000Hz 超高回报率对 CPU 占用与游戏画面的影响。",
+      "tool_mouse_doc_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">mouse</span> 1. 鼠标微动物理双击的原理解剖</h3>
+        <p>传统机械微动（如欧姆龙蓝点/灰点、TTC金微动）依赖弹簧片物理接触通电。随着使用时长增加，金属触点表面发生电弧烧蚀与轻微氧化，接触阻抗急剧上升，按压时产生剧烈杂波电压，导致系统误识别为多次点击（即双击连击）。光微动（Optical Switch）通过红外光栅遮断导通，彻底消除了物理触点磨损与双击可能。</p>
+        <h3><span class="material-symbols-outlined" style="font-size: 18px;">speed</span> 2. 1000Hz vs 4000Hz/8000Hz 超高回报率技术解析</h3>
+        <p>回报率（Polling Rate）决定鼠标主控每秒向操作系统报告位置的频率。1000Hz 对应 1ms 间隔，8000Hz 对应 0.125ms 间隔。超高回报率能大幅降低 240Hz/360Hz 电竞显示器上的鼠标光标微撕裂，但对单核 CPU 中断性能提出极高要求。</p>`,
+
+
       "dash_pub_title": "极客技术专栏与白皮书 (Technical Publications)",
       "dash_pub_sub": "由 825412.xyz 核心工程团队撰写的原创网络架构、密码学安全与前端图形算法深度指南。",
       "dash_pub_card1_title": "WebRTC 点对点通信内幕与 NAT 穿透握手白皮书 ➔",
@@ -572,6 +638,72 @@ const I18nController = {
       'footer_rights': '© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利'
     },
     'en-US': {
+
+      "dash_shortcut_screen": "Dead Pixel Test",
+      "dash_shortcut_kb": "Keyboard Test",
+      "dash_shortcut_mouse": "Mouse & Hz Test",
+
+
+      "tool_screen_title": "Online Monitor Display Dead Pixel & Ghosting Quality Tester",
+      "tool_screen_sub": "Essential for new monitor inspection: Fullscreen pure-color dead pixel check, IPS backlight bleed diagnostics, 256-level grayscale dynamic range, and high-refresh ghosting test.",
+      "screen_mode1_title": "1. Solid Color Dead / Hot Pixel Check",
+      "screen_mode1_desc": "Cycle through full screen black, white, red, green, blue, cyan, magenta, and yellow to spot dead pixels.",
+      "screen_btn_start_solid": "Start Dead Pixel Test (Fullscreen)",
+      "screen_mode2_title": "2. 256-Level Grayscale & Ramp Test",
+      "screen_mode2_desc": "Evaluate display panel color banding, shadow detail, and contrast transitions.",
+      "screen_btn_start_grad": "Start Grayscale Ramp Test",
+      "screen_mode3_title": "3. High-Refresh Motion Ghosting",
+      "screen_mode3_desc": "Render fast-moving color blocks to visually check pixel response time and motion blur.",
+      "screen_btn_start_ghost": "Start Motion Ghosting Test",
+      "screen_tip_title": "Instructions:",
+      "screen_tip_text": "Once in fullscreen, left click or press [Space] / [Arrow keys] to cycle test patterns. Press [ESC] to exit.",
+      "tool_screen_doc_title": "Monitor Panel Architectures (IPS / OLED / Mini-LED) & ISO 9241 Defect Standards",
+      "tool_screen_doc_sub": "Understand liquid crystal alignments, backlight glow mechanics, GtG vs MPRT response times, and warranty replacement criteria.",
+      "tool_screen_doc_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">tv</span> 1. Pixel Defect Standards (ISO 9241-307 Class II)</h3>
+        <p>The ISO standard classifies pixel defects into three distinct categories:</p>
+        <ul>
+          <li><strong>Hot / Stuck Pixel</strong>: Pixels that remain illuminated on a pure black background due to shorted subpixel transistors;</li>
+          <li><strong>Dead Pixel</strong>: Completely unlit black dots on a pure white or solid background caused by broken drive circuits;</li>
+          <li><strong>Industry Replacement Thresholds</strong>: Class II panels typically allow no more than 2 hot pixels or 5 dead pixels. Perfect panel gaming displays guarantee zero hot pixels.</li>
+        </ul>
+        <h3><span class="material-symbols-outlined" style="font-size: 18px;">speed</span> 2. GtG Response Times vs MPRT Motion Clarity</h3>
+        <p>1ms specs frequently reference MPRT black frame insertion rather than physical gray-to-gray (GtG) transition speeds. Slower GtG results in severe motion blur (ghosting / smearing) during fast camera rotations.</p>`,
+
+      "tool_kb_title": "Mechanical Keyboard Ghosting & Key Chatter Online Tester",
+      "tool_kb_sub": "Real-time key illumination for standard 87/104 layouts, N-Key Rollover (NKRO) concurrency counter, and mechanical switch chattering diagnostics.",
+      "kb_stat_tested": "Keys Tested:",
+      "kb_stat_nkro": "Max Concurrency:",
+      "kb_stat_chatter": "Chatters / Faults:",
+      "kb_legend_tested": "Green: Passed test",
+      "kb_legend_pressing": "Cyan: Currently pressed",
+      "kb_legend_chatter": "Red: Hardware double-click/chatter detected",
+      "tool_kb_doc_title": "Keyboard Anti-Ghosting Diode Matrices & Microcontroller Debounce Algorithms",
+      "tool_kb_doc_sub": "Deep dive into N-Key Rollover diode circuitry, USB HID report descriptors, and mechanical switch oxidation chattering.",
+      "tool_kb_doc_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">keyboard</span> 1. Why Do Membrane Keyboards Suffer From Ghosting?</h3>
+        <p>Membrane keyboards use simple row-column scanning matrices. Pressing 3 keys forming a rectangle vertex causes parasitic current backflow triggering a false 4th key (ghosting). Mechanical keyboards integrate a dedicated diode per switch, physically isolating current flow to achieve true N-Key Rollover (NKRO).</p>
+        <h3><span class="material-symbols-outlined" style="font-size: 18px;">timer</span> 2. Mechanical Switch Chattering Mechanics</h3>
+        <p>As internal metal contacts oxidize and collect dust, closing contacts experience mechanical vibrations (bouncing). If the microcontroller debounce window is tuned too aggressively (<10ms), bouncing spikes register as unintended double presses.</p>`,
+
+      "tool_mouse_title": "Mouse Microswitch Double-Click & Polling Rate (Hz) Tester",
+      "tool_mouse_sub": "Millisecond-level double-click switch fault detection, real-time USB polling rate monitoring (125Hz-8000Hz), and scroll wheel smoothness analysis.",
+      "mouse_card1_title": "1. Microswitch Double-Click Fault Detection",
+      "mouse_pad_hint": "Rapidly click within this box (Left / Right / Middle click)",
+      "mouse_pad_sub": "Anomalous clicks under 80ms interval trigger a double-click hardware fault warning",
+      "mouse_btn_left": "Left Clicks:",
+      "mouse_btn_right": "Right Clicks:",
+      "mouse_fault_count": "Double Faults:",
+      "mouse_card2_title": "2. Real-Time Mouse Polling Rate (Hz) Speedometer",
+      "mouse_hz_hint": "Continuously move your mouse in fast circles within this area",
+      "mouse_hz_sub": "Captures mousemove event intervals to compute USB polling frequency",
+      "mouse_curr_hz": "Current Rate:",
+      "mouse_peak_hz": "Peak Rate:",
+      "tool_mouse_doc_title": "Mouse Microswitch Contact Oxidation & USB Polling Rate Engineering",
+      "tool_mouse_doc_sub": "Why metal leaf microswitches degrade, optical switch advantages, and 1000Hz-8000Hz ultra-high polling rate impacts on CPU load and frame pacing.",
+      "tool_mouse_doc_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">mouse</span> 1. Anatomy of Mechanical Microswitch Double-Clicking</h3>
+        <p>Traditional mechanical switches (Omron, TTC Gold) rely on metal leaf springs for electrical contact. Over time, contact surfaces suffer arc burn and oxidation, elevating impedance and introducing electrical noise that triggers false double clicks. Optical switches use infrared beams, completely eliminating physical contact wear.</p>
+        <h3><span class="material-symbols-outlined" style="font-size: 18px;">speed</span> 2. 1000Hz vs 4000Hz/8000Hz Ultra-High Polling Rates</h3>
+        <p>Polling rate defines how frequently the mouse reports position data to the OS (1000Hz = 1ms interval; 8000Hz = 0.125ms interval). Ultra-high polling eliminates cursor micro-stuttering on 240Hz+ gaming monitors at the cost of higher CPU interrupt overhead.</p>`,
+
 
       "dash_pub_title": "Developer Technical Publications & Whitepapers",
       "dash_pub_sub": "Deep-dive engineering guides on network architectures, cryptographic security, and computer graphics by the 825412.xyz team.",

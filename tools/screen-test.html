@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>在线显示器坏点/漏光/残影与色阶检测 (4K/高刷) - 825412.xyz</title>
+  <meta name="description" content="专业在线显示器屏幕体检工具：支持真全屏纯色切屏查坏点、IPS 屏幕边缘漏光检测、256级灰阶对比度测试与 144Hz/240Hz 高刷残影响应时间测试，买新机/验屏幕必备。">
+  <meta name="keywords" content="屏幕坏点检测, 显示器漏光测试, 屏幕残影测试, 灰阶测试, 4k屏幕测试, 825412.xyz">
+  <link rel="canonical" href="https://825412.xyz/tools/screen-test.html">
+  <link rel="stylesheet" href="../style.css?v=2.7.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5943907597157682" crossorigin="anonymous"></script>
+  <style>
+    .screen-canvas-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 99999;
+      display: none;
+      cursor: none;
+    }
+    .screen-tip {
+      position: absolute;
+      top: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      pointer-events: none;
+      transition: opacity 0.5s;
+    }
+  </style>
+</head>
+<body style="display: block; overflow: auto;">
+  <!-- 顶部面包屑与快捷导航 -->
+  <header style="background: rgba(6, 14, 32, 0.95); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 24px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="/" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: #fff; font-weight: 800; font-size: 18px;">
+          <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #8b5cf6, #06b6d4); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900;">82</div>
+          <span>825412.xyz</span>
+        </a>
+        <span style="color: #64748b;">/</span>
+        <a href="/toolbox.html" style="color: #8b5cf6; font-size: 14px; font-weight: 600; text-decoration: none;" data-i18n="nav_toolbox">极客工具箱</a>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
+          <a href="/" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_dashboard">控制台</a>
+          <a href="/toolbox.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_toolbox">极客工具箱</a>
+          <a href="/airdrop.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_airdrop">隔空快传</a>
+          <a href="/webhook.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_webhook">Webhook 调试</a>
+          <a href="/clipboard.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_clipboard">匿名剪贴板</a>
+          <a href="/sitemap.html" style="color: var(--color-primary); font-weight: 700; text-decoration: none;" data-i18n="nav_sitemap">全站索引</a>
+        </nav>
+        <div class="lang-toggle-wrapper">
+          <select id="lang-select-header" class="custom-select" style="padding: 4px 10px; font-size: 12px; border-radius: var(--radius-sm); background: var(--surface-high); color: var(--text-primary); border: 1px solid var(--border-light); cursor: pointer;">
+            <option value="zh-CN">🇨🇳 中文</option>
+            <option value="en-US">🇺🇸 English</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main style="max-width: 1200px; margin: 30px auto; padding: 0 20px;">
+    <div style="margin-bottom: 24px;">
+      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px;" data-i18n="tool_screen_title">在线显示器坏点/漏光/残影与色阶检测</h1>
+      <p style="font-size: 14px; color: var(--text-secondary);" data-i18n="tool_screen_sub">买新机与验屏必备：支持全屏纯色坏点检测、IPS 漏光诊断、256 级灰阶对比度与高刷残影测试。</p>
+    </div>
+
+    <!-- 交互工作台 -->
+    <div class="glass-card" style="margin-bottom: 30px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 18px; text-align: center;">
+          <span class="material-symbols-outlined" style="font-size: 36px; color: #38bdf8; margin-bottom: 8px;">fullscreen</span>
+          <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 6px;" data-i18n="screen_mode1_title">1. 纯色坏点/亮点检测</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;" data-i18n="screen_mode1_desc">黑、白、红、绿、蓝、青、洋红、黄纯色全屏快速切屏，寻找像素坏点。</p>
+          <button class="btn btn-primary" id="btn-start-solid" style="width: 100%;" data-i18n="screen_btn_start_solid">进入纯色坏点检测 (全屏)</button>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 18px; text-align: center;">
+          <span class="material-symbols-outlined" style="font-size: 36px; color: #10b981; margin-bottom: 8px;">contrast</span>
+          <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 6px;" data-i18n="screen_mode2_title">2. 256 级灰阶与色阶测试</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;" data-i18n="screen_mode2_desc">评估面板色彩过渡平滑度、暗部细节与高光层次，检测色彩断层。</p>
+          <button class="btn" id="btn-start-gradient" style="width: 100%; background: var(--surface-high);" data-i18n="screen_btn_start_grad">进入灰阶过渡测试</button>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 18px; text-align: center;">
+          <span class="material-symbols-outlined" style="font-size: 36px; color: #c084fc; margin-bottom: 8px;">motion_photos_on</span>
+          <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 6px;" data-i18n="screen_mode3_title">3. 高刷动态残影 (Ghosting)</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;" data-i18n="screen_mode3_desc">以不同速度渲染高速运动色块，肉眼观察像素响应时间与拖影情况。</p>
+          <button class="btn" id="btn-start-ghosting" style="width: 100%; background: var(--surface-high);" data-i18n="screen_btn_start_ghost">进入动态残影测试</button>
+        </div>
+      </div>
+
+      <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 14px 18px; font-size: 13px; color: var(--text-secondary);">
+        💡 <strong data-i18n="screen_tip_title">操作提示:</strong> <span data-i18n="screen_tip_text">进入全屏后，点击鼠标左键或按键盘【空格键】/【方向键】切换下一个测试图样，按【ESC】随时退出全屏。</span>
+      </div>
+    </div>
+
+    <!-- 全屏测试容器 -->
+    <div id="screen-overlay" class="screen-canvas-overlay">
+      <div id="screen-tip" class="screen-tip">点击或按空格切换颜色，按 ESC 退出</div>
+      <canvas id="screen-canvas" style="width: 100%; height: 100%;"></canvas>
+    </div>
+
+    <!-- 深度技术专栏与规范 -->
+    <div class="doc-section">
+      <div class="doc-header">
+        <span class="material-symbols-outlined doc-header-icon">auto_stories</span>
+        <div>
+          <h2 class="doc-header-title" data-i18n="tool_screen_doc_title">显示器面板技术（IPS / OLED / Mini-LED）与 ISO 9241 像素缺陷等级规范</h2>
+          <p class="doc-header-subtitle" data-i18n="tool_screen_doc_sub">深入了解液晶排列、背光漏光成因、GtG 与 MPRT 响应时间差异及国家三包坏点判定标准。</p>
+        </div>
+      </div>
+
+      <div class="doc-card" style="margin-bottom: 20px;" data-i18n="tool_screen_doc_body"></div>
+    </div>
+  </main>
+  <footer style="border-top: 1px solid rgba(255,255,255,0.08); padding: 30px 20px; margin-top: 50px; text-align: center; font-size: 13px; color: var(--text-muted); background: rgba(6, 14, 32, 0.5);">
+    <div style="margin-bottom: 12px;"><span data-i18n="footer_rights">© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利</span></div>
+    <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 10px;">
+      <a href="/about.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_about">关于本站</a>
+      <a href="/privacy.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_privacy">隐私政策</a>
+      <a href="/terms.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_terms">服务条款</a>
+      <a href="/contact.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_contact">联系我们</a>
+      <a href="/sitemap.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_sitemap_html">HTML 网站地图</a>
+    </div>
+  </footer>
+  <script src="../js/storage.js?v=2.7.0"></script>
+  <script src="../js/i18n.js?v=2.7.0"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const select = document.getElementById('lang-select-header');
+      if (select && typeof I18nController !== 'undefined') {
+        select.value = I18nController.currentLang;
+        select.addEventListener('change', (e) => {
+          I18nController.setLanguage(e.target.value);
+        });
+      }
+
+      // Screen Test Engine
+      const overlay = document.getElementById('screen-overlay');
+      const canvas = document.getElementById('screen-canvas');
+      const ctx = canvas.getContext('2d');
+      const tip = document.getElementById('screen-tip');
+
+      let currentMode = 'solid';
+      let solidIndex = 0;
+      const solidColors = ['#000000', '#ffffff', '#ff0000', '#00ff00', '#0000ff', '#00ffff', '#ff00ff', '#ffff00', '#808080'];
+      let animId = null;
+
+      function resize() {
+        canvas.width = window.innerWidth * window.devicePixelRatio;
+        canvas.height = window.innerHeight * window.devicePixelRatio;
+      }
+
+      function enterTest(mode) {
+        currentMode = mode;
+        solidIndex = 0;
+        overlay.style.display = 'block';
+        resize();
+        if (overlay.requestFullscreen) {
+          overlay.requestFullscreen().catch(() => {});
+        }
+        render();
+        tip.style.opacity = '1';
+        setTimeout(() => { tip.style.opacity = '0'; }, 3000);
+      }
+
+      function exitTest() {
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        }
+        overlay.style.display = 'none';
+        if (animId) cancelAnimationFrame(animId);
+      }
+
+      function render() {
+        if (animId) cancelAnimationFrame(animId);
+        const w = canvas.width;
+        const h = canvas.height;
+
+        if (currentMode === 'solid') {
+          ctx.fillStyle = solidColors[solidIndex];
+          ctx.fillRect(0, 0, w, h);
+        } else if (currentMode === 'gradient') {
+          // 256 Gray Steps
+          const stepW = w / 32;
+          const stepH = h / 8;
+          for (let i = 0; i < 256; i++) {
+            const x = (i % 32) * stepW;
+            const y = Math.floor(i / 32) * stepH;
+            ctx.fillStyle = 'rgb(' + i + ',' + i + ',' + i + ')';
+            ctx.fillRect(x, y, stepW, stepH);
+          }
+        } else if (currentMode === 'ghosting') {
+          let posX = 0;
+          function loop() {
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(0, 0, w, h);
+            
+            // Moving blocks at different speeds
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect((posX * 4) % w, h * 0.25, 120, 60);
+            
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect((posX * 8) % w, h * 0.5, 120, 60);
+
+            ctx.fillStyle = '#f43f5e';
+            ctx.fillRect((posX * 12) % w, h * 0.75, 120, 60);
+
+            posX += 2;
+            animId = requestAnimationFrame(loop);
+          }
+          loop();
+        }
+      }
+
+      document.getElementById('btn-start-solid').addEventListener('click', () => enterTest('solid'));
+      document.getElementById('btn-start-gradient').addEventListener('click', () => enterTest('gradient'));
+      document.getElementById('btn-start-ghosting').addEventListener('click', () => enterTest('ghosting'));
+
+      overlay.addEventListener('click', () => {
+        if (currentMode === 'solid') {
+          solidIndex = (solidIndex + 1) % solidColors.length;
+          render();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (overlay.style.display === 'block') {
+          if (e.key === 'Escape') {
+            exitTest();
+          } else if (e.key === ' ' || e.key === 'ArrowRight' || e.key === 'Enter') {
+            if (currentMode === 'solid') {
+              solidIndex = (solidIndex + 1) % solidColors.length;
+              render();
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
