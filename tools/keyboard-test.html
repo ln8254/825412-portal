@@ -176,6 +176,9 @@
         <div>🟦 <span data-i18n="kb_legend_pressing">青色: 当前正处于按下状态</span></div>
         <div>🟥 <span data-i18n="kb_legend_chatter">红色: 捕捉到物理微动双击/弹跳连击</span></div>
       </div>
+      <div style="margin-top: 12px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: var(--radius-sm); padding: 10px 16px; font-size: 12px; color: #38bdf8;">
+        🐧 <strong>Linux 极客提示：</strong> Linux (GNOME / KDE) 桌面默认会在系统层全局拦截单按 <code>Super(Win)</code> 与 <code>PrtSc</code>。您可以通过 <strong>按住 Super 键再按任意键</strong>、点击右上角 <strong>【🎮 全屏独占锁定】</strong>、或 <strong>直接鼠标点击键位</strong> 完成快速测试！
+      </div>
     </div>
 
     <!-- 深度技术专栏与规范 -->
@@ -396,6 +399,47 @@
         return code || key;
       }
 
+      
+      // Check modifier states on EVERY event (Handles Linux GNOME eating standalone Super/Win tap)
+      function checkModifierStates(e) {
+        // 1. Meta / Super / Win Modifier State
+        if (e.metaKey || (e.getModifierState && (e.getModifierState('Meta') || e.getModifierState('Super') || e.getModifierState('OS')))) {
+          if (!testedKeys.has('MetaLeft')) {
+            handleKeyHit('MetaLeft', { key: 'Super', code: 'MetaLeft', keyCode: 91 });
+          }
+        }
+        // 2. Alt / Option
+        if (e.altKey || (e.getModifierState && e.getModifierState('Alt'))) {
+          if (!testedKeys.has('AltLeft') && !testedKeys.has('AltRight')) {
+            handleKeyHit('AltLeft', { key: 'Alt', code: 'AltLeft', keyCode: 18 });
+          }
+        }
+        // 3. Control
+        if (e.ctrlKey || (e.getModifierState && e.getModifierState('Control'))) {
+          if (!testedKeys.has('ControlLeft') && !testedKeys.has('ControlRight')) {
+            handleKeyHit('ControlLeft', { key: 'Control', code: 'ControlLeft', keyCode: 17 });
+          }
+        }
+        // 4. Shift
+        if (e.shiftKey || (e.getModifierState && e.getModifierState('Shift'))) {
+          if (!testedKeys.has('ShiftLeft') && !testedKeys.has('ShiftRight')) {
+            handleKeyHit('ShiftLeft', { key: 'Shift', code: 'ShiftLeft', keyCode: 16 });
+          }
+        }
+        // 5. CapsLock
+        if (e.getModifierState && e.getModifierState('CapsLock')) {
+          if (!testedKeys.has('CapsLock')) {
+            handleKeyHit('CapsLock', { key: 'CapsLock', code: 'CapsLock', keyCode: 20 });
+          }
+        }
+        // 6. ScrollLock
+        if (e.getModifierState && e.getModifierState('ScrollLock')) {
+          if (!testedKeys.has('ScrollLock')) {
+            handleKeyHit('ScrollLock', { key: 'ScrollLock', code: 'ScrollLock', keyCode: 145 });
+          }
+        }
+      }
+
       function handleKeyHit(code, e) {
         var now = performance.now();
         var label = code + ' (Key: "' + (e.key || '-') + '" | Code: ' + (e.code || '-') + ' | KeyCode: ' + (e.keyCode || e.which || '-') + ')';
@@ -430,12 +474,14 @@
 
       // DOM Capture Listeners on document and window
       document.addEventListener('keydown', function(e) {
+        checkModifierStates(e);
         var code = normalizeKeyCode(e);
         e.preventDefault();
         handleKeyHit(code, e);
       }, true);
 
       document.addEventListener('keyup', function(e) {
+        checkModifierStates(e);
         var code = normalizeKeyCode(e);
         e.preventDefault();
 
