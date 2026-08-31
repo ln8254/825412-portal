@@ -8,7 +8,6 @@ const STATIC_ASSETS = [
   '/toolbox.html',
   '/clipboard.html',
   '/tools/screen-test.html',
-  '/tools/keyboard-test.html',
   '/tools/mouse-test.html',
   '/tools/password-generator.html',
   '/tools/json-formatter.html',
