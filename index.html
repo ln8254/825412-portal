@@ -1336,10 +1336,50 @@ function verifyWebhook(rawPayload, signatureHeader, secret) {
       </div>
     </section>
     
+    
+      <!-- 极客技术专栏与白皮书精选 (Content-Rich Section) -->
+      <div class="doc-section" style="margin-top: 30px;">
+        <div class="doc-header">
+          <span class="material-symbols-outlined doc-header-icon">auto_stories</span>
+          <div>
+            <h2 class="doc-header-title">极客技术专栏与白皮书 (Technical Publications)</h2>
+            <p class="doc-header-subtitle">由 825412.xyz 核心工程团队撰写的原创网络架构、密码学安全与前端图形算法深度指南。</p>
+          </div>
+        </div>
+
+        <div class="doc-grid">
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">lan</span> <a href="/articles/webrtc-p2p-architecture-guide.html" style="color: var(--text-primary); text-decoration: none;">WebRTC 点对点通信内幕与 NAT 穿透握手白皮书 ➔</a></h3>
+            <p>深入剖析 WebRTC P2P 浏览器底层连接原理：STUN 公网 IP 探测、ICE 候选地址协商、SDP 握手到 DTLS 加密分块流式传输。</p>
+          </div>
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">security</span> <a href="/articles/webhook-security-and-idempotency.html" style="color: var(--text-primary); text-decoration: none;">生产级 Webhook 消费端五大安全规范与幂等性 ➔</a></h3>
+            <p>掌握反向 HTTP 回调设计模式、HMAC-SHA256 签名校验算法、时间戳防重放攻击与分布式排他锁幂等性消费方案。</p>
+          </div>
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">lock</span> <a href="/articles/modern-password-entropy-and-nist-standard.html" style="color: var(--text-primary); text-decoration: none;">现代密码安全黄金法则：信息熵与 NIST 800-63B ➔</a></h3>
+            <p>基于香农信息论推导密码熵计算公式 E = L × log2(N)，对比 8 卡 RTX 4090 集群暴力破解算力，解读长度优先准则。</p>
+          </div>
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">vpn_key</span> <a href="/articles/why-you-should-stop-storing-jwt-in-localstorage.html" style="color: var(--text-primary); text-decoration: none;">Web 安全深度剖析：千万不要在 LocalStorage 存 JWT ➔</a></h3>
+            <p>深入探讨 XSS 跨站脚本攻击与 JWT 窃取风险：对比 LocalStorage 与 HttpOnly SameSite Cookie 的多层防御体系。</p>
+          </div>
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">fingerprint</span> <a href="/articles/cryptographic-hash-functions-and-slow-hashing.html" style="color: var(--text-primary); text-decoration: none;">单向散列函数演进史：从 MD5 到 Argon2 慢哈希 ➔</a></h3>
+            <p>密码学散列演进历程：探讨 MD5 碰撞原理、SHA-256 算法内部结构，以及为什么存储用户密码必须使用 Argon2id / bcrypt。</p>
+          </div>
+          <div class="doc-card">
+            <h3><span class="material-symbols-outlined" style="font-size: 18px;">photo_size_select_large</span> <a href="/articles/pure-frontend-image-processing-and-exif-privacy.html" style="color: var(--text-primary); text-decoration: none;">浏览器端图像处理与 EXIF GPS 隐私抹除实战 ➔</a></h3>
+            <p>纯前端 Canvas 硬件加速图像压缩与元数据清洗：利用 HTML5 Canvas 实现 WebP 编码并物理级抹除拍摄地点经纬度。</p>
+          </div>
+        </div>
+      </div>
+
     <!-- 站点全局通用页脚 -->
     <footer class="site-footer">
       <div data-i18n="footer_rights">© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利</div>
       <div class="site-footer-links">
+        <a href="sitemap.html" id="footer-link-sitemap">全站索引</a>
         <a href="about.html" id="footer-link-about" data-i18n="nav_about">关于本站</a>
         <a href="privacy.html" id="footer-link-privacy" data-i18n="nav_privacy">隐私政策</a>
         <a href="terms.html" id="footer-link-terms" data-i18n="nav_terms">服务条款</a>
