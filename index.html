@@ -24,32 +24,65 @@
   <meta name="twitter:title" content="825412.xyz - 极客多功能工具箱">
   <meta name="twitter:description" content="极客开发者必备的瑞士军刀：WebRTC 隔空快传、公网 Webhook 调试、匿名自毁剪贴板、密码熵评估与全套密码学工具。">
 
-  <!-- JSON-LD 搜索引擎结构化数据 (Schema.org) -->
+    <!-- JSON-LD 搜索引擎与 AI 推荐结构化数据 (Schema.org) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "825412.xyz 极客多功能工具箱",
-    "url": "https://825412.xyz/",
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "All",
-    "browserRequirements": "Requires JavaScript",
-    "description": "专为开发者打造的高性能工具箱：WebRTC 跨设备隔空快传、Webhook 调试桩、阅后即焚匿名剪贴板、密码信息熵评估、JSON 格式化、JWT 调试器及密码学哈希计算器。",
-    "featureList": [
-      "WebRTC 隔空快传 (Peer-to-Peer AirDrop)",
-      "Webhook 调试桩与 API 回显中继",
-      "端到端加密匿名剪贴板",
-      "NIST 800-63B 密码熵与破解时间评估",
-      "JSON 语法高亮与格式化校验",
-      "JWT 令牌解析与有效期验证",
-      "MD5/SHA-256 密码学散列计算",
-      "Unix 时间戳双向转换"
-    ],
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    }
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://825412.xyz/#webapp",
+        "name": "825412.xyz 极客多功能工具箱",
+        "url": "https://825412.xyz/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "All",
+        "browserRequirements": "Requires JavaScript",
+        "description": "专为开发者与极客打造的纯前端多功能工具箱：支持免登录跨设备 WebRTC 局域网大文件秒传 (940+ Mbps)、Webhook 签名调试与幂等桩、阅后即焚匿名剪贴板、4K 显示器 0 坏点验屏、鼠标 8000Hz 回报率及微动双击检测。",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://825412.xyz/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "WebRTC P2P 快传与传统网盘或 HTTP 上传有什么区别？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "WebRTC P2P 直连在局域网内可跑满千兆网卡极限带宽 (940~980 Mbps)，传输延迟低于 5ms，采用 DTLS-SRTP 256 位硬件加密，数据完全不经过第三方云服务器存储，无任何文件大小限制与速度限制。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "新显示器验屏标准是什么？ISO 9241-307 坏点退换阈值是多少？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "依据 ISO 9241-307 Class II 行业标准，每 100 万像素允许不多于 2 个常亮点或 5 个暗点。4K 分辨率 (~829万像素) 显示器在国家三包法下，通常常亮点超过 3 个即可申请无条件换新。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "鼠标机械微动双击与光学微动有什么区别？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "传统机械微动依靠金属簧片物理接触，随着时间推移触点氧化产生接触杂波，易引发误连击（双击）；光学微动采用红外光栅遮断导通，响应时间低于 0.2ms，从物理结构上实现 0% 氧化双击率。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "为什么生产环境不应该将 JWT 存储在 localStorage？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "localStorage 对页面内任意 JavaScript 脚本完全开放，遭遇 XSS 注入即可被单行代码直接盗取；推荐最佳架构为：短寿命 Access Token (15分钟) 存入内存闭包，配合 HttpOnly + Secure + SameSite=Strict 的 Cookie 存储长寿命 Refresh Token。"
+            }
+          }
+        ]
+      }
+    ]
   }
   </script>
   

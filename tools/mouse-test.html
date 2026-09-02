@@ -103,7 +103,45 @@
         </div>
       </div>
 
-      <div class="doc-card" style="margin-bottom: 20px;" data-i18n="tool_mouse_doc_body"></div>
+      <div class="doc-card" style="margin-bottom: 20px;" data-i18n="tool_mouse_doc_body">
+        <div class="scenario-box" style="background: rgba(139, 92, 246, 0.08); border-left: 4px solid #8b5cf6; padding: 14px 18px; border-radius: 6px; margin-bottom: 20px;">
+          <h4 style="color: #a78bfa; margin-top: 0; margin-bottom: 8px;">🎯 最佳适用场景 (Best Scenarios)</h4>
+          <ul style="margin: 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary);">
+            <li><strong>二手外设回收与微动按键故障排查</strong>：毫秒级捕获左/右/中键低于 80ms 的非预期物理弹跳（双击连击），快速定位是否需要更换微动开关。</li>
+            <li><strong>电竞鼠标实际回报率 (Polling Rate) 真实测速</strong>：实测 USB 接口在 125Hz、500Hz、1000Hz、4000Hz、8000Hz 下的实际刷新率稳定性与丢包抖动。</li>
+          </ul>
+        </div>
+        <h3><span class="material-symbols-outlined" style="font-size: 18px;">analytics</span> 1. 传统机械金属微动 vs 光学微动 (Optical Switch) 深度对比矩阵</h3>
+        <div style="overflow-x: auto; margin: 16px 0;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.06); color: #fff; border-bottom: 1px solid var(--border-light);">
+                <th style="padding: 10px 14px;">微动技术类别</th>
+                <th style="padding: 10px 14px;">触发机制与触点氧化</th>
+                <th style="padding: 10px 14px;">按键触发延迟 (Click Latency)</th>
+                <th style="padding: 10px 14px;">双击连击故障率</th>
+                <th style="padding: 10px 14px;">标称电气寿命</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 10px 14px; font-weight: 700; color: #f87171;">传统机械金属簧片 (欧姆龙/TTC金微动)</td>
+                <td style="padding: 10px 14px;">金属触点物理撞击接触，受潮氧化导致阻抗升高</td>
+                <td style="padding: 10px 14px;">需 8~15ms 消抖延时 (Debounce Time) 防误触</td>
+                <td style="padding: 10px 14px; color: #f87171;">较高 (使用 1~2 年后极易因氧化产生连击)</td>
+                <td style="padding: 10px 14px;">2,000 万 ~ 8,000 万次点击</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 14px; font-weight: 700; color: #10b981;">红外光学微动 (Razer / 罗技 Lightforce)</td>
+                <td style="padding: 10px 14px; color: #10b981;"><strong>红外光栅遮断导通，无物理金属触点磨损</strong></td>
+                <td style="padding: 10px 14px; color: #10b981;"><strong>< 0.2 ms (光速触发，无需消抖算法)</strong></td>
+                <td style="padding: 10px 14px; color: #10b981;"><strong>0% (物理结构上杜绝双击可能)</strong></td>
+                <td style="padding: 10px 14px; color: #10b981;"><strong>9,000 万 ~ 1 亿次点击</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </main>
   <footer style="border-top: 1px solid rgba(255,255,255,0.08); padding: 30px 20px; margin-top: 50px; text-align: center; font-size: 13px; color: var(--text-muted); background: rgba(6, 14, 32, 0.5);">

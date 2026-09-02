@@ -38,15 +38,58 @@ const I18nController = {
       "screen_tip_text": "进入全屏后，点击鼠标左键或按键盘【空格键】/【方向键】切换下一个测试图样，按【ESC】随时退出全屏。",
       "tool_screen_doc_title": "显示器面板技术（IPS / OLED / Mini-LED）与 ISO 9241 像素缺陷等级规范",
       "tool_screen_doc_sub": "深入了解液晶排列、背光漏光成因、GtG 与 MPRT 响应时间差异及国家三包坏点判定标准。",
-      "tool_screen_doc_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">tv</span> 1. 坏点、亮点、暗点判定标准 (ISO 9241-307 Class II)</h3>
-        <p>国际 ISO 9241 标准将屏幕像素缺陷分为三类：</p>
-        <ul>
-          <li><strong>亮点 (Hot Pixel)</strong>：在纯黑背景下持续发光的异常像素点（子像素晶体管短路无法关闭）；</li>
-          <li><strong>暗点/死点 (Dead Pixel)</strong>：在纯白或纯色背景下完全不发光的黑点（驱动电路断路损坏）；</li>
-          <li><strong>行业三包退换标准</strong>：通常 Class II 等级面板允许全屏不多于 2 个亮点或 5 个暗点；电竞级“完美屏 (Perfect Panel)”承诺 0 亮点。</li>
-        </ul>
-        <h3><span class="material-symbols-outlined" style="font-size: 18px;">speed</span> 2. GtG 灰阶响应时间与 MPRT 动态清晰度差异</h3>
-        <p>很多商家宣传的 1ms 响应时间通常指 MPRT 插黑帧技术，而非真实的物理灰阶切换时间（GtG）。GtG 越慢，高刷下快速转动视角的拖影（Ghosting / Smearing）越严重。</p>`,
+      "tool_screen_doc_body": `
+<div class="scenario-box" style="background: rgba(139, 92, 246, 0.08); border-left: 4px solid #8b5cf6; padding: 14px 18px; border-radius: 6px; margin-bottom: 20px;">
+  <h4 style="color: #a78bfa; margin-top: 0; margin-bottom: 8px;">🎯 Best Use Cases & Scenarios</h4>
+  <ul style="margin: 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary);">
+    <li><strong>New Monitor & Laptop Unboxing Quality Inspection</strong>: Rapidly check for dead pixels, stuck hot subpixels, and IPS backlight bleed within the return window.</li>
+    <li><strong>High-Refresh Gaming Displays (144Hz / 240Hz / 360Hz / 540Hz) Motion Ghosting Test</strong>: Visually evaluate physical GtG response times and motion blur artifacts using high-speed color ramps.</li>
+  </ul>
+</div>
+
+<h3><span class="material-symbols-outlined" style="font-size: 18px;">analytics</span> 1. Fast-IPS vs OLED vs Mini-LED Panel Performance Comparison</h3>
+<div style="overflow-x: auto; margin: 16px 0;">
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+    <thead>
+      <tr style="background: rgba(255,255,255,0.06); color: #fff; border-bottom: 1px solid var(--border-light);">
+        <th style="padding: 10px 14px;">Panel Architecture</th>
+        <th style="padding: 10px 14px;">Physical Response Time (GtG)</th>
+        <th style="padding: 10px 14px;">Static Contrast Ratio</th>
+        <th style="padding: 10px 14px;">Backlight Glow / Bleed</th>
+        <th style="padding: 10px 14px;">Tradeoffs & Best Role</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="padding: 10px 14px; font-weight: 700; color: #38bdf8;">Fast-IPS (Mainstream Esports)</td>
+        <td style="padding: 10px 14px;">1.0 ms ~ 3.5 ms</td>
+        <td style="padding: 10px 14px;">1000 : 1</td>
+        <td style="padding: 10px 14px;">Corner IPS glow common in dark rooms</td>
+        <td style="padding: 10px 14px;">High color accuracy, balanced response, best value</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="padding: 10px 14px; font-weight: 700; color: #10b981;">OLED / QD-OLED</td>
+        <td style="padding: 10px 14px; color: #10b981;"><strong>0.03 ms (Instantaneous)</strong></td>
+        <td style="padding: 10px 14px; color: #10b981;"><strong>1,500,000 : 1 (True pixel black)</strong></td>
+        <td style="padding: 10px 14px; color: #10b981;"><strong>0 Bleed (Self-emissive)</strong></td>
+        <td style="padding: 10px 14px; color: #10b981;">Flawless motion clarity & infinite contrast</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 14px; font-weight: 700; color: #a78bfa;">Mini-LED (Local Dimming)</td>
+        <td style="padding: 10px 14px;">2.0 ms ~ 4.0 ms</td>
+        <td style="padding: 10px 14px;">100,000 : 1 ~ 1,000,000 : 1</td>
+        <td style="padding: 10px 14px;">Minor blooming (halo) around small bright objects</td>
+        <td style="padding: 10px 14px;">Extreme peak brightness (1000+ nits), great for HDR</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h3><span class="material-symbols-outlined" style="font-size: 18px;">verified</span> 2. ISO 9241-307 Pixel Defect Classes & Warranty Standards</h3>
+<ul>
+  <li><strong>Class I (Perfect Display)</strong>: <strong>0 hot pixels, 0 dead pixels, 0 subpixel defects</strong> strictly required;</li>
+  <li><strong>Class II (Standard Industry Warranty)</strong>: Allows up to <strong>2 hot pixels (Type 1)</strong> or <strong>5 dead pixels (Type 2)</strong> per million pixels. On a 4K panel (~8.29M pixels), more than 3 hot pixels typically qualifies for immediate warranty replacement.</li>
+</ul>`,
 
       "tool_kb_title": "机械键盘全键无冲与连击/延迟在线测试仪",
       "tool_kb_sub": "支持标准 87/104 键位实时点亮、NKRO 全键无冲最大并发数统计、轴体物理双击连击检测。",
@@ -78,10 +121,52 @@ const I18nController = {
       "mouse_peak_hz": "峰值频率:",
       "tool_mouse_doc_title": "鼠标机械微动老化接触氧化与 USB 轮询率 (Polling Rate) 原理解析",
       "tool_mouse_doc_sub": "深入解析传统金属簧片微动双击成因、光微动优势、1000Hz~8000Hz 超高回报率对 CPU 占用与游戏画面的影响。",
-      "tool_mouse_doc_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">mouse</span> 1. 鼠标微动物理双击的原理解剖</h3>
-        <p>传统机械微动（如欧姆龙蓝点/灰点、TTC金微动）依赖弹簧片物理接触通电。随着使用时长增加，金属触点表面发生电弧烧蚀与轻微氧化，接触阻抗急剧上升，按压时产生剧烈杂波电压，导致系统误识别为多次点击（即双击连击）。光微动（Optical Switch）通过红外光栅遮断导通，彻底消除了物理触点磨损与双击可能。</p>
-        <h3><span class="material-symbols-outlined" style="font-size: 18px;">speed</span> 2. 1000Hz vs 4000Hz/8000Hz 超高回报率技术解析</h3>
-        <p>回报率（Polling Rate）决定鼠标主控每秒向操作系统报告位置的频率。1000Hz 对应 1ms 间隔，8000Hz 对应 0.125ms 间隔。超高回报率能大幅降低 240Hz/360Hz 电竞显示器上的鼠标光标微撕裂，但对单核 CPU 中断性能提出极高要求。</p>`,
+      "tool_mouse_doc_body": `
+<div class="scenario-box" style="background: rgba(139, 92, 246, 0.08); border-left: 4px solid #8b5cf6; padding: 14px 18px; border-radius: 6px; margin-bottom: 20px;">
+  <h4 style="color: #a78bfa; margin-top: 0; margin-bottom: 8px;">🎯 Best Use Cases & Scenarios</h4>
+  <ul style="margin: 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary);">
+    <li><strong>Used Gaming Peripherals & Switch Fault Diagnostics</strong>: Millisecond-level detection of sub-80ms anomalous physical bounces (double-clicking) to determine switch replacement needs.</li>
+    <li><strong>Esports Mouse Real Polling Rate (Hz) Stability Benchmark</strong>: Real-time USB polling rate analysis measuring packet stability and frame pacing across 125Hz, 1000Hz, 4000Hz, and 8000Hz.</li>
+  </ul>
+</div>
+
+<h3><span class="material-symbols-outlined" style="font-size: 18px;">analytics</span> 1. Mechanical Leaf Switches vs Optical Microswitches Comparison</h3>
+<div style="overflow-x: auto; margin: 16px 0;">
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+    <thead>
+      <tr style="background: rgba(255,255,255,0.06); color: #fff; border-bottom: 1px solid var(--border-light);">
+        <th style="padding: 10px 14px;">Switch Architecture</th>
+        <th style="padding: 10px 14px;">Actuation Mechanism</th>
+        <th style="padding: 10px 14px;">Click Latency</th>
+        <th style="padding: 10px 14px;">Double-Click Chattering Risk</th>
+        <th style="padding: 10px 14px;">Rated Lifespan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="padding: 10px 14px; font-weight: 700; color: #f87171;">Mechanical Metal Leaf (Omron / TTC Gold)</td>
+        <td style="padding: 10px 14px;">Physical metal contact collision; prone to oxidation & arcing</td>
+        <td style="padding: 10px 14px;">Requires 8-15ms debounce filter algorithm</td>
+        <td style="padding: 10px 14px; color: #f87171;">High (Oxidation introduces chatter after 1-2 years)</td>
+        <td style="padding: 10px 14px;">20M ~ 80M clicks</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 14px; font-weight: 700; color: #10b981;">Infrared Optical Switch (Razer / Lightforce)</td>
+        <td style="padding: 10px 14px; color: #10b981;"><strong>Light beam interruption; zero physical contact wear</strong></td>
+        <td style="padding: 10px 14px; color: #10b981;"><strong>< 0.2 ms (Instantaneous, 0 debounce delay)</strong></td>
+        <td style="padding: 10px 14px; color: #10b981;"><strong>0% (Immune to contact oxidation chattering)</strong></td>
+        <td style="padding: 10px 14px; color: #10b981;"><strong>90M ~ 100M clicks</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h3><span class="material-symbols-outlined" style="font-size: 18px;">speed</span> 2. USB Polling Rate (Hz) Latency & CPU Interrupt Overhead</h3>
+<ul>
+  <li><strong>125 Hz (Office Standard)</strong>: <strong>8.0 ms</strong> packet interval, negligible CPU load (<0.1%), noticeable cursor stepping on 144Hz+ monitors;</li>
+  <li><strong>1000 Hz (Esports Gold Standard)</strong>: <strong>1.0 ms</strong> packet interval, balanced ~1% CPU load, fluid high-refresh cursor tracking;</li>
+  <li><strong>4000 Hz / 8000 Hz (Hyper-Polling)</strong>: <strong>0.25 ms ~ 0.125 ms</strong> interval, eliminates micro-stutter on 360Hz/540Hz displays, requires multi-core high-IPC CPUs to process 8000 hardware interrupts/sec.</li>
+</ul>`,
 
 
       "dash_pub_title": "极客技术专栏与白皮书 (Technical Publications)",
