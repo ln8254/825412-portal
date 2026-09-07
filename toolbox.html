@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>极客开发者工具箱 (Geek Toolbox) - 强密码生成与熵评估 · JSON校验 · JWT调试 · 哈希散列计算 | 825412.xyz</title>
-  <meta name="description" content="825412.xyz 极客工具箱：免安装、零依赖、纯浏览器本地内存运算的开发者瑞士军刀。包含基于 NIST 800-63B 的密码熵与破译时间评估、JSON 格式化校验、JWT 令牌调试、MD5/SHA-256 散列计算、Unix 时间戳转换、图片极限压缩与 EXIF GPS 抹除。">
-  <meta name="keywords" content="密码生成器, 密码信息熵评估, json格式化, jwt调试器, md5计算器, sha256计算, 时间戳转换, 图片压缩, exif抹除, 开发者工具箱, 825412.xyz">
+  <title>极客开发者工具箱 (Geek Toolbox) - 纯前端高性能开发与硬件测试套件 | 825412.xyz</title>
+  <meta name="description" content="825412.xyz 极客工具箱：免安装、零依赖、100% 浏览器本地内存运算的开发者瑞士军刀。包含密码熵评估、JSON 格式化、JWT 调试、MD5/SHA-256 散列计算、时间戳转换、Squoosh 图片压缩、WiFi 二维码、4K 屏幕坏点验屏及鼠标双击测速。">
+  <meta name="keywords" content="极客工具箱, 开发者工具, 密码生成器, json格式化, jwt调试, 哈希计算, 时间戳转换, squoosh图片压缩, 屏幕坏点检测, 鼠标测速, 825412.xyz">
   <link rel="canonical" href="https://825412.xyz/toolbox.html">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 
   <!-- Open Graph -->
   <meta property="og:title" content="极客开发者工具箱 (Geek Toolbox) - 纯前端高性能开发套件 | 825412.xyz">
-  <meta property="og:description" content="密码熵评估、JSON 校验、JWT 解析、密码学 Hash、时间戳转换与图片 EXIF 隐私清洗。">
+  <meta property="og:description" content="密码熵评估、JSON 校验、JWT 解析、密码学 Hash、Squoosh 图片压缩、屏幕坏点验机与鼠标测速。纯前端 0 上传。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://825412.xyz/toolbox.html">
   <meta property="og:site_name" content="825412.xyz 极客多功能工具箱">
@@ -25,7 +25,8 @@
     "url": "https://825412.xyz/toolbox.html",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "All",
-    "description": "专为开发者打造的高性能、纯前端、零依赖的极客工具集。",
+    "browserRequirements": "Requires JavaScript",
+    "description": "专为开发者打造的高性能、纯前端、零依赖的极客工具聚合中心。",
     "offers": {
       "@type": "Offer",
       "price": "0",
@@ -39,7 +40,96 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5943907597157682" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="style.css?v=2.6.4">
+  <link rel="stylesheet" href="style.css?v=2.7.0">
+  <style>
+    .filter-btn {
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--surface-high);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filter-btn:hover {
+      color: #fff;
+      border-color: var(--color-secondary);
+    }
+    .filter-btn.active {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
+    }
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+    .hub-card {
+      background: var(--surface-medium);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .hub-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--color-secondary);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+    .hub-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent-color, var(--color-secondary)), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .hub-card:hover::before {
+      opacity: 1;
+    }
+    .hub-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .hub-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .hub-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+  </style>
 </head>
 <body style="display: block; overflow: auto;">
 
@@ -52,556 +142,356 @@
           <span>825412.xyz</span>
         </a>
         <span style="color: #64748b;">/</span>
-        <span style="color: #8b5cf6; font-size: 14px; font-weight: 600;" data-i18n="nav_toolbox">极客工具</span>
+        <span style="color: #8b5cf6; font-size: 14px; font-weight: 600;" data-i18n="nav_toolbox">极客工具箱</span>
       </div>
-      <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
-        <a href="/" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_dashboard">控制台</a>
-        <a href="airdrop.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_airdrop">隔空快传</a>
-        <a href="webhook.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_webhook">Webhook 调试</a>
-        <a href="clipboard.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_clipboard">匿名剪贴板</a>
-        <a href="toolbox.html" style="color: #8b5cf6; text-decoration: none; font-weight: 700;" data-i18n="nav_toolbox">极客工具箱</a>
-      </nav>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
+          <a href="/" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_dashboard">控制台</a>
+          <a href="/toolbox.html" style="color: var(--color-primary); font-weight: 700; text-decoration: none;" data-i18n="nav_toolbox">极客工具箱</a>
+          <a href="/airdrop.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_airdrop">隔空快传</a>
+          <a href="/webhook.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_webhook">Webhook 调试</a>
+          <a href="/clipboard.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_clipboard">匿名剪贴板</a>
+          <a href="/sitemap.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_sitemap">全站索引</a>
+        </nav>
+        <div class="lang-toggle-wrapper">
+          <select id="lang-select-header" class="custom-select" style="padding: 4px 10px; font-size: 12px; border-radius: var(--radius-sm); background: var(--surface-high); color: var(--text-primary); border: 1px solid var(--border-light); cursor: pointer;">
+            <option value="zh-CN">🇨🇳 中文</option>
+            <option value="en-US">🇺🇸 English</option>
+          </select>
+        </div>
+      </div>
     </div>
   </header>
 
   <!-- 主体内容 -->
   <main style="max-width: 1200px; margin: 30px auto; padding: 0 20px;">
     
-    <!-- 标题与介绍 -->
+    <!-- 标题与架构介绍 -->
     <div style="margin-bottom: 24px;">
-      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px;" data-i18n="tool_title">标题</h1>
-      <p style="font-size: 14px; color: var(--text-secondary);" data-i18n="tool_subtitle">介绍</p>
-    </div>
-
-        <!-- 子 Tab 导航 -->
-    <div class="toolbox-tabs" style="margin-bottom: 20px;">
-      <div class="toolbox-tab-btn active" data-tab="password-tab" data-i18n="tool_tab_pwd">密码生成器</div>
-      <div class="toolbox-tab-btn" data-tab="json-tab" data-i18n="tool_tab_json">JSON 格式化</div>
-      <div class="toolbox-tab-btn" data-tab="jwt-tab" data-i18n="tool_tab_jwt">JWT 调试器</div>
-      <div class="toolbox-tab-btn" data-tab="hash-tab" data-i18n="tool_tab_hash">哈希散列计算</div>
-      <div class="toolbox-tab-btn" data-tab="time-tab" data-i18n="tool_tab_time">时间戳转换</div>
-      <div class="toolbox-tab-btn" data-tab="text-tab" data-i18n="tool_tab_text">文本处理</div>
-      <div class="toolbox-tab-btn" data-tab="media-tab" data-i18n="tool_media_tab">Squoosh 图片压缩</div>
-      <a href="/tools/screen-test.html" class="toolbox-tab-btn" style="text-decoration: none; color: inherit;">🖥️ 屏幕坏点检测 ➔</a>
-      <a href="/tools/mouse-test.html" class="toolbox-tab-btn" style="text-decoration: none; color: inherit;">🖱️ 鼠标双击测速 ➔</a>
-    </div>
-
-    <!-- 1. 子视图：密码生成器与信息熵评估 -->
-    <div id="password-tab" class="tool-view active glass-card" style="margin-bottom: 30px;">
-      <div class="pwd-result-box">
-        <div class="pwd-display" id="generated-password">点击下方生成按钮</div>
-        <button class="material-symbols-outlined" id="copy-password-btn" style="cursor: pointer; color: var(--color-secondary); background: none; border: none;">content_copy</button>
+      <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #a78bfa; margin-bottom: 10px; font-weight: 700;">
+        <span>🧰 统一工具聚合中心 · 100% 纯前端零上传</span>
       </div>
+      <h1 style="font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px;" data-i18n="toolbox_hub_title">极客工具箱聚合大厅 (Geek Toolbox Hub)</h1>
+      <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;" data-i18n="toolbox_hub_desc">免安装、零依赖、纯浏览器本地内存运算的开发者瑞士军刀。每个工具均配备独立沉浸式工作台，彻底告别堆叠与割裂。</p>
+    </div>
+
+    <!-- 分类筛选导航条 -->
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;">
+      <button class="filter-btn active" data-filter="all">🌟 全部工具 (<span id="count-all">10</span>)</button>
+      <button class="filter-btn" data-filter="security">🔐 安全与密码 (3)</button>
+      <button class="filter-btn" data-filter="dev">🔤 格式与开发 (3)</button>
+      <button class="filter-btn" data-filter="media">🖼️ 多媒体图像 (2)</button>
+      <button class="filter-btn" data-filter="hardware">🖥️ 硬件与外设 (2)</button>
+    </div>
+
+    <!-- 10 大独立工具网格矩阵 -->
+    <div class="hub-grid" id="hub-tool-grid">
       
-      <!-- 密码强度与熵值评估面板 -->
-      <div class="pwd-entropy-card">
-        <div class="entropy-header">
-          <span><strong>密码安全性评估：</strong><span id="pwd-strength-text" style="color: #10b981; font-weight:700;">极高 (Military Grade)</span></span>
-          <span id="pwd-entropy-val" style="color: var(--color-secondary); font-family: var(--font-mono);">熵值: 95.2 Bits</span>
-        </div>
-        <div class="strength-bar-bg">
-          <div class="strength-bar-fill" id="pwd-strength-bar" style="width: 95%;"></div>
-        </div>
-        <div class="entropy-details">
-          <div class="entropy-tag">
-            <span>暴力破解预估耗时：</span><br>
-            <b id="pwd-crack-time" style="color: #38bdf8;">约 3.2 亿年 (RTX 4090 集群)</b>
-          </div>
-          <div class="entropy-tag">
-            <span>可用字符集空间：</span><br>
-            <b id="pwd-charset-size">94 个可能字符 (N)</b>
-          </div>
-          <div class="entropy-tag">
-            <span>安全合规建议：</span><br>
-            <b id="pwd-security-tip" style="color: #10b981;">符合 NIST SP 800-63B 标准</b>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="password-length"><span>密码长度:</span> <span id="length-val">16</span></label>
-        <input type="range" class="range-input" id="password-length" min="8" max="64" value="16">
-      </div>
-      
-      <div class="form-group checkbox-group">
-        <label class="checkbox-label">
-          <input type="checkbox" id="include-uppercase" checked> <span>包含大写字母 (A-Z)</span>
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="include-lowercase" checked> <span>包含小写字母 (a-z)</span>
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="include-numbers" checked> <span>包含数字 (0-9)</span>
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="include-symbols" checked> <span>包含特殊符号 (!@#$%)</span>
-        </label>
-      </div>
-      
-      <button class="btn btn-primary" id="generate-password-btn">
-        <span class="material-symbols-outlined">autorenew</span>
-        <span>生成安全密码</span>
-      </button>
-    </div>
-
-    <!-- 2. 子视图：JSON 格式化、校验与压缩 -->
-    <div id="json-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
-      <div class="code-toolbar">
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button class="btn btn-primary" id="json-format-2-btn" style="padding: 8px 14px; font-size: 13px;">
-            <span class="material-symbols-outlined" style="font-size: 16px;">format_align_left</span>
-            <span>格式化 (2空格)</span>
-          </button>
-          <button class="btn" id="json-format-4-btn" style="background: var(--surface-high); padding: 8px 14px; font-size: 13px;">
-            <span>格式化 (4空格)</span>
-          </button>
-          <button class="btn" id="json-minify-btn" style="background: var(--surface-high); padding: 8px 14px; font-size: 13px;">
-            <span class="material-symbols-outlined" style="font-size: 16px;">compress</span>
-            <span>压缩 JSON</span>
-          </button>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn" id="json-copy-btn" style="background: var(--surface-high); padding: 8px 14px; font-size: 13px;">
-            <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
-            <span>复制结果</span>
-          </button>
-          <button class="btn" id="json-clear-btn" style="background: var(--surface-high); padding: 8px 14px; font-size: 13px;">清空</button>
-        </div>
-      </div>
-      <div class="text-area-wrapper" style="min-height: 280px;">
-        <textarea class="custom-textarea" id="json-input" placeholder="在此粘贴待校验或格式化的 JSON 字符串..."></textarea>
-      </div>
-      <div id="json-status-box" style="margin-top: 12px; font-size: 13px; font-family: var(--font-mono); color: var(--text-secondary);">
-        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px; color: #10b981;">check_circle</span>
-        <span>JSON 解析器已就绪，输入后即刻进行语法树分析与高亮校验。</span>
-      </div>
-    </div>
-
-    <!-- 3. 子视图：JWT 令牌解析与调试 -->
-    <div id="jwt-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
-      <div class="jwt-container">
+      <!-- 1. 密码生成器 -->
+      <a href="/tools/password-generator.html" class="hub-card" data-category="security" style="--accent-color: #8b5cf6;">
         <div>
-          <div class="jwt-section-card">
-            <div class="jwt-header-title">
-              <span style="color: var(--color-primary);">Encoded Token (待解析令牌):</span>
-              <button class="btn" id="jwt-load-sample" style="background: var(--surface-high); padding: 4px 8px; font-size: 11px;">载入示例</button>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">
+              <span class="material-symbols-outlined">lock</span>
             </div>
-            <textarea class="custom-textarea jwt-token-input" id="jwt-input" style="height: 220px;" placeholder="在此粘贴 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #a78bfa; background: rgba(139, 92, 246, 0.1);">安全加密</span>
+                <span class="hub-tag">NIST 800-63B</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">密码生成与熵评估</h2>
+            </div>
           </div>
-          <div id="jwt-validity-box" style="margin-top: 12px; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); font-size: 12px; color: #10b981;">
-            <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 16px;">verified_user</span>
-            <span id="jwt-validity-text">纯前端安全解析：绝无任何 Token 上传至远程服务器风险。</span>
-          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            基于加密级 CSPRNG 生成超强随机密码，实时推演香农信息熵与 8x RTX 4090 GPU 暴力破解耗时。
+          </p>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <div class="jwt-section-card">
-            <div class="jwt-header-title" style="color: #f43f5e;">HEADER: 算法与令牌类型 (ALGORITHM & TOKEN TYPE)</div>
-            <textarea class="custom-textarea" id="jwt-header-output" readonly style="height: 90px; color: #f43f5e;"></textarea>
-          </div>
-          <div class="jwt-section-card">
-            <div class="jwt-header-title" style="color: #8b5cf6;">PAYLOAD: 数据载荷 (DATA CLAIMS)</div>
-            <textarea class="custom-textarea" id="jwt-payload-output" readonly style="height: 120px; color: #a78bfa;"></textarea>
-          </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #a78bfa;">
+          <span>进入独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>
-      </div>
-    </div>
+      </a>
 
-    <!-- 4. 子视图：密码学哈希计算 (支持文本与附件文件) -->
-    <div id="hash-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
-      <!-- 切换模式：文本 / 文件 -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-primary" id="hash-mode-text-btn" style="padding: 6px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-            <span class="material-symbols-outlined" style="font-size: 16px;">edit_note</span>
-            <span>文本字符计算</span>
-          </button>
-          <button class="btn" id="hash-mode-file-btn" style="background: var(--surface-high); padding: 6px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-            <span class="material-symbols-outlined" style="font-size: 16px;">upload_file</span>
-            <span>上传文件附件计算</span>
-          </button>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 12px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 4px;">
-            <input type="checkbox" id="hash-uppercase-toggle">
-            <span>大写输出 (A-F)</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- 文本模式输入框 -->
-      <div id="hash-text-container" class="text-area-wrapper" style="min-height: 120px; margin-bottom: 16px;">
-        <textarea class="custom-textarea" id="hash-input" placeholder="在此输入需要计算散列哈希的任意文本或密码字符串..."></textarea>
-      </div>
-
-      <!-- 文件附件模式拖拽区 -->
-      <div id="hash-file-container" style="display: none; margin-bottom: 16px;">
-        <div id="hash-file-dropzone" style="border: 2px dashed var(--border-light); border-radius: var(--radius-md); padding: 28px 20px; text-align: center; cursor: pointer; transition: var(--transition-smooth); background: var(--surface-low);">
-          <span class="material-symbols-outlined" style="font-size: 42px; color: var(--color-secondary); margin-bottom: 8px;">folder_zip</span>
-          <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">拖拽待校验文件至此 或 点击选择本地文件</div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">纯前端本地瞬时计算，绝不上传至任何服务器，保障商业私密性 (支持大型固件/ISO/压缩包/安装包)</div>
-          <input type="file" id="hash-file-input" style="display: none;">
-        </div>
-        <div id="hash-file-info" style="display: none; margin-top: 10px; padding: 10px 14px; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-sm); font-size: 12px; color: var(--color-secondary); justify-content: space-between; align-items: center;">
-          <span id="hash-file-name-size">📄 文件信息</span>
-          <span id="hash-calc-status" style="font-weight: 700; color: #10b981;">⚡ 计算完成</span>
-        </div>
-      </div>
-
-      <!-- 哈希结果输出列表 -->
-      <div class="hash-result-grid" style="margin-bottom: 16px;">
-        <div class="hash-row">
-          <span class="hash-label">MD5</span>
-          <span class="hash-val" id="hash-md5">-</span>
-          <button class="material-symbols-outlined" id="copy-hash-md5" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;" title="Copy">content_copy</button>
-        </div>
-        <div class="hash-row">
-          <span class="hash-label">SHA-1</span>
-          <span class="hash-val" id="hash-sha1">-</span>
-          <button class="material-symbols-outlined" id="copy-hash-sha1" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;" title="Copy">content_copy</button>
-        </div>
-        <div class="hash-row">
-          <span class="hash-label">SHA-256</span>
-          <span class="hash-val" id="hash-sha256">-</span>
-          <button class="material-symbols-outlined" id="copy-hash-sha256" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;" title="Copy">content_copy</button>
-        </div>
-        <div class="hash-row">
-          <span class="hash-label">SHA-512</span>
-          <span class="hash-val" id="hash-sha512">-</span>
-          <button class="material-symbols-outlined" id="copy-hash-sha512" style="cursor: pointer; color: var(--color-secondary); background:none; border:none;" title="Copy">content_copy</button>
-        </div>
-      </div>
-
-      <!-- 哈希校验比对器 -->
-      <div style="padding: 12px 14px; background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-sm);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
-            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--color-secondary);">fact_check</span>
-            <span>哈希一致性比对校验 (Checksum Matcher)</span>
-          </span>
-          <span id="hash-verify-result" style="font-size: 12px; font-weight: 700;"></span>
-        </div>
-        <input type="text" class="text-input" id="hash-verify-input" style="font-size: 12px; font-family: var(--font-mono);" placeholder="在此粘贴官方提供的 MD5 / SHA-256 校验码，系统将自动进行毫秒级一致性比对...">
-      </div>
-    </div>
-    
-    <!-- 5. 子视图：时间戳转换与各语言代码 -->
-    <div id="time-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
-      <div class="time-tool-grid">
+      <!-- 2. JSON 格式化 -->
+      <a href="/tools/json-formatter.html" class="hub-card" data-category="dev" style="--accent-color: #06b6d4;">
         <div>
-          <h3 style="margin-bottom: 16px; font-size: 16px; color: var(--color-secondary);">当前本地时间</h3>
-          <div class="time-row">
-            <input type="text" class="text-input" id="current-local-time" readonly>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4;">
+              <span class="material-symbols-outlined">data_object</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #06b6d4; background: rgba(6, 182, 212, 0.1);">开发调试</span>
+                <span class="hub-tag">RFC 8259</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">JSON 校验与格式化</h2>
+            </div>
           </div>
-          <div class="time-row">
-            <input type="text" class="text-input" id="current-timestamp" readonly>
-            <button class="btn btn-primary" style="padding: 10px 16px;" id="copy-current-ts">复制秒</button>
-          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            支持语法高亮树形渲染、行号精确定位报错、键名字典序排序、Unicode 字符自动转义与紧凑压缩。
+          </p>
         </div>
-        
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #06b6d4;">
+          <span>进入独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+        </div>
+      </a>
+
+      <!-- 3. JWT 调试器 -->
+      <a href="/tools/jwt-debugger.html" class="hub-card" data-category="security" style="--accent-color: #f59e0b;">
         <div>
-          <h3 style="margin-bottom: 16px; font-size: 16px; color: var(--color-primary);">时间戳转换</h3>
-          <div class="form-group">
-            <label class="form-label">时间戳 (秒) -> 日期时间</label>
-            <div class="time-row">
-              <input type="text" class="text-input" id="input-timestamp" placeholder="输入10位时间戳">
-              <button class="btn btn-primary" id="convert-ts-btn">转换</button>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+              <span class="material-symbols-outlined">vpn_key</span>
             </div>
-            <input type="text" class="text-input" id="output-datetime" readonly placeholder="转换结果">
-          </div>
-        </div>
-      </div>
-
-      <div class="time-lang-snippet">
-        <div style="color: var(--color-secondary); font-weight: 700; margin-bottom: 6px;">常用编程语言获取当前时间戳速查：</div>
-        <div><b>JavaScript:</b> <code>Math.floor(Date.now() / 1000)</code></div>
-        <div><b>Python:</b> <code>import time; int(time.time())</code></div>
-        <div><b>Go:</b> <code>import "time"; time.Now().Unix()</code></div>
-        <div><b>Java:</b> <code>System.currentTimeMillis() / 1000L</code></div>
-        <div><b>PHP:</b> <code>time()</code> | <b>Rust:</b> <code>SystemTime::now().duration_since(UNIX_EPOCH)</code></div>
-      </div>
-    </div>
-    
-    <!-- 6. 子视图：文本处理 -->
-    <div id="text-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
-      <div class="text-tool-container">
-        <div class="text-area-wrapper" style="min-height: 180px;">
-          <textarea class="custom-textarea" id="toolbox-text-input" placeholder="在这里输入你想处理的文本..."></textarea>
-        </div>
-        
-        <div class="text-btn-grid">
-          <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-upper-btn">大写转换</button>
-          <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-lower-btn">小写转换</button>
-          <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-count-btn">计算字数与指标</button>
-          <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-b64-enc-btn">Base64 编码</button>
-          <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-b64-dec-btn">Base64 解码</button>
-          <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-url-enc-btn">URL 编码</button>
-          <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-url-dec-btn">URL 解码</button>
-          <button class="btn btn-primary" style="padding: 10px 18px; font-size: 14px;" id="text-clear-btn" style="background: var(--surface-high);">清空</button>
-        </div>
-        
-        <div id="text-result-box" style="display: none; margin-top: 10px;">
-          <p class="form-label">结果展示:</p>
-          <div class="text-area-wrapper" style="min-height: 120px;">
-            <textarea class="custom-textarea" id="toolbox-text-output" readonly></textarea>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 7. 子视图：图片与媒体隐私 (本地图片极限压缩、多格式互转、EXIF 隐私与 GPS 擦除) -->
-    <div id="media-tab" class="tool-view glass-card" style="margin-bottom: 30px;">
-      <!-- 1. 图片压缩与格式转换 -->
-      <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
-        <h3 style="font-size: 15px; color: var(--color-primary); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-          <span class="material-symbols-outlined" style="font-size: 18px;">photo_size_select_large</span>
-          <span>纯前端图片极限压缩与格式互转</span>
-        </h3>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">100% 浏览器本地内存极速压缩，绝不上传至任何服务器，零隐私泄露风险。</p>
-
-        <!-- 拖拽上传区 -->
-        <div id="media-dropzone" style="border: 2px dashed var(--border-light); border-radius: var(--radius-md); padding: 26px 20px; text-align: center; cursor: pointer; transition: var(--transition-smooth); background: var(--surface-high); margin-bottom: 16px;">
-          <span class="material-symbols-outlined" style="font-size: 40px; color: var(--color-secondary); margin-bottom: 8px;">add_photo_alternate</span>
-          <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">拖拽待处理图片至此 或 点击选择本地图片</div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">支持 PNG, JPG, WebP, BMP (纯前端秒级处理)</div>
-          <input type="file" id="media-file-input" accept="image/*" style="display: none;">
-      </div>
-
-      <!-- Squoosh 风格双视窗对比器 -->
-      <div id="squoosh-preview-section" style="display: none; margin-bottom: 24px;">
-        <div class="squoosh-viewport squoosh-bg-grid" id="squoosh-viewport" style="position: relative; width: 100%; height: 420px; background: #020617; border: 1px solid var(--border-light); border-radius: var(--radius-md); overflow: hidden; user-select: none; display: flex; align-items: center; justify-content: center;">
-          <!-- 原图层 -->
-          <div class="squoosh-layer" id="squoosh-layer-orig" style="position: absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-            <img id="img-orig-preview" alt="Original Image" style="max-width:100%; max-height:100%; object-fit:contain;">
-          </div>
-          <!-- 压缩图层 -->
-          <div class="squoosh-layer" id="squoosh-layer-comp" style="position: absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; clip-path: inset(0 0 0 50%);">
-            <img id="img-comp-preview" alt="Compressed Image" style="max-width:100%; max-height:100%; object-fit:contain;">
-          </div>
-          <!-- 中间拖动把手 -->
-          <div class="squoosh-divider" id="squoosh-divider" style="position: absolute; top:0; bottom:0; left:50%; width:3px; background:#38bdf8; box-shadow:0 0 12px rgba(56,189,248,0.8); cursor:ew-resize; z-index:20;">
-            <div class="squoosh-handle" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:34px; height:34px; border-radius:50%; background:#020617; border:2px solid #38bdf8; color:#38bdf8; display:flex; align-items:center; justify-content:center; font-size:16px;">
-              <span class="material-symbols-outlined" style="font-size:18px;">code</span>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);">安全认证</span>
+                <span class="hub-tag">RFC 7519</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">JWT 令牌解析与调试</h2>
             </div>
           </div>
-          <!-- 悬浮数据指示徽章 -->
-          <div class="squoosh-badge squoosh-badge-left" style="position:absolute; bottom:16px; left:16px; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.15); color:#94a3b8; z-index:10;">
-            原图: <span id="stat-orig-size">0 KB</span> (<span id="stat-orig-dim">0x0</span>)
-          </div>
-          <div class="squoosh-badge squoosh-badge-right" style="position:absolute; bottom:16px; right:16px; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399; z-index:10;">
-            压缩后: <span id="stat-comp-size">0 KB</span> (<span id="stat-comp-dim">0x0</span>)
-            <span id="stat-saving" style="display:inline-block; padding:2px 8px; border-radius:12px; background:#10b981; color:#020617; font-weight:800; font-size:11px; margin-left:6px;">-0%</span>
-          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            纯本地内存解构 Header/Payload/Signature，智能解析 iat/exp 时间戳状态，杜绝 Token 泄漏风险。
+          </p>
         </div>
-      </div>
-
-        <!-- 控制面板 (质量、格式、缩放) -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
-          <div>
-            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
-              <span>压缩画质:</span>
-              <b id="media-quality-val" style="color: var(--color-secondary);">80%</b>
-            </div>
-            <input type="range" id="media-quality-slider" min="10" max="100" value="80" style="width: 100%;">
-          </div>
-
-          <div>
-            <label class="form-label" style="font-size: 12px;">输出格式:</label>
-            <select class="custom-select" id="media-format-select" style="width: 100%; padding: 6px 10px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 13px;">
-              <option value="image/webp">WebP (推荐 · 极高压缩比)</option>
-              <option value="image/jpeg">JPEG / JPG (兼容性好)</option>
-              <option value="image/png">PNG (透明无损)</option>
-              <option value="favicon">Favicon 图标 (.ico 32x32)</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="form-label" style="font-size: 12px;">最大宽度限制 (px, 留空保持原图):</label>
-            <input type="number" class="text-input" id="media-max-width" placeholder="例如：1920 (可选)" style="font-size: 13px; padding: 6px 10px;">
-          </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #f59e0b;">
+          <span>进入独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>
+      </a>
 
-        <!-- 压缩对比结果与下载 -->
-        <div id="media-result-container" style="display: none; padding: 14px; background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-sm); margin-bottom: 12px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div style="display: flex; gap: 20px; font-size: 13px;">
-              <span>原图大小: <b id="media-orig-size" style="color: var(--text-primary);">-</b></span>
-              <span>压缩后大小: <b id="media-comp-size" style="color: #10b981;">-</b></span>
-              <span>体积优化率: <b id="media-saved-ratio" style="color: var(--color-secondary);">-</b></span>
-            </div>
-            <button class="btn btn-primary" id="media-download-btn" style="padding: 7px 18px; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
-              <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
-              <span>下载处理后图片</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 2. 照片 EXIF 隐私与 GPS 经纬度擦除器 -->
-      <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px;">
-        <h3 style="font-size: 15px; color: var(--color-secondary); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-          <span class="material-symbols-outlined" style="font-size: 18px;">no_photography</span>
-          <span>照片 EXIF 隐私与 GPS 经纬度擦除器</span>
-        </h3>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">手机直出照片包含精确 GPS 经纬度、拍摄时间与相机设备信息。一键抹除所有隐私元数据，安全分享。</p>
-
-        <div id="media-exif-info-box" style="padding: 12px 14px; background: var(--surface-high); border: 1px solid var(--border-light); border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 14px;">
-          <div id="media-exif-status" style="font-weight: 600; color: var(--text-secondary);">✅ 请选择上方照片进行 EXIF 隐私扫描</div>
-          <div id="media-exif-details" style="margin-top: 6px; font-size: 12px; font-family: var(--font-mono); color: var(--text-muted);"></div>
-        </div>
-
-        <button class="btn btn-primary" id="media-exif-clean-btn" style="padding: 8px 18px; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">cleaning_services</span>
-          <span>一键清洗所有 EXIF 隐私并导出</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- 工具箱指南与深度知识库 (6 篇专业技术专栏 + 密码破译表) -->
-    <section class="doc-section">
-      <div class="doc-header">
-        <span class="material-symbols-outlined doc-header-icon">auto_stories</span>
+      <!-- 4. 哈希散列计算 -->
+      <a href="/tools/hash-calculator.html" class="hub-card" data-category="security" style="--accent-color: #ef4444;">
         <div>
-          <h2 class="doc-header-title">极客工具箱技术专栏与密码学算法知识库</h2>
-          <p class="doc-header-subtitle">涵盖现代密码熵评估模型、JWT 无状态身份认证体系、单向散列抗碰撞性与时间系统原理。</p>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+              <span class="material-symbols-outlined">fingerprint</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #ef4444; background: rgba(239, 68, 68, 0.1);">密码散列</span>
+                <span class="hub-tag">多模态</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">密码学哈希散列计算</h2>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            MD5 / SHA-1 / SHA-256 / SHA-512 高速计算，支持大文件本地流式分块读取与哈希校验码自动一致性比对。
+          </p>
         </div>
-      </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #ef4444;">
+          <span>进入独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+        </div>
+      </a>
 
-      <!-- 破解时间对照表 -->
-      <div class="doc-card" style="margin-bottom: 20px;">
-        <h3><span class="material-symbols-outlined" style="font-size: 18px;">timer</span> 现代 GPU 算力集群（RTX 4090 矩阵）暴力破解密码耗时对照表</h3>
-        <p style="margin-bottom: 12px;">以下数据基于单机 8 卡 RTX 4090 集群（每秒约 1000 亿次 NTLM 哈希尝试）理论计算结果：</p>
-        <div class="doc-table-wrapper">
-          <table class="doc-table">
-            <thead>
-              <tr>
-                <th>密码长度</th>
-                <th>纯数字 (10个字符)</th>
-                <th>纯小写字母 (26个字符)</th>
-                <th>大小写混合 (52个字符)</th>
-                <th>大小写+数字+特殊符号 (94个字符)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>6 位字符</strong></td>
-                <td><span style="color: #ef4444; font-weight:700;">瞬时 (0.001 秒)</span></td>
-                <td><span style="color: #ef4444; font-weight:700;">0.03 秒</span></td>
-                <td><span style="color: #ef4444; font-weight:700;">0.2 秒</span></td>
-                <td><span style="color: #f59e0b; font-weight:700;">7 秒</span></td>
-              </tr>
-              <tr>
-                <td><strong>8 位字符</strong></td>
-                <td><span style="color: #ef4444; font-weight:700;">0.01 秒</span></td>
-                <td><span style="color: #ef4444; font-weight:700;">2 秒</span></td>
-                <td><span style="color: #f59e0b; font-weight:700;">8 分钟</span></td>
-                <td><span style="color: #f59e0b; font-weight:700;">7 小时</span></td>
-              </tr>
-              <tr>
-                <td><strong>12 位字符</strong></td>
-                <td><span style="color: #ef4444; font-weight:700;">1 秒</span></td>
-                <td><span style="color: #f59e0b; font-weight:700;">3 周</span></td>
-                <td><span style="color: #10b981; font-weight:700;">200 年</span></td>
-                <td><span style="color: #10b981; font-weight:700;">3.4 万年</span></td>
-              </tr>
-              <tr>
-                <td><strong>16 位字符 (推荐)</strong></td>
-                <td><span style="color: #f59e0b; font-weight:700;">3 小时</span></td>
-                <td><span style="color: #10b981; font-weight:700;">4.5 万年</span></td>
-                <td><span style="color: #10b981; font-weight:700;">10 亿年</span></td>
-                <td><span style="color: #10b981; font-weight:700;">3.2 亿亿年 (绝对安全)</span></td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- 5. Unix 时间戳转换 -->
+      <a href="/tools/timestamp-converter.html" class="hub-card" data-category="dev" style="--accent-color: #10b981;">
+        <div>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+              <span class="material-symbols-outlined">schedule</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #10b981; background: rgba(16, 185, 129, 0.1);">系统运维</span>
+                <span class="hub-tag">代码速查</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">Unix 时间戳转换</h2>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            10 位秒与 13 位毫秒互转、当前时间实时脉冲更新，附带 JS/Python/Go/Java/Rust 时间戳单行代码速查。
+          </p>
         </div>
-        <div class="doc-callout success">
-          <strong>💡 NIST 黄金法则</strong>：密码长度（Length）对安全强度的提升呈指数级倍增，远大于单纯增加复杂符号。建议日常密码长度<strong>保持在 16 位以上</strong>。
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #10b981;">
+          <span>进入独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>
-      </div>
-      
-      <div class="doc-grid">
-        <div class="doc-card">
-          <h3><span class="material-symbols-outlined" style="font-size: 18px;">lock</span> 1. 密码信息熵（Entropy）数学原理</h3>
-          <p>密码信息熵是香农信息论在计算机安全领域的延伸应用，公式为：<code>E = L × log2(N)</code>。</p>
-          <p>其中 <code>L</code> 为密码长度，<code>N</code> 为可用字符集池大小（大小写+数字+特殊符号共 94 个）。</p>
-          <ul>
-            <li><strong>低于 40 Bits</strong>：极度脆弱，秒级破解。</li>
-            <li><strong>60 ~ 80 Bits</strong>：普通企业级标准。</li>
-            <li><strong>90 Bits 以上</strong>：军工级抗爆破防护。</li>
-          </ul>
-        </div>
-        
-        <div class="doc-card">
-          <h3><span class="material-symbols-outlined" style="font-size: 18px;">vpn_key</span> 2. JWT (RFC 7519) 核心架构与安全漏洞</h3>
-          <p>JWT 由 <code>Header.Payload.Signature</code> 三段组成，属于无状态身份凭证。开发中必须防范以下常见漏洞：</p>
-          <ul>
-            <li><strong>None 算法攻击</strong>：部分旧版库若未强制校验 <code>alg</code>，攻击者将 <code>alg: "none"</code> 即可伪造任意管理员身份。</li>
-            <li><strong>弱密钥爆破</strong>：使用纯数字或常见词作为 HMAC 签名密钥，极易被离线穷举爆破出 Secret。</li>
-            <li><strong>防 XSS 窃取</strong>：千万不要将 JWT 存在 <code>localStorage</code> 中，应使用 <code>HttpOnly SameSite=Strict</code> Cookie 存储。</li>
-          </ul>
-        </div>
+      </a>
 
-        <div class="doc-card">
-          <h3><span class="material-symbols-outlined" style="font-size: 18px;">fingerprint</span> 3. 单向散列 (MD5 vs SHA-256 vs Argon2)</h3>
-          <p>密码学哈希具备雪崩效应与不可逆性。MD5 与 SHA-1 已被证实存在碰撞漏洞：</p>
-          <ul>
-            <li><strong>数据完整性校验</strong>：推荐使用 <strong>SHA-256</strong> 与 <strong>SHA-512</strong>。</li>
-            <li><strong>用户密码落库存储</strong>：绝不能使用普通的快哈希（MD5/SHA256），必须使用针对 GPU 爆破优化的慢哈希算法：<strong>Argon2id、bcrypt 或 PBKDF2</strong> 并配合动态加盐（Salt）。</li>
-          </ul>
+      <!-- 6. 文本处理与 Base64 -->
+      <a href="/tools/text-tools.html" class="hub-card" data-category="dev" style="--accent-color: #ec4899;">
+        <div>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(236, 72, 153, 0.15); color: #ec4899;">
+              <span class="material-symbols-outlined">edit_note</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #ec4899; background: rgba(236, 72, 153, 0.1);">文本工具</span>
+                <span class="hub-tag">UTF-8</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">文本处理与编解码</h2>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            大小写转换、字数与字符指标统计、标准 Base64 编解码与 URL 百分号转义解构。
+          </p>
         </div>
-
-        <div class="doc-card">
-          <h3><span class="material-symbols-outlined" style="font-size: 18px;">schedule</span> 4. Unix 时间戳与 2038 年危机 (Y2K38)</h3>
-          <p>Unix 时间戳从 <code>1970-01-01 00:00:00 UTC</code> 开始计时：</p>
-          <ul>
-            <li>在传统的 <strong>32 位有符号整数</strong>系统中，最大表示值为 <code>2,147,483,647</code> 秒；</li>
-            <li>将在 <strong>2038 年 1 月 19 日 03:14:07 UTC</strong> 发生整型溢出回滚至 1901 年；</li>
-            <li>现代 64 位体系已彻底解决该问题，可支持长达 2920 亿年的时间跨度。</li>
-          </ul>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #ec4899;">
+          <span>进入独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>
-      </div>
-    </section>
+      </a>
 
-    <!-- 页脚 -->
-    <footer style="border-top: 1px solid rgba(255,255,255,0.08); padding: 24px 0; margin-top: 40px; text-align: center; font-size: 13px; color: var(--text-muted);">
-      <div style="margin-bottom: 10px;"><span data-i18n="footer_rights">© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利</span></div>
-      <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
-        <a href="sitemap.html" style="color: var(--text-secondary); text-decoration: none;">网站地图</a>
-        <a href="about.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_about">关于本站</a>
-        <a href="privacy.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_privacy">隐私政策</a>
-        <a href="terms.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_terms">服务条款</a>
-        <a href="contact.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_contact">联系我们</a>
+      <!-- 7. Squoosh 图片压缩 -->
+      <a href="/tools/media-compress.html" class="hub-card" data-category="media" style="--accent-color: #38bdf8;">
+        <div>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+              <span class="material-symbols-outlined">photo_size_select_large</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #38bdf8; background: rgba(56, 189, 248, 0.1);">多媒体</span>
+                <span class="hub-tag">Squoosh 级划线对比</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">Squoosh 图片极限压缩</h2>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            WebP/AVIF/MozJPEG 硬件级压缩，左右 1:1 双视窗实时划线比对画质，一键彻底抹除照片 GPS 经纬度隐私。
+          </p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #38bdf8;">
+          <span>进入独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+        </div>
+      </a>
+
+      <!-- 8. WiFi 二维码 -->
+      <a href="/tools/wifi-qr.html" class="hub-card" data-category="media" style="--accent-color: #6366f1;">
+        <div>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+              <span class="material-symbols-outlined">qr_code_2</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #818cf8; background: rgba(99, 102, 241, 0.1);">离线工具</span>
+                <span class="hub-tag">WPA3 免输密码</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">WiFi 扫码直连二维码</h2>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            纯本地离线生成符合标准协议的 WiFi 二维码卡片，访客使用 iOS / Android 相机一扫即连，密码不经任何云端。
+          </p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #818cf8;">
+          <span>进入独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+        </div>
+      </a>
+
+      <!-- 9. 屏幕坏点漏光检测 -->
+      <a href="/tools/screen-test.html" class="hub-card" data-category="hardware" style="--accent-color: #10b981;">
+        <div>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+              <span class="material-symbols-outlined">tv</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #34d399; background: rgba(16, 185, 129, 0.1);">硬件外设</span>
+                <span class="hub-tag">ISO 9241-307</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">4K 屏幕坏点与漏光检测</h2>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            F11 全屏独占纯色与灰阶矩阵，精准排查显示器常亮点、暗点、色偏与 IPS 边角漏光，新机验屏退换必备。
+          </p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #34d399;">
+          <span>进入独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+        </div>
+      </a>
+
+      <!-- 10. 鼠标双击测速 -->
+      <a href="/tools/mouse-test.html" class="hub-card" data-category="hardware" style="--accent-color: #c084fc;">
+        <div>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(192, 132, 252, 0.15); color: #c084fc;">
+              <span class="material-symbols-outlined">mouse</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #c084fc; background: rgba(192, 132, 252, 0.1);">硬件外设</span>
+                <span class="hub-tag">8000Hz 轮询率</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">鼠标微动双击与测速</h2>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            毫秒级捕获微动金属簧片氧化弹跳连击（双击误触），实时统计滚轮平滑度与 125Hz~8000Hz USB 回报率。
+          </p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #c084fc;">
+          <span>进入独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- 底部架构与安全声明 -->
+    <div style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+      <div style="font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+        <span class="material-symbols-outlined" style="font-size: 18px; color: #10b981;">verified_user</span>
+        <span>纯前端零上传安全承诺 (Zero-Knowledge Client Architecture)</span>
       </div>
-    </footer>
+      <div>
+        以上所有工具完全基于浏览器 JavaScript、HTML5 Canvas 与 Web Cryptography API 构建，所有计算过程在您本机的内存与 CPU/GPU 线程中秒级完成，不会向任何服务器上传您的任何图片、明文密码、JWT Token 或私密文本。
+      </div>
+    </div>
   </main>
 
-  <!-- 脚本引入 -->
-  <script src="js/storage.js?v=2.6.0"></script>
-  <script src="js/i18n.js?v=2.6.0"></script>
-  <script src="js/toolbox.js?v=2.6.0"></script>
+  <footer style="border-top: 1px solid rgba(255,255,255,0.08); padding: 30px 20px; margin-top: 50px; text-align: center; font-size: 13px; color: var(--text-muted); background: rgba(6, 14, 32, 0.5);">
+    <div style="margin-bottom: 12px;"><span data-i18n="footer_rights">© 2026 825412.xyz 极客多功能工具箱 | 保留所有权利</span></div>
+    <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 10px;">
+      <a href="/about.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_about">关于本站</a>
+      <a href="/privacy.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_privacy">隐私政策</a>
+      <a href="/terms.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_terms">服务条款</a>
+      <a href="/contact.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_contact">联系我们</a>
+      <a href="/sitemap.html" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_sitemap_html">HTML 网站地图</a>
+    </div>
+  </footer>
+
+  <script src="js/storage.js?v=2.7.0"></script>
+  <script src="js/i18n.js?v=2.7.0"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof ToolboxController !== 'undefined') {
-        ToolboxController.init();
+    document.addEventListener('DOMContentLoaded', function() {
+      // 1. Language Toggle
+      var select = document.getElementById('lang-select-header');
+      if (select && typeof I18nController !== 'undefined') {
+        select.value = I18nController.currentLang;
+        select.addEventListener('change', function(e) {
+          I18nController.setLanguage(e.target.value);
+        });
       }
 
-      // 子 Tab 选项卡切换
-      const toolTabs = document.querySelectorAll('.toolbox-tab-btn');
-      const toolViews = document.querySelectorAll('.tool-view');
-      toolTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          const targetTabId = tab.getAttribute('data-tab');
-          toolTabs.forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
+      // 2. Category Filter
+      var filterBtns = document.querySelectorAll('.filter-btn');
+      var cards = document.querySelectorAll('.hub-card');
 
-          toolViews.forEach(view => {
-            view.classList.remove('active');
-            view.style.display = 'none';
+      filterBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          filterBtns.forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          var cat = btn.getAttribute('data-filter');
+
+          cards.forEach(function(card) {
+            if (cat === 'all' || card.getAttribute('data-category') === cat) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
           });
-          const targetView = document.getElementById(targetTabId);
-          if (targetView) {
-            targetView.classList.add('active');
-            targetView.style.display = 'block';
-          }
         });
       });
     });

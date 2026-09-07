@@ -12,6 +12,29 @@ const ToolboxController = {
     this.initTextProcessor();
     this.initMediaSuite();
     this.initCopyButtons();
+    this.initCategoryFilters();
+  },
+
+  initCategoryFilters() {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.hub-card');
+    if (!filterBtns.length || !cards.length) return;
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.getAttribute('data-filter');
+
+        cards.forEach(card => {
+          if (cat === 'all' || card.getAttribute('data-category') === cat) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
   },
 
   initCopyButtons() {
