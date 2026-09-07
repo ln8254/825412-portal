@@ -252,13 +252,64 @@ const I18nController = {
 
       "tool_card_media_doc_title": "现代图像压缩算法 (WebP / AVIF) 与 EXIF 隐私安全白皮书",
       "tool_card_media_doc_sub": "深入了解离散余弦变换 (DCT)、预测编码与照片地理位置信息泄露风险。",
-      "tool_card_media_exif_body": `<h3><span class="material-symbols-outlined" style="font-size: 18px;">warning</span> 照片 EXIF 元数据泄露风险：为什么社交分享前必须脱敏？</h3>
-        <p>现代智能手机相机在拍摄每一张照片时，默认都会将大量敏感硬件元数据写入图片头部（Exchangeable Image File Format，简称 EXIF）：</p>
-        <ul>
-          <li><strong>GPS 物理经纬度 (精确到 1 米)</strong>：照片直接记录了拍摄者的住宅楼层、家庭住址或办公地点；</li>
-          <li><strong>时间戳与相机设备序列号</strong>：记录精确到毫秒的拍摄时间与设备 IMEI/序列号，极易被用于关联个人身份；</li>
-          <li><strong>纯前端防御原理</strong>：通过 HTML5 <code>Canvas.drawImage()</code> 将图片像素重绘并导出，底层会直接丢弃所有 EXIF Header 二进制块，实现真正的 100% 物理级隐私擦除。</li>
-        </ul>`,
+      "tool_card_media_exif_body": `
+<div class="scenario-box" style="background: rgba(139, 92, 246, 0.08); border-left: 4px solid #8b5cf6; padding: 14px 18px; border-radius: 6px; margin-bottom: 20px;">
+  <h4 style="color: #a78bfa; margin-top: 0; margin-bottom: 8px;">🎯 Best Use Cases & Scenarios</h4>
+  <ul style="margin: 0; padding-left: 20px; font-size: 13.5px; color: var(--text-secondary);">
+    <li><strong>Core Web Vitals Optimization (LCP)</strong>: Shrink 5MB-10MB hero banners down to 200KB-400KB WebP/AVIF, slashing Largest Contentful Paint (LCP) times by over 70%.</li>
+    <li><strong>Sensitive Documents & Confidential Photos Zero-Leakage</strong>: Passports, ID cards, financial statements, and invoices are processed strictly within client-side memory without ever touching cloud servers.</li>
+    <li><strong>GPS Metadata Sanitization for Social Media</strong>: Scrub precision GPS latitude/longitude, timestamp, and device serial numbers embedded in Exif headers prior to public sharing.</li>
+  </ul>
+</div>
+
+<h3><span class="material-symbols-outlined" style="font-size: 18px;">analytics</span> 1. Modern Image Codecs (JPEG vs WebP vs AVIF vs MozJPEG) Benchmark Matrix</h3>
+<div style="overflow-x: auto; margin: 16px 0;">
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+    <thead>
+      <tr style="background: rgba(255,255,255,0.06); color: #fff; border-bottom: 1px solid var(--border-light);">
+        <th style="padding: 10px 14px;">Codec Format</th>
+        <th style="padding: 10px 14px;">Underlying Algorithm & Standard</th>
+        <th style="padding: 10px 14px;">Compression vs JPEG</th>
+        <th style="padding: 10px 14px;">Alpha Transparency</th>
+        <th style="padding: 10px 14px;">Browser Support</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="padding: 10px 14px; font-weight: 700; color: #10b981;">AVIF (AV1 Image File Format)</td>
+        <td style="padding: 10px 14px;">AV1 intra-frame prediction with 10/12-bit color depth</td>
+        <td style="padding: 10px 14px; color: #10b981;"><strong>70% ~ 90% Savings (Extreme)</strong></td>
+        <td style="padding: 10px 14px; color: #10b981;">Supported (Lossless Alpha)</td>
+        <td style="padding: 10px 14px;">93.5%+ (Chrome, Firefox, Safari 16+)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="padding: 10px 14px; font-weight: 700; color: #38bdf8;">WebP (Google Web Format)</td>
+        <td style="padding: 10px 14px;">VP8 intra-prediction & Huffman entropy coding (RFC 6386)</td>
+        <td style="padding: 10px 14px; color: #38bdf8;"><strong>50% ~ 75% Savings</strong></td>
+        <td style="padding: 10px 14px; color: #10b981;">Supported (Lossy & Lossless)</td>
+        <td style="padding: 10px 14px; color: #10b981;">98.2%+ (Universal Global Standard)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="padding: 10px 14px; font-weight: 700; color: #a78bfa;">MozJPEG (Mozilla Enhanced JPEG)</td>
+        <td style="padding: 10px 14px;">Trellis quantization & progressive scan optimization</td>
+        <td style="padding: 10px 14px;">15% ~ 25% Savings</td>
+        <td style="padding: 10px 14px; color: #f87171;">Not Supported</td>
+        <td style="padding: 10px 14px; color: #10b981;">100% Universal Compatibility</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 14px;">Standard JPEG (ISO/IEC 10918-1)</td>
+        <td style="padding: 10px 14px;">8x8 Discrete Cosine Transform (DCT)</td>
+        <td style="padding: 10px 14px;">Baseline Reference (100%)</td>
+        <td style="padding: 10px 14px; color: #f87171;">Not Supported</td>
+        <td style="padding: 10px 14px; color: #10b981;">100% Universal Compatibility</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h3><span class="material-symbols-outlined" style="font-size: 18px;">security</span> 2. EXIF GPS Geolocation Privacy Risk & Sanitization</h3>
+<p>Modern smartphones and digital cameras embed precise GPS coordinates (meter-level accuracy), timestamp, camera serial number, and exposure parameters directly into Exif headers.</p>
+<p>This portal processes images completely client-side in browser memory: during bitmap reconstruction, <strong>all private Exif/TIFF metadata tags and GPS tags are physically stripped</strong>, generating 100% clean images that eliminate location tracking risks.</p>`,
 
       "tool_card_wifi_doc_title": "WiFi Alliance Easy Connect 规范与 WPA3 握手安全",
       "tool_card_wifi_doc_sub": "了解国际标准 WiFi 二维码 URI 格式与 Simultaneous Authentication of Equals (SAE) 防破解协议。",
