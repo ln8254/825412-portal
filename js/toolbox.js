@@ -987,7 +987,7 @@ const ToolboxController = {
 
       const quality = parseInt(qualitySlider ? qualitySlider.value : 80) / 100;
 
-      canvas.toBlob((blob) => {
+            canvas.toBlob((blob) => {
         if (!blob) return;
         currentCompressedBlob = blob;
 
@@ -1002,7 +1002,51 @@ const ToolboxController = {
           savedRatioEl.textContent = `🎉 节省 ${savedPercent}%`;
           savedRatioEl.style.color = compSize <= origSize ? '#10b981' : '#f59e0b';
         }
+
+        // Squoosh Dual-Viewport Synchronization
+        const squooshSec = document.getElementById('squoosh-preview-section');
+        const imgOrig = document.getElementById('img-orig-preview');
+        const imgComp = document.getElementById('img-comp-preview');
+        const statOrigSize = document.getElementById('stat-orig-size');
+        const statOrigDim = document.getElementById('stat-orig-dim');
+        const statCompSize = document.getElementById('stat-comp-size');
+        const statCompDim = document.getElementById('stat-comp-dim');
+        const statSaving = document.getElementById('stat-saving');
+
+        if (squooshSec && imgComp) {
+          squooshSec.style.display = 'block';
+          imgComp.src = URL.createObjectURL(blob);
+          if (statCompSize) statCompSize.textContent = formatBytes(compSize);
+          if (statCompDim) statCompDim.textContent = `${width}x${height}`;
+          if (statSaving) {
+            statSaving.textContent = compSize < origSize ? `-${savedPercent}% 缩减` : `+${savedPercent}% 变大`;
+            statSaving.style.background = compSize < origSize ? '#10b981' : '#f59e0b';
+          }
+        }
       }, mimeType, quality);
+          // 3. Squoosh Divider Dragging Support
+      const divider = document.getElementById('squoosh-divider');
+      const layerComp = document.getElementById('squoosh-layer-comp');
+      const viewport = document.getElementById('squoosh-viewport');
+      let isDragging = false;
+
+      if (divider && layerComp && viewport) {
+        const updateDivider = (clientX) => {
+          const rect = viewport.getBoundingClientRect();
+          const x = clientX - rect.left;
+          const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+          divider.style.left = percent + '%';
+          layerComp.style.clipPath = 'inset(0 0 0 ' + percent + '%)';
+        };
+
+        divider.addEventListener('mousedown', (e) => { isDragging = true; e.preventDefault(); });
+        window.addEventListener('mousemove', (e) => { if (isDragging) updateDivider(e.clientX); });
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        divider.addEventListener('touchstart', () => { isDragging = true; });
+        window.addEventListener('touchmove', (e) => { if (isDragging && e.touches.length > 0) updateDivider(e.touches[0].clientX); });
+        window.addEventListener('touchend', () => { isDragging = false; });
+      }
     };
 
     // EXIF 解析逻辑
@@ -1056,12 +1100,18 @@ const ToolboxController = {
 
       currentFile = file;
 
-      // 1. 读取用于压缩渲染
+            // 1. 读取用于压缩渲染
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
           currentImageElement = img;
+          const imgOrig = document.getElementById('img-orig-preview');
+          const statOrigSize = document.getElementById('stat-orig-size');
+          const statOrigDim = document.getElementById('stat-orig-dim');
+          if (imgOrig) imgOrig.src = e.target.result;
+          if (statOrigSize) statOrigSize.textContent = formatBytes(file.size);
+          if (statOrigDim) statOrigDim.textContent = `${img.naturalWidth}x${img.naturalHeight}`;
           processImageCompression();
           if (typeof Toast !== 'undefined') Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Image loaded and processed!' : '图片已载入并完成本地极速压缩！');
         };

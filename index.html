@@ -159,6 +159,18 @@
         <span class="material-symbols-outlined">build</span>
         <span data-i18n="nav_toolbox">极客工具箱</span>
       </li>
+      <li class="nav-item" onclick="location.href='/tools/media-compress.html'">
+        <span class="material-symbols-outlined" style="color: #38bdf8;">photo_size_select_large</span>
+        <span>Squoosh 图片压缩</span>
+      </li>
+      <li class="nav-item" onclick="location.href='/tools/screen-test.html'">
+        <span class="material-symbols-outlined" style="color: #10b981;">tv</span>
+        <span>屏幕坏点检测</span>
+      </li>
+      <li class="nav-item" onclick="location.href='/tools/mouse-test.html'">
+        <span class="material-symbols-outlined" style="color: #c084fc;">mouse</span>
+        <span>鼠标双击测速</span>
+      </li>
       <li class="nav-item" data-target="ai-view" style="display: none;">
         <span class="material-symbols-outlined">smart_toy</span>
         <span data-i18n="nav_ai">AI 智能助手</span>
@@ -607,7 +619,9 @@
         <div class="toolbox-tab-btn" data-tab="hash-tab" data-i18n="tool_hash_tab">哈希散列计算</div>
         <div class="toolbox-tab-btn" data-tab="time-tab" data-i18n="tool_time_tab">时间戳转换</div>
         <div class="toolbox-tab-btn" data-tab="text-tab" data-i18n="tool_text_tab">文本处理</div>
-        <div class="toolbox-tab-btn" data-tab="media-tab" data-i18n="tool_media_tab">图片与媒体隐私</div>
+        <div class="toolbox-tab-btn" data-tab="media-tab">⚡ Squoosh 图片压缩</div>
+        <a href="/tools/screen-test.html" class="toolbox-tab-btn" style="text-decoration: none; color: inherit;">🖥️ 屏幕坏点检测 ➔</a>
+        <a href="/tools/mouse-test.html" class="toolbox-tab-btn" style="text-decoration: none; color: inherit;">🖱️ 鼠标测速 ➔</a>
       </div>
       
       <!-- 1. 子视图：密码生成器与信息熵评估 -->
@@ -874,187 +888,86 @@
       </div>
 
       <!-- 7. 子视图：图片与媒体隐私 (本地图片极限压缩、多格式互转、EXIF 隐私与 GPS 擦除) -->
+            <!-- 7. 子视图：Squoosh 级纯前端图片极限压缩与 EXIF 清洗 -->
       <div id="media-tab" class="tool-view glass-card">
-        <!-- 1. 图片压缩与格式转换 -->
-        <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
-          <h3 style="font-size: 15px; color: var(--color-primary); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-            <span class="material-symbols-outlined" style="font-size: 18px;">photo_size_select_large</span>
-            <span data-i18n="media_compress_title">纯前端图片极限压缩与格式互转</span>
-          </h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;" data-i18n="media_compress_sub">100% 浏览器本地内存极速压缩，绝不上传至任何服务器，零隐私泄露风险。</p>
-
-          <!-- 拖拽上传区 -->
-          <div id="media-dropzone" style="border: 2px dashed var(--border-light); border-radius: var(--radius-md); padding: 26px 20px; text-align: center; cursor: pointer; transition: var(--transition-smooth); background: var(--surface-high); margin-bottom: 16px;">
-            <span class="material-symbols-outlined" style="font-size: 40px; color: var(--color-secondary); margin-bottom: 8px;">add_photo_alternate</span>
-            <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);" data-i18n="media_drop_hint">拖拽待处理图片至此 或 点击选择本地图片</div>
-            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" data-i18n="media_drop_sub">支持 PNG, JPG, WebP, BMP (纯前端秒级处理)</div>
-            <input type="file" id="media-file-input" accept="image/*" style="display: none;">
-          </div>
-
-          <!-- 控制面板 (质量、格式、缩放) -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
-                <span data-i18n="media_quality_label">压缩画质:</span>
-                <b id="media-quality-val" style="color: var(--color-secondary);">80%</b>
-              </div>
-              <input type="range" id="media-quality-slider" min="10" max="100" value="80" style="width: 100%;">
-            </div>
-
-            <div>
-              <label class="form-label" style="font-size: 12px;" data-i18n="media_format_label">输出格式:</label>
-              <select class="custom-select" id="media-format-select" style="width: 100%; padding: 6px 10px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 13px;">
-                <option value="image/webp" data-i18n="media_opt_webp">WebP (推荐 · 极高压缩比)</option>
-                <option value="image/jpeg" data-i18n="media_opt_jpeg">JPEG / JPG (兼容性好)</option>
-                <option value="image/png" data-i18n="media_opt_png">PNG (透明无损)</option>
-                <option value="favicon" data-i18n="media_opt_favicon">Favicon 图标 (.ico 32x32)</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="form-label" style="font-size: 12px;" data-i18n="media_max_width_label">最大宽度限制 (px, 留空保持原图):</label>
-              <input type="number" class="text-input" id="media-max-width" data-i18n-ph="media_max_width_ph" placeholder="例如：1920 (可选)" style="font-size: 13px; padding: 6px 10px;">
-            </div>
-          </div>
-
-          <!-- 压缩对比结果与下载 -->
-          <div id="media-result-container" style="display: none; padding: 14px; background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-sm); margin-bottom: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-              <div style="display: flex; gap: 20px; font-size: 13px;">
-                <span><span data-i18n="media_stats_orig">原图大小:</span> <b id="media-orig-size" style="color: var(--text-primary);">-</b></span>
-                <span><span data-i18n="media_stats_comp">压缩后大小:</span> <b id="media-comp-size" style="color: #10b981;">-</b></span>
-                <span><span data-i18n="media_stats_saved">体积优化率:</span> <b id="media-saved-ratio" style="color: var(--color-secondary);">-</b></span>
-              </div>
-              <button class="btn btn-primary" id="media-download-btn" style="padding: 7px 18px; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
-                <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
-                <span data-i18n="media_download_btn">下载处理后图片</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. 照片 EXIF 隐私与 GPS 经纬度擦除器 -->
-        <div style="background: var(--surface-low); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px;">
-          <h3 style="font-size: 15px; color: var(--color-secondary); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-            <span class="material-symbols-outlined" style="font-size: 18px;">no_photography</span>
-            <span data-i18n="media_exif_title">照片 EXIF 隐私与 GPS 经纬度擦除器</span>
-          </h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;" data-i18n="media_exif_sub">手机直出照片包含精确 GPS 经纬度、拍摄时间与相机设备信息。一键抹除所有隐私元数据，安全分享。</p>
-
-          <div id="media-exif-info-box" style="padding: 12px 14px; background: var(--surface-high); border: 1px solid var(--border-light); border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 14px;">
-            <div id="media-exif-status" style="font-weight: 600; color: var(--text-secondary);" data-i18n="media_exif_no_gps">✅ 请选择上方照片进行 EXIF 隐私扫描</div>
-            <div id="media-exif-details" style="margin-top: 6px; font-size: 12px; font-family: var(--font-mono); color: var(--text-muted);"></div>
-          </div>
-
-          <button class="btn btn-primary" id="media-exif-clean-btn" style="padding: 8px 18px; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
-            <span class="material-symbols-outlined" style="font-size: 16px;">cleaning_services</span>
-            <span data-i18n="media_exif_clean_btn">一键清洗所有 EXIF 隐私并导出</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 工具箱指南与深度知识库 (6 篇专业技术专栏 + 密码破译表) -->
-      <div class="doc-section">
-        <div class="doc-header">
-          <span class="material-symbols-outlined doc-header-icon">auto_stories</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
           <div>
-            <h2 class="doc-header-title" data-i18n="tool_doc_title">极客工具箱技术专栏与密码学算法知识库</h2>
-            <p class="doc-header-subtitle" data-i18n="tool_doc_sub">涵盖现代密码熵评估模型、JWT 无状态身份认证体系、单向散列抗碰撞性与时间系统原理。</p>
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; padding: 2px 10px; font-size: 11px; color: #38bdf8; margin-bottom: 6px; font-weight: 700;">
+              <span>⚡ Squoosh 级纯前端零上传架构</span>
+            </div>
+            <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 4px;">Squoosh 级纯前端图片极限压缩与 EXIF 清洗</h2>
+            <p style="font-size: 13px; color: var(--text-secondary);">100% 浏览器本地 WebP/AVIF/MozJPEG 硬件加速压缩，左右双视窗 1:1 实时划线对比，0 字节上传云端。</p>
+          </div>
+          <a href="/tools/media-compress.html" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #06b6d4); font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+            <span>全屏独立对比工作台 ➔</span>
+          </a>
+        </div>
+
+        <!-- 拖拽上传区 -->
+        <div id="media-dropzone" style="border: 2px dashed var(--border-light); border-radius: var(--radius-md); padding: 32px 20px; text-align: center; cursor: pointer; transition: var(--transition-smooth); background: var(--surface-high); margin-bottom: 20px;">
+          <span class="material-symbols-outlined" style="font-size: 44px; color: var(--color-secondary); margin-bottom: 8px;">add_photo_alternate</span>
+          <div style="font-size: 15px; font-weight: 600; color: var(--text-primary);">拖拽待处理图片至此 或 点击选择本地图片</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">支持 PNG, JPG, WebP, AVIF, BMP (纯前端秒级处理，绝不上传云端)</div>
+          <input type="file" id="media-file-input" accept="image/*" style="display: none;">
+        </div>
+
+        <!-- Squoosh 风格双视窗对比器 -->
+        <div id="squoosh-preview-section" style="display: none; margin-bottom: 24px;">
+          <div class="squoosh-viewport squoosh-bg-grid" id="squoosh-viewport" style="position: relative; width: 100%; height: 420px; background: #020617; border: 1px solid var(--border-light); border-radius: var(--radius-md); overflow: hidden; user-select: none; display: flex; align-items: center; justify-content: center;">
+            <!-- 原图层 -->
+            <div class="squoosh-layer" id="squoosh-layer-orig" style="position: absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+              <img id="img-orig-preview" alt="Original Image" style="max-width:100%; max-height:100%; object-fit:contain;">
+            </div>
+            <!-- 压缩图层 -->
+            <div class="squoosh-layer" id="squoosh-layer-comp" style="position: absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; clip-path: inset(0 0 0 50%);">
+              <img id="img-comp-preview" alt="Compressed Image" style="max-width:100%; max-height:100%; object-fit:contain;">
+            </div>
+            <!-- 中间拖动把手 -->
+            <div class="squoosh-divider" id="squoosh-divider" style="position: absolute; top:0; bottom:0; left:50%; width:3px; background:#38bdf8; box-shadow:0 0 12px rgba(56,189,248,0.8); cursor:ew-resize; z-index:20;">
+              <div class="squoosh-handle" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:34px; height:34px; border-radius:50%; background:#020617; border:2px solid #38bdf8; color:#38bdf8; display:flex; align-items:center; justify-content:center; font-size:16px;">
+                <span class="material-symbols-outlined" style="font-size:18px;">code</span>
+              </div>
+            </div>
+            <!-- 悬浮数据指示徽章 -->
+            <div class="squoosh-badge squoosh-badge-left" style="position:absolute; bottom:16px; left:16px; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.15); color:#94a3b8; z-index:10;">
+              原图: <span id="stat-orig-size">0 KB</span> (<span id="stat-orig-dim">0x0</span>)
+            </div>
+            <div class="squoosh-badge squoosh-badge-right" style="position:absolute; bottom:16px; right:16px; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399; z-index:10;">
+              压缩后: <span id="stat-comp-size">0 KB</span> (<span id="stat-comp-dim">0x0</span>)
+              <span id="stat-saving" style="display:inline-block; padding:2px 8px; border-radius:12px; background:#10b981; color:#020617; font-weight:800; font-size:11px; margin-left:6px;">-0%</span>
+            </div>
           </div>
         </div>
 
-        <!-- 破解时间对照表 -->
-        <div class="doc-card" style="margin-bottom: 20px;" data-i18n="tool_gpu_table_body">
-          <h3><span class="material-symbols-outlined" style="font-size: 18px;">timer</span> 现代 GPU 算力集群（RTX 4090 矩阵）暴力破解密码耗时对照表</h3>
-          <p style="margin-bottom: 12px;">以下数据基于单机 8 卡 RTX 4090 集群（每秒约 1000 亿次 NTLM 哈希尝试）理论计算结果：</p>
-          <div class="doc-table-wrapper">
-            <table class="doc-table">
-              <thead>
-                <tr>
-                  <th>密码长度</th>
-                  <th>纯数字 (10个字符)</th>
-                  <th>纯小写字母 (26个字符)</th>
-                  <th>大小写混合 (52个字符)</th>
-                  <th>大小写+数字+特殊符号 (94个字符)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>6 位字符</strong></td>
-                  <td><span style="color: #ef4444; font-weight:700;">瞬时 (0.001 秒)</span></td>
-                  <td><span style="color: #ef4444; font-weight:700;">0.03 秒</span></td>
-                  <td><span style="color: #ef4444; font-weight:700;">0.2 秒</span></td>
-                  <td><span style="color: #f59e0b; font-weight:700;">7 秒</span></td>
-                </tr>
-                <tr>
-                  <td><strong>8 位字符</strong></td>
-                  <td><span style="color: #ef4444; font-weight:700;">0.01 秒</span></td>
-                  <td><span style="color: #ef4444; font-weight:700;">2 秒</span></td>
-                  <td><span style="color: #f59e0b; font-weight:700;">8 分钟</span></td>
-                  <td><span style="color: #f59e0b; font-weight:700;">7 小时</span></td>
-                </tr>
-                <tr>
-                  <td><strong>12 位字符</strong></td>
-                  <td><span style="color: #ef4444; font-weight:700;">1 秒</span></td>
-                  <td><span style="color: #f59e0b; font-weight:700;">3 周</span></td>
-                  <td><span style="color: #10b981; font-weight:700;">200 年</span></td>
-                  <td><span style="color: #10b981; font-weight:700;">3.4 万年</span></td>
-                </tr>
-                <tr>
-                  <td><strong>16 位字符 (推荐)</strong></td>
-                  <td><span style="color: #f59e0b; font-weight:700;">3 小时</span></td>
-                  <td><span style="color: #10b981; font-weight:700;">4.5 万年</span></td>
-                  <td><span style="color: #10b981; font-weight:700;">10 亿年</span></td>
-                  <td><span style="color: #10b981; font-weight:700;">3.2 亿亿年 (绝对安全)</span></td>
-                </tr>
-              </tbody>
-            </table>
+        <!-- 参数调节 -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+          <div>
+            <label class="form-label" style="font-size: 12px;">目标输出格式:</label>
+            <select class="custom-select" id="media-format-select" style="width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 13px;">
+              <option value="image/webp" selected>WebP (推荐 · 极高压缩比)</option>
+              <option value="image/jpeg">JPEG / MozJPEG (经典兼容)</option>
+              <option value="image/png">PNG (透明无损优化)</option>
+              <option value="favicon">Favicon 图标 (.ico 32x32)</option>
+            </select>
           </div>
-          <div class="doc-callout success">
-            <strong>💡 NIST 黄金法则</strong>：密码长度（Length）对安全强度的提升呈指数级倍增，远大于单纯增加复杂符号。建议日常密码长度<strong>保持在 16 位以上</strong>。
+          <div>
+            <label class="form-label" style="font-size: 12px;">压缩画质: <b id="media-quality-val" style="color: var(--color-secondary); font-weight: 700;">75</b>%</label>
+            <input type="range" class="range-slider" id="media-quality-slider" min="5" max="100" value="75" style="width: 100%;">
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 12px;">最大宽度限制 (px, 可选):</label>
+            <input type="number" class="text-input" id="media-max-width" placeholder="保持原图尺寸 (或输入如 1920)" style="font-size: 13px; padding: 6px 10px;">
           </div>
         </div>
-        
-        <div class="doc-grid">
-          <div class="doc-card" data-i18n="tool_card1_body">
-            <h3><span class="material-symbols-outlined" style="font-size: 18px;">lock</span> 1. 密码信息熵（Entropy）数学原理</h3>
-            <p>密码信息熵是香农信息论在计算机安全领域的延伸应用，公式为：<code>E = L × log2(N)</code>。</p>
-            <p>其中 <code>L</code> 为密码长度，<code>N</code> 为可用字符集池大小（大小写+数字+特殊符号共 94 个）。</p>
-            <ul>
-              <li><strong>低于 40 Bits</strong>：极度脆弱，秒级破解。</li>
-              <li><strong>60 ~ 80 Bits</strong>：普通企业级标准。</li>
-              <li><strong>90 Bits 以上</strong>：军工级抗爆破防护。</li>
-            </ul>
-          </div>
-          
-          <div class="doc-card" data-i18n="tool_card2_body">
-            <h3><span class="material-symbols-outlined" style="font-size: 18px;">vpn_key</span> 2. JWT (RFC 7519) 核心架构与安全漏洞</h3>
-            <p>JWT 由 <code>Header.Payload.Signature</code> 三段组成，属于无状态身份凭证。开发中必须防范以下常见漏洞：</p>
-            <ul>
-              <li><strong>None 算法攻击</strong>：部分旧版库若未强制校验 <code>alg</code>，攻击者将 <code>alg: "none"</code> 即可伪造任意管理员身份。</li>
-              <li><strong>弱密钥爆破</strong>：使用纯数字或常见词作为 HMAC 签名密钥，极易被离线穷举爆破出 Secret。</li>
-              <li><strong>防 XSS 窃取</strong>：千万不要将 JWT 存在 <code>localStorage</code> 中，应使用 <code>HttpOnly SameSite=Strict</code> Cookie 存储。</li>
-            </ul>
-          </div>
 
-          <div class="doc-card" data-i18n="tool_card3_body">
-            <h3><span class="material-symbols-outlined" style="font-size: 18px;">fingerprint</span> 3. 单向散列 (MD5 vs SHA-256 vs Argon2)</h3>
-            <p>密码学哈希具备雪崩效应与不可逆性。MD5 与 SHA-1 已被证实存在碰撞漏洞：</p>
-            <ul>
-              <li><strong>数据完整性校验</strong>：推荐使用 <strong>SHA-256</strong> 与 <strong>SHA-512</strong>。</li>
-              <li><strong>用户密码落库存储</strong>：绝不能使用普通的快哈希（MD5/SHA256），必须使用针对 GPU 爆破优化的慢哈希算法：<strong>Argon2id、bcrypt 或 PBKDF2</strong> 并配合动态加盐（Salt）。</li>
-            </ul>
-          </div>
-
-          <div class="doc-card" data-i18n="tool_card4_body">
-            <h3><span class="material-symbols-outlined" style="font-size: 18px;">schedule</span> 4. Unix 时间戳与 2038 年危机 (Y2K38)</h3>
-            <p>Unix 时间戳从 <code>1970-01-01 00:00:00 UTC</code> 开始计时：</p>
-            <ul>
-              <li>在传统的 <strong>32 位有符号整数</strong>系统中，最大表示值为 <code>2,147,483,647</code> 秒；</li>
-              <li>将在 <strong>2038 年 1 月 19 日 03:14:07 UTC</strong> 发生整型溢出回滚至 1901 年；</li>
-              <li>现代 64 位体系已彻底解决该问题，可支持长达 2920 亿年的时间跨度。</li>
-            </ul>
-          </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+          <button class="btn btn-primary" id="media-download-btn" style="display: none; background: linear-gradient(135deg, #10b981, #06b6d4);" data-i18n="media_btn_download">
+            📥 下载压缩图片 (<span id="btn-download-size">0 KB</span>)
+          </button>
+          <button class="btn" id="media-scrub-btn" style="background: var(--surface-high);">
+            🛡️ 一键清洗 EXIF GPS 并导出
+          </button>
+          <span id="compress-status-msg" style="font-size: 12px; color: var(--text-muted);"></span>
         </div>
       </div>
     </section>

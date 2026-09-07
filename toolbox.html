@@ -73,7 +73,7 @@
       <p style="font-size: 14px; color: var(--text-secondary);" data-i18n="tool_subtitle">介绍</p>
     </div>
 
-    <!-- 子 Tab 导航 -->
+        <!-- 子 Tab 导航 -->
     <div class="toolbox-tabs" style="margin-bottom: 20px;">
       <div class="toolbox-tab-btn active" data-tab="password-tab" data-i18n="tool_tab_pwd">密码生成器</div>
       <div class="toolbox-tab-btn" data-tab="json-tab" data-i18n="tool_tab_json">JSON 格式化</div>
@@ -81,9 +81,11 @@
       <div class="toolbox-tab-btn" data-tab="hash-tab" data-i18n="tool_tab_hash">哈希散列计算</div>
       <div class="toolbox-tab-btn" data-tab="time-tab" data-i18n="tool_tab_time">时间戳转换</div>
       <div class="toolbox-tab-btn" data-tab="text-tab" data-i18n="tool_tab_text">文本处理</div>
-      <div class="toolbox-tab-btn" data-tab="media-tab" data-i18n="tool_tab_media">图片与媒体隐私</div>
+      <div class="toolbox-tab-btn" data-tab="media-tab" data-i18n="tool_media_tab">Squoosh 图片压缩</div>
+      <a href="/tools/screen-test.html" class="toolbox-tab-btn" style="text-decoration: none; color: inherit;">🖥️ 屏幕坏点检测 ➔</a>
+      <a href="/tools/mouse-test.html" class="toolbox-tab-btn" style="text-decoration: none; color: inherit;">🖱️ 鼠标双击测速 ➔</a>
     </div>
-    
+
     <!-- 1. 子视图：密码生成器与信息熵评估 -->
     <div id="password-tab" class="tool-view active glass-card" style="margin-bottom: 30px;">
       <div class="pwd-result-box">
@@ -362,7 +364,35 @@
           <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">拖拽待处理图片至此 或 点击选择本地图片</div>
           <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">支持 PNG, JPG, WebP, BMP (纯前端秒级处理)</div>
           <input type="file" id="media-file-input" accept="image/*" style="display: none;">
+      </div>
+
+      <!-- Squoosh 风格双视窗对比器 -->
+      <div id="squoosh-preview-section" style="display: none; margin-bottom: 24px;">
+        <div class="squoosh-viewport squoosh-bg-grid" id="squoosh-viewport" style="position: relative; width: 100%; height: 420px; background: #020617; border: 1px solid var(--border-light); border-radius: var(--radius-md); overflow: hidden; user-select: none; display: flex; align-items: center; justify-content: center;">
+          <!-- 原图层 -->
+          <div class="squoosh-layer" id="squoosh-layer-orig" style="position: absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <img id="img-orig-preview" alt="Original Image" style="max-width:100%; max-height:100%; object-fit:contain;">
+          </div>
+          <!-- 压缩图层 -->
+          <div class="squoosh-layer" id="squoosh-layer-comp" style="position: absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; clip-path: inset(0 0 0 50%);">
+            <img id="img-comp-preview" alt="Compressed Image" style="max-width:100%; max-height:100%; object-fit:contain;">
+          </div>
+          <!-- 中间拖动把手 -->
+          <div class="squoosh-divider" id="squoosh-divider" style="position: absolute; top:0; bottom:0; left:50%; width:3px; background:#38bdf8; box-shadow:0 0 12px rgba(56,189,248,0.8); cursor:ew-resize; z-index:20;">
+            <div class="squoosh-handle" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:34px; height:34px; border-radius:50%; background:#020617; border:2px solid #38bdf8; color:#38bdf8; display:flex; align-items:center; justify-content:center; font-size:16px;">
+              <span class="material-symbols-outlined" style="font-size:18px;">code</span>
+            </div>
+          </div>
+          <!-- 悬浮数据指示徽章 -->
+          <div class="squoosh-badge squoosh-badge-left" style="position:absolute; bottom:16px; left:16px; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.15); color:#94a3b8; z-index:10;">
+            原图: <span id="stat-orig-size">0 KB</span> (<span id="stat-orig-dim">0x0</span>)
+          </div>
+          <div class="squoosh-badge squoosh-badge-right" style="position:absolute; bottom:16px; right:16px; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399; z-index:10;">
+            压缩后: <span id="stat-comp-size">0 KB</span> (<span id="stat-comp-dim">0x0</span>)
+            <span id="stat-saving" style="display:inline-block; padding:2px 8px; border-radius:12px; background:#10b981; color:#020617; font-weight:800; font-size:11px; margin-left:6px;">-0%</span>
+          </div>
         </div>
+      </div>
 
         <!-- 控制面板 (质量、格式、缩放) -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
