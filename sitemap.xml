@@ -7,151 +7,151 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/sitemap.html</loc>
+    <loc>https://825412.xyz/sitemap</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/airdrop.html</loc>
+    <loc>https://825412.xyz/airdrop</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/webhook.html</loc>
+    <loc>https://825412.xyz/webhook</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/toolbox.html</loc>
+    <loc>https://825412.xyz/toolbox</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/clipboard.html</loc>
+    <loc>https://825412.xyz/clipboard</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/tools/screen-test.html</loc>
+    <loc>https://825412.xyz/tools/screen-test</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/tools/mouse-test.html</loc>
+    <loc>https://825412.xyz/tools/mouse-test</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/tools/password-generator.html</loc>
+    <loc>https://825412.xyz/tools/password-generator</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/tools/json-formatter.html</loc>
+    <loc>https://825412.xyz/tools/json-formatter</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/tools/jwt-debugger.html</loc>
+    <loc>https://825412.xyz/tools/jwt-debugger</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/tools/hash-calculator.html</loc>
+    <loc>https://825412.xyz/tools/hash-calculator</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/tools/timestamp-converter.html</loc>
+    <loc>https://825412.xyz/tools/timestamp-converter</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/tools/text-tools.html</loc>
+    <loc>https://825412.xyz/tools/text-tools</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/tools/media-compress.html</loc>
+    <loc>https://825412.xyz/tools/media-compress</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/tools/wifi-qr.html</loc>
+    <loc>https://825412.xyz/tools/wifi-qr</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/articles/webrtc-p2p-architecture-guide.html</loc>
+    <loc>https://825412.xyz/articles/webrtc-p2p-architecture-guide</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/articles/webhook-security-and-idempotency.html</loc>
+    <loc>https://825412.xyz/articles/webhook-security-and-idempotency</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/articles/modern-password-entropy-and-nist-standard.html</loc>
+    <loc>https://825412.xyz/articles/modern-password-entropy-and-nist-standard</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/articles/why-you-should-stop-storing-jwt-in-localstorage.html</loc>
+    <loc>https://825412.xyz/articles/why-you-should-stop-storing-jwt-in-localstorage</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/articles/cryptographic-hash-functions-and-slow-hashing.html</loc>
+    <loc>https://825412.xyz/articles/cryptographic-hash-functions-and-slow-hashing</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/articles/pure-frontend-image-processing-and-exif-privacy.html</loc>
+    <loc>https://825412.xyz/articles/pure-frontend-image-processing-and-exif-privacy</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/about.html</loc>
+    <loc>https://825412.xyz/about</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/privacy.html</loc>
+    <loc>https://825412.xyz/privacy</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/terms.html</loc>
+    <loc>https://825412.xyz/terms</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://825412.xyz/contact.html</loc>
+    <loc>https://825412.xyz/contact</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
