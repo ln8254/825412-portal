@@ -148,52 +148,62 @@
     
     <ul class="nav-menu">
       <li class="nav-item active" data-target="dashboard-view">
-        <span class="material-symbols-outlined">dashboard</span>
-        <span data-i18n="nav_dashboard">控制台</span>
+        <a href="/" style="display: flex; align-items: center; gap: 12px; width: 100%; color: inherit; text-decoration: none;">
+          <span class="material-symbols-outlined">dashboard</span>
+          <span data-i18n="nav_dashboard">控制台</span>
+        </a>
       </li>
       <li class="nav-item" data-target="toolbox-view">
-        <span class="material-symbols-outlined">build</span>
-        <span data-i18n="nav_toolbox">极客工具箱</span>
+        <a href="/toolbox.html" style="display: flex; align-items: center; gap: 12px; width: 100%; color: inherit; text-decoration: none;">
+          <span class="material-symbols-outlined">build</span>
+          <span data-i18n="nav_toolbox">极客工具箱</span>
+        </a>
       </li>
       <li class="nav-item" data-target="airdrop-view">
-        <span class="material-symbols-outlined">wifi_tethering</span>
-        <span data-i18n="nav_airdrop">极客隔空快传</span>
+        <a href="/airdrop.html" style="display: flex; align-items: center; gap: 12px; width: 100%; color: inherit; text-decoration: none;">
+          <span class="material-symbols-outlined">wifi_tethering</span>
+          <span data-i18n="nav_airdrop">极客隔空快传</span>
+        </a>
       </li>
       <li class="nav-item" data-target="webhook-view">
-        <span class="material-symbols-outlined">webhook</span>
-        <span data-i18n="nav_webhook">Webhook 调试桩</span>
+        <a href="/webhook.html" style="display: flex; align-items: center; gap: 12px; width: 100%; color: inherit; text-decoration: none;">
+          <span class="material-symbols-outlined">webhook</span>
+          <span data-i18n="nav_webhook">Webhook 调试桩</span>
+        </a>
       </li>
       <li class="nav-item" data-target="clipboard-view">
-        <span class="material-symbols-outlined">assignment</span>
-        <span data-i18n="nav_clipboard">匿名剪贴板</span>
+        <a href="/clipboard.html" style="display: flex; align-items: center; gap: 12px; width: 100%; color: inherit; text-decoration: none;">
+          <span class="material-symbols-outlined">assignment</span>
+          <span data-i18n="nav_clipboard">匿名剪贴板</span>
+        </a>
       </li>
     </ul>
     
     <div class="sidebar-footer">
       <div class="sidebar-footer-menu">
-        <div class="footer-link-item" id="lang-switch-btn" style="color: var(--color-secondary); font-weight: 600; margin-bottom: 6px; padding: 4px 0;">
+        <div class="footer-link-item" id="lang-switch-btn" style="color: var(--color-secondary); font-weight: 600; margin-bottom: 6px; padding: 4px 0; cursor: pointer;">
           🌐 English
         </div>
-        <div class="footer-link-item" id="open-settings">
-          <span class="material-symbols-outlined" style="font-size: 18px;">settings</span>
-          <span data-i18n="nav_settings">设置中心</span>
-        </div>
-        <div class="footer-link-item" id="open-about">
+        <a href="/about.html" class="footer-link-item" style="text-decoration: none; color: inherit;">
           <span class="material-symbols-outlined" style="font-size: 18px;">info</span>
           <span data-i18n="nav_about">关于本站</span>
-        </div>
-        <div class="footer-link-item" id="open-privacy">
+        </a>
+        <a href="/privacy.html" class="footer-link-item" style="text-decoration: none; color: inherit;">
           <span class="material-symbols-outlined" style="font-size: 18px;">policy</span>
           <span data-i18n="nav_privacy">隐私政策</span>
-        </div>
-        <div class="footer-link-item" id="open-terms">
+        </a>
+        <a href="/terms.html" class="footer-link-item" style="text-decoration: none; color: inherit;">
           <span class="material-symbols-outlined" style="font-size: 18px;">gavel</span>
           <span data-i18n="nav_terms">服务条款</span>
-        </div>
-        <div class="footer-link-item" id="open-contact">
+        </a>
+        <a href="/contact.html" class="footer-link-item" style="text-decoration: none; color: inherit;">
           <span class="material-symbols-outlined" style="font-size: 18px;">mail</span>
           <span data-i18n="nav_contact">联系我们</span>
-        </div>
+        </a>
+        <a href="/sitemap.html" class="footer-link-item" style="text-decoration: none; color: inherit;">
+          <span class="material-symbols-outlined" style="font-size: 18px;">account_tree</span>
+          <span data-i18n="nav_sitemap">全站索引</span>
+        </a>
       </div>
     </div>
   </nav>
@@ -527,6 +537,72 @@
           </div>
         </div>
       </div>
+          <!-- 爬虫全量静态索引导航 (Full Crawler Link Directory) -->
+      <footer style="margin-top: 50px; padding: 36px 24px; border-top: 1px solid var(--border-light); background: rgba(6, 14, 32, 0.6); border-radius: var(--radius-md);">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 24px; font-size: 13px;">
+          <div>
+            <div style="font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-primary);">wifi_tethering</span>
+              <span>核心通信服务</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <a href="/airdrop.html" style="color: var(--text-secondary); text-decoration: none;">极客隔空快传 (WebRTC P2P)</a>
+              <a href="/webhook.html" style="color: var(--text-secondary); text-decoration: none;">Webhook 调试桩与 API 中继</a>
+              <a href="/clipboard.html" style="color: var(--text-secondary); text-decoration: none;">匿名阅后即焚剪贴板</a>
+              <a href="/toolbox.html" style="color: var(--text-secondary); text-decoration: none;">极客工具箱总大厅</a>
+            </div>
+          </div>
+          <div>
+            <div style="font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-secondary);">build</span>
+              <span>常用极客工具</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <a href="/tools/password-generator.html" style="color: var(--text-secondary); text-decoration: none;">密码生成器与信息熵评估</a>
+              <a href="/tools/json-formatter.html" style="color: var(--text-secondary); text-decoration: none;">JSON 语法高亮与格式化</a>
+              <a href="/tools/jwt-debugger.html" style="color: var(--text-secondary); text-decoration: none;">JWT 令牌签名解析与调试</a>
+              <a href="/tools/hash-calculator.html" style="color: var(--text-secondary); text-decoration: none;">MD5 / SHA-256 哈希计算器</a>
+              <a href="/tools/timestamp-converter.html" style="color: var(--text-secondary); text-decoration: none;">Unix 时间戳转换与多语言速查</a>
+              <a href="/tools/text-tools.html" style="color: var(--text-secondary); text-decoration: none;">文本处理与 Base64 编解码</a>
+              <a href="/tools/media-compress.html" style="color: var(--text-secondary); text-decoration: none;">Squoosh 图片极限压缩与对比</a>
+              <a href="/tools/wifi-qr.html" style="color: var(--text-secondary); text-decoration: none;">WiFi 扫码免密一键连二维码</a>
+              <a href="/tools/screen-test.html" style="color: var(--text-secondary); text-decoration: none;">4K 屏幕坏点漏光与验机检测</a>
+              <a href="/tools/mouse-test.html" style="color: var(--text-secondary); text-decoration: none;">鼠标双击与 8000Hz 轮询率测试</a>
+            </div>
+          </div>
+          <div>
+            <div style="font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" style="font-size: 18px; color: #10b981;">menu_book</span>
+              <span>极客技术白皮书</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <a href="/articles/webrtc-p2p-architecture-guide.html" style="color: var(--text-secondary); text-decoration: none;">WebRTC P2P 端到端通信原理</a>
+              <a href="/articles/webhook-security-and-idempotency.html" style="color: var(--text-secondary); text-decoration: none;">Webhook 签名安全与幂等设计</a>
+              <a href="/articles/modern-password-entropy-and-nist-standard.html" style="color: var(--text-secondary); text-decoration: none;">密码信息熵与 GPU 算力破译模型</a>
+              <a href="/articles/why-you-should-stop-storing-jwt-in-localstorage.html" style="color: var(--text-secondary); text-decoration: none;">JWT 存储安全与 XSS 防御</a>
+              <a href="/articles/cryptographic-hash-functions-and-slow-hashing.html" style="color: var(--text-secondary); text-decoration: none;">慢哈希与单向散列抗碰撞分析</a>
+              <a href="/articles/pure-frontend-image-processing-and-exif-privacy.html" style="color: var(--text-secondary); text-decoration: none;">图像离线压缩与 EXIF GPS 脱敏</a>
+            </div>
+          </div>
+          <div>
+            <div style="font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" style="font-size: 18px; color: #a78bfa;">policy</span>
+              <span>合规与索引</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <a href="/about.html" style="color: var(--text-secondary); text-decoration: none;">关于本站 (About Us)</a>
+              <a href="/privacy.html" style="color: var(--text-secondary); text-decoration: none;">隐私政策 (Privacy Policy)</a>
+              <a href="/terms.html" style="color: var(--text-secondary); text-decoration: none;">服务条款 (Terms of Service)</a>
+              <a href="/contact.html" style="color: var(--text-secondary); text-decoration: none;">联系我们 (Contact Us)</a>
+              <a href="/sitemap.html" style="color: var(--text-secondary); text-decoration: none;">HTML 网站地图</a>
+              <a href="/sitemap.xml" style="color: var(--text-secondary); text-decoration: none;">XML 站点地图</a>
+            </div>
+          </div>
+        </div>
+        <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; font-size: 12px; color: var(--text-muted);">
+          © 2026 825412.xyz 极客多功能工具箱 | 纯前端零上传·保护数据隐私
+        </div>
+      </footer>
     </section>
 
     <!-- 2. 匿名剪贴板 View -->
