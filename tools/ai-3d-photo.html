@@ -30,6 +30,7 @@
       justify-content: center;
       padding: 16px;
       cursor: grab;
+      perspective: 1000px;
     }
     .parallax-viewport:active {
       cursor: grabbing;
@@ -43,8 +44,12 @@
       border-radius: 6px;
       overflow: hidden;
       line-height: 0;
+      transform-style: preserve-3d;
+      transition: transform 0.08s ease-out;
+      will-change: transform;
     }
-    #webgl-canvas {
+    #webgl-canvas,
+    #fallback-canvas {
       display: block;
       max-width: 100%;
       max-height: calc(72vh - 32px);
@@ -116,8 +121,8 @@
         <span style="color: #c084fc; font-size: 13px; font-weight: 600;">AI 2D转3D视差壁纸</span>
       </div>
       <div style="display: flex; gap: 10px; align-items: center;">
-        <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3); font-weight: 700;">
-          ⚡ 100% 浏览器 WebGL 空间着色器
+        <span id="engine-badge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3); font-weight: 700;">
+          ⚡ 3D 空间着色器
         </span>
       </div>
     </div>
@@ -221,6 +226,8 @@
           <div class="parallax-stage-wrapper" id="stage-wrapper">
             <!-- WebGL 3D 实时着色器画布 -->
             <canvas id="webgl-canvas"></canvas>
+            <!-- 纯 2D 备用画布 (无 WebGL 硬件加速环境下的平滑容灾) -->
+            <canvas id="fallback-canvas" style="display: none;"></canvas>
             <!-- 灰度景深图纯净画布 -->
             <canvas id="depth-canvas"></canvas>
           </div>
@@ -303,17 +310,25 @@
     const statusText = document.getElementById('status-text');
     const workbench = document.getElementById('workbench');
     const viewport = document.getElementById('viewport');
+    const stageWrapper = document.getElementById('stage-wrapper');
     const webglCanvas = document.getElementById('webgl-canvas');
+    const fallbackCanvas = document.getElementById('fallback-canvas');
     const depthCanvas = document.getElementById('depth-canvas');
     const btnExportDepth = document.getElementById('btn-export-depth');
     const btnExport3dShot = document.getElementById('btn-export-3d-shot');
     const btnReset = document.getElementById('btn-reset');
+    const engineBadge = document.getElementById('engine-badge');
 
     let rawImg = null;
+    let renderEngine = 'webgl'; // 'webgl' | 'canvas2d'
     let gl = null;
     let shaderProgram = null;
     let imageTexture = null;
     let depthTexture = null;
+
+    // Canvas 2D 容灾图层
+    let fgCanvas = null;
+    let bgCanvas = null;
 
     let targetOffsetX = 0;
     let targetOffsetY = 0;
@@ -328,18 +343,29 @@
       strengthVal.textContent = e.target.value;
     });
 
+    function updateViewDisplay() {
+      if (currentView === '3d') {
+        if (renderEngine === 'webgl') {
+          webglCanvas.style.display = 'block';
+          fallbackCanvas.style.display = 'none';
+        } else {
+          webglCanvas.style.display = 'none';
+          fallbackCanvas.style.display = 'block';
+        }
+        depthCanvas.style.display = 'none';
+      } else {
+        webglCanvas.style.display = 'none';
+        fallbackCanvas.style.display = 'none';
+        depthCanvas.style.display = 'block';
+      }
+    }
+
     viewPills.forEach(pill => {
       pill.addEventListener('click', () => {
         viewPills.forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         currentView = pill.getAttribute('data-view');
-        if (currentView === '3d') {
-          webglCanvas.style.display = 'block';
-          depthCanvas.style.display = 'none';
-        } else {
-          webglCanvas.style.display = 'none';
-          depthCanvas.style.display = 'block';
-        }
+        updateViewDisplay();
       });
     });
 
@@ -415,30 +441,30 @@
       reader.readAsDataURL(file);
     }
 
-    // 估计深度并构建 WebGL
+    // 估计深度并构建 3D 视差空间
     async function processDepth() {
       progressBar.style.width = '45%';
       percentText.textContent = '45%';
       statusText.textContent = '端侧单目深度估计模型推理中 (Z轴空间重建)...';
 
-      await new Promise(r => setTimeout(r, 80));
+      await new Promise(r => setTimeout(r, 60));
 
       const w = rawImg.naturalWidth || rawImg.width;
       const h = rawImg.naturalHeight || rawImg.height;
 
-      // 生成黑白深度图到 depthCanvas
+      // 1. 生成高精度灰度景深图到 depthCanvas
       depthCanvas.width = w;
       depthCanvas.height = h;
       generateDepthMap(rawImg, depthCanvas);
 
-      progressBar.style.width = '85%';
-      percentText.textContent = '85%';
-      statusText.textContent = '编译 WebGL 3D 空间置换着色器...';
+      progressBar.style.width = '80%';
+      percentText.textContent = '80%';
+      statusText.textContent = '正在检测并适配最佳视差引擎 (WebGL 硬件加速 / CSS 3D 智能容灾)...';
 
-      await new Promise(r => setTimeout(r, 60));
+      await new Promise(r => setTimeout(r, 50));
 
-      // 初始化 WebGL
-      initWebGL(w, h);
+      // 2. 智能探测 WebGL / 2D 双引擎，绝不 alert 弹窗打断用户
+      init3DViewer(w, h);
 
       progressBar.style.width = '100%';
       percentText.textContent = '100%';
@@ -447,6 +473,7 @@
       setTimeout(() => {
         progressPanel.style.display = 'none';
         workbench.style.display = 'block';
+        updateViewDisplay();
         startRenderLoop();
       }, 200);
     }
@@ -497,113 +524,218 @@
       ctx.putImageData(imgData, 0, 0);
     }
 
-    // 初始化 WebGL 着色器
-    function initWebGL(w, h) {
-      webglCanvas.width = w;
-      webglCanvas.height = h;
-      gl = webglCanvas.getContext('webgl') || webglCanvas.getContext('experimental-webgl');
-      if (!gl) {
-        alert('您的浏览器暂不支持 WebGL，无法进行 3D 渲染');
-        return;
+    // 双引擎初始化入口：优先 WebGL，若环境受限或无独显平滑降级为 Canvas 2D + CSS 3D
+    function init3DViewer(w, h) {
+      const webglSuccess = tryInitWebGL(w, h);
+      if (webglSuccess) {
+        renderEngine = 'webgl';
+        if (engineBadge) {
+          engineBadge.innerHTML = '⚡ WebGL 3D 硬件加速';
+          engineBadge.style.color = '#c084fc';
+          engineBadge.style.borderColor = 'rgba(139, 92, 246, 0.4)';
+          engineBadge.style.background = 'rgba(139, 92, 246, 0.15)';
+        }
+      } else {
+        renderEngine = 'canvas2d';
+        initCanvas2DFallback(w, h);
+        if (engineBadge) {
+          engineBadge.innerHTML = '🌐 CSS 3D + 2D 智能分层视差引擎 (广谱兼容)';
+          engineBadge.style.color = '#38bdf8';
+          engineBadge.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+          engineBadge.style.background = 'rgba(56, 189, 248, 0.15)';
+        }
       }
+    }
 
-      // 顶点着色器
-      const vsSource = `
-        attribute vec2 a_position;
-        attribute vec2 a_texCoord;
-        varying vec2 v_texCoord;
-        void main() {
-          gl_Position = vec4(a_position, 0.0, 1.0);
-          v_texCoord = a_texCoord;
+    // 引擎 A: WebGL 3D 空间置换着色器
+    function tryInitWebGL(w, h) {
+      try {
+        webglCanvas.width = w;
+        webglCanvas.height = h;
+
+        // 关键：failIfMajorPerformanceCaveat 设置为 false，允许 Mesa/SwiftShader 等软解运行
+        const glOptions = {
+          alpha: false,
+          depth: false,
+          stencil: false,
+          antialias: false,
+          preserveDrawingBuffer: true,
+          failIfMajorPerformanceCaveat: false
+        };
+
+        gl = webglCanvas.getContext('webgl2', glOptions) ||
+             webglCanvas.getContext('webgl', glOptions) ||
+             webglCanvas.getContext('experimental-webgl', glOptions);
+
+        if (!gl) return false;
+
+        // 顶点着色器
+        const vsSource = `
+          attribute vec2 a_position;
+          attribute vec2 a_texCoord;
+          varying vec2 v_texCoord;
+          void main() {
+            gl_Position = vec4(a_position, 0.0, 1.0);
+            v_texCoord = a_texCoord;
+          }
+        `;
+
+        // 片元着色器：3D 视差置换核心
+        const fsSource = `
+          precision mediump float;
+          uniform sampler2D u_image;
+          uniform sampler2D u_depth;
+          uniform vec2 u_offset;
+          uniform float u_focus;
+          varying vec2 v_texCoord;
+
+          void main() {
+            float depth = texture2D(u_depth, v_texCoord).r;
+            vec2 offset = (depth - u_focus) * u_offset;
+            vec2 coord = v_texCoord + offset;
+            coord = clamp(coord, 0.0, 1.0);
+            gl_FragColor = texture2D(u_image, coord);
+          }
+        `;
+
+        const vs = compileShader(gl, gl.VERTEX_SHADER, vsSource);
+        const fs = compileShader(gl, gl.FRAGMENT_SHADER, fsSource);
+        if (!vs || !fs) return false;
+
+        shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vs);
+        gl.attachShader(shaderProgram, fs);
+        gl.linkProgram(shaderProgram);
+
+        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+          console.warn('WebGL Link error:', gl.getProgramInfoLog(shaderProgram));
+          return false;
         }
-      `;
 
-      // 片元着色器：3D 视差置换核心
-      const fsSource = `
-        precision mediump float;
-        uniform sampler2D u_image;
-        uniform sampler2D u_depth;
-        uniform vec2 u_offset;
-        uniform float u_focus;
-        varying vec2 v_texCoord;
+        gl.useProgram(shaderProgram);
 
-        void main() {
-          float depth = texture2D(u_depth, v_texCoord).r;
-          // 根据景深值与对焦点进行坐标偏移
-          vec2 offset = (depth - u_focus) * u_offset;
-          vec2 coord = v_texCoord + offset;
-          coord = clamp(coord, 0.0, 1.0);
-          gl_FragColor = texture2D(u_image, coord);
-        }
-      `;
+        // 设置矩形网格顶点
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+          -1.0, -1.0,
+           1.0, -1.0,
+          -1.0,  1.0,
+          -1.0,  1.0,
+           1.0, -1.0,
+           1.0,  1.0,
+        ]), gl.STATIC_DRAW);
 
-      const vs = compileShader(gl, gl.VERTEX_SHADER, vsSource);
-      const fs = compileShader(gl, gl.FRAGMENT_SHADER, fsSource);
-      shaderProgram = gl.createProgram();
-      gl.attachShader(shaderProgram, vs);
-      gl.attachShader(shaderProgram, fs);
-      gl.linkProgram(shaderProgram);
-      gl.useProgram(shaderProgram);
+        const posAttr = gl.getAttribLocation(shaderProgram, "a_position");
+        gl.enableVertexAttribArray(posAttr);
+        gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0);
 
-      // 设置矩形网格顶点
-      const positionBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-        -1.0, -1.0,
-         1.0, -1.0,
-        -1.0,  1.0,
-        -1.0,  1.0,
-         1.0, -1.0,
-         1.0,  1.0,
-      ]), gl.STATIC_DRAW);
+        const texCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+          0.0, 1.0,
+          1.0, 1.0,
+          0.0, 0.0,
+          0.0, 0.0,
+          1.0, 1.0,
+          1.0, 0.0,
+        ]), gl.STATIC_DRAW);
 
-      const posAttr = gl.getAttribLocation(shaderProgram, "a_position");
-      gl.enableVertexAttribArray(posAttr);
-      gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0);
+        const texAttr = gl.getAttribLocation(shaderProgram, "a_texCoord");
+        gl.enableVertexAttribArray(texAttr);
+        gl.vertexAttribPointer(texAttr, 2, gl.FLOAT, false, 0, 0);
 
-      const texCoordBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-        0.0, 1.0,
-        1.0, 1.0,
-        0.0, 0.0,
-        0.0, 0.0,
-        1.0, 1.0,
-        1.0, 0.0,
-      ]), gl.STATIC_DRAW);
+        // 绑定原图与深度图纹理
+        imageTexture = createTexture(gl, rawImg, 0);
+        depthTexture = createTexture(gl, depthCanvas, 1);
+        if (!imageTexture || !depthTexture) return false;
 
-      const texAttr = gl.getAttribLocation(shaderProgram, "a_texCoord");
-      gl.enableVertexAttribArray(texAttr);
-      gl.vertexAttribPointer(texAttr, 2, gl.FLOAT, false, 0, 0);
+        gl.uniform1i(gl.getUniformLocation(shaderProgram, "u_image"), 0);
+        gl.uniform1i(gl.getUniformLocation(shaderProgram, "u_depth"), 1);
+        gl.uniform1f(gl.getUniformLocation(shaderProgram, "u_focus"), 0.5);
 
-      // 绑定原图纹理 (Texture 0)
-      imageTexture = createTexture(gl, rawImg, 0);
-      gl.uniform1i(gl.getUniformLocation(shaderProgram, "u_image"), 0);
-
-      // 绑定景深图纹理 (Texture 1)
-      depthTexture = createTexture(gl, depthCanvas, 1);
-      gl.uniform1i(gl.getUniformLocation(shaderProgram, "u_depth"), 1);
-
-      gl.uniform1f(gl.getUniformLocation(shaderProgram, "u_focus"), 0.5);
+        return true;
+      } catch (err) {
+        console.warn('tryInitWebGL caught error, will fallback:', err);
+        return false;
+      }
     }
 
     function compileShader(gl, type, source) {
       const shader = gl.createShader(type);
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.warn('Shader compile failed:', gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+      }
       return shader;
     }
 
     function createTexture(gl, source, unit) {
-      const texture = gl.createTexture();
-      gl.activeTexture(gl.TEXTURE0 + unit);
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
-      return texture;
+      try {
+        const texture = gl.createTexture();
+        gl.activeTexture(gl.TEXTURE0 + unit);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+        return texture;
+      } catch (e) {
+        console.warn('createTexture failed:', e);
+        return null;
+      }
+    }
+
+    // 引擎 B: 纯 Canvas 2D + CSS 3D 智能前后景切片容灾算法 (100% 浏览器全兼容)
+    function initCanvas2DFallback(w, h) {
+      fallbackCanvas.width = w;
+      fallbackCanvas.height = h;
+
+      // 1. 离屏背景层 Canvas
+      bgCanvas = document.createElement('canvas');
+      bgCanvas.width = w;
+      bgCanvas.height = h;
+      const bgCtx = bgCanvas.getContext('2d');
+      bgCtx.drawImage(rawImg, 0, 0, w, h);
+
+      // 2. 离屏前景层 Canvas (基于景深蒙版提取近处主体并平滑羽化)
+      fgCanvas = document.createElement('canvas');
+      fgCanvas.width = w;
+      fgCanvas.height = h;
+      const fgCtx = fgCanvas.getContext('2d');
+      fgCtx.drawImage(rawImg, 0, 0, w, h);
+
+      const depthCtx = depthCanvas.getContext('2d', { willReadFrequently: true });
+      const depthData = depthCtx.getImageData(0, 0, w, h).data;
+      const fgImgData = fgCtx.getImageData(0, 0, w, h);
+      const fgData = fgImgData.data;
+
+      // 统计画面平均景深作为主体分界
+      let totalDepth = 0;
+      const step = 4;
+      let sampleCount = 0;
+      for (let i = 0; i < depthData.length; i += step * 4) {
+        totalDepth += depthData[i];
+        sampleCount++;
+      }
+      const avgDepth = sampleCount > 0 ? (totalDepth / sampleCount) : 128;
+      const fgThreshold = Math.max(90, Math.min(160, avgDepth));
+
+      // 生成前景羽化透明通道
+      for (let i = 0; i < fgData.length; i += 4) {
+        const d = depthData[i];
+        if (d <= fgThreshold) {
+          fgData[i + 3] = 0; // 远景透明
+        } else {
+          const alphaRatio = Math.min(1, (d - fgThreshold) / 36);
+          fgData[i + 3] = Math.round(fgData[i + 3] * alphaRatio);
+        }
+      }
+      fgCtx.putImageData(fgImgData, 0, 0);
     }
 
     // 交互监听：鼠标移动
@@ -642,26 +774,53 @@
       targetOffsetY = ny;
     }, { passive: true });
 
-    // 动画渲染循环 (60 FPS 平滑阻尼跟踪)
+    // 动画渲染循环 (60 FPS 平滑弹性阻尼追踪)
     function startRenderLoop() {
       if (animFrameId) cancelAnimationFrame(animFrameId);
 
       function render() {
         if (isAutoWiggle) {
-          wiggleTime += 0.035;
+          wiggleTime += 0.032;
           targetOffsetX = Math.sin(wiggleTime) * 0.35;
-          targetOffsetY = Math.cos(wiggleTime * 0.7) * 0.15;
+          targetOffsetY = Math.cos(wiggleTime * 0.75) * 0.16;
         }
 
         // 弹性平滑逼近
         currentOffsetX += (targetOffsetX - currentOffsetX) * 0.12;
         currentOffsetY += (targetOffsetY - currentOffsetY) * 0.12;
 
-        if (gl && shaderProgram && currentView === '3d') {
-          const strength = parseFloat(depthStrength.value) / 1000;
-          const uOffsetLoc = gl.getUniformLocation(shaderProgram, "u_offset");
-          gl.uniform2f(uOffsetLoc, currentOffsetX * strength, -currentOffsetY * strength);
-          gl.drawArrays(gl.TRIANGLES, 0, 6);
+        if (currentView === '3d') {
+          // 容器 CSS 3D 物理空间倾斜
+          const tiltX = -currentOffsetY * 10;
+          const tiltY = currentOffsetX * 10;
+          stageWrapper.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+
+          if (renderEngine === 'webgl' && gl && shaderProgram) {
+            // WebGL 像素级置换
+            const strength = parseFloat(depthStrength.value) / 1000;
+            const uOffsetLoc = gl.getUniformLocation(shaderProgram, "u_offset");
+            gl.uniform2f(uOffsetLoc, currentOffsetX * strength, -currentOffsetY * strength);
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+          } else if (renderEngine === 'canvas2d' && fgCanvas && bgCanvas) {
+            // Canvas 2D 前后景双层差速视差
+            const ctx = fallbackCanvas.getContext('2d');
+            const w = fallbackCanvas.width;
+            const h = fallbackCanvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const strength = parseFloat(depthStrength.value);
+            const bgShiftX = -currentOffsetX * (strength * 0.4);
+            const bgShiftY = -currentOffsetY * (strength * 0.4);
+            const fgShiftX = currentOffsetX * (strength * 0.75);
+            const fgShiftY = currentOffsetY * (strength * 0.75);
+
+            const marginX = w * 0.04;
+            const marginY = h * 0.04;
+            ctx.drawImage(bgCanvas, -marginX + bgShiftX, -marginY + bgShiftY, w + marginX * 2, h + marginY * 2);
+            ctx.drawImage(fgCanvas, fgShiftX, fgShiftY, w, h);
+          }
+        } else {
+          stageWrapper.style.transform = 'none';
         }
 
         animFrameId = requestAnimationFrame(render);
@@ -682,9 +841,10 @@
       }, 'image/png');
     });
 
-    // 截取当前立体帧
+    // 截取当前立体帧 (支持 WebGL 与 Canvas 2D 智能选择活动画布)
     btnExport3dShot.addEventListener('click', () => {
-      webglCanvas.toBlob((blob) => {
+      const activeShotCanvas = (renderEngine === 'webgl') ? webglCanvas : fallbackCanvas;
+      activeShotCanvas.toBlob((blob) => {
         if (!blob) return;
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -695,10 +855,14 @@
       }, 'image/png');
     });
 
+    // 重置并上传新图片
     btnReset.addEventListener('click', () => {
       fileInput.value = '';
       rawImg = null;
+      fgCanvas = null;
+      bgCanvas = null;
       if (animFrameId) cancelAnimationFrame(animFrameId);
+      stageWrapper.style.transform = 'none';
       workbench.style.display = 'none';
       dropzone.style.display = 'block';
     });
