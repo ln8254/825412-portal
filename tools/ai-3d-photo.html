@@ -42,16 +42,15 @@
       justify-content: center;
       max-width: 100%;
       max-height: calc(58vh - 24px);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
-      border-radius: 8px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8), 0 0 30px rgba(139, 92, 246, 0.2);
+      border-radius: 10px;
       overflow: hidden;
       line-height: 0;
       transform-style: preserve-3d;
-      transition: transform 0.08s ease-out;
-      will-change: transform;
+      transition: transform 0.06s ease-out, box-shadow 0.06s ease-out;
+      will-change: transform, box-shadow;
     }
-    #webgl-canvas,
-    #fallback-canvas,
+    #main-canvas,
     #depth-canvas {
       display: block;
       max-width: 100%;
@@ -59,6 +58,18 @@
       width: auto;
       height: auto;
       object-fit: contain;
+    }
+    .glare-effect {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      mix-blend-mode: color-dodge;
+      opacity: 0.7;
+      border-radius: 10px;
+      z-index: 5;
     }
     .view-mode-pill {
       padding: 5px 14px;
@@ -173,7 +184,7 @@
           <div style="display: flex; gap: 6px;">
             <button type="button" class="view-mode-pill active" data-view="3d">
               <span class="material-symbols-outlined" style="font-size: 15px;">view_in_ar</span>
-              <span>3D 视差动态视图</span>
+              <span>3D 空间实体画框</span>
             </button>
             <button type="button" class="view-mode-pill" data-view="depth">
               <span class="material-symbols-outlined" style="font-size: 15px;">blur_linear</span>
@@ -182,27 +193,18 @@
           </div>
         </div>
 
-        <!-- 3D 强度调节 -->
+        <!-- 3D 空间倾角灵敏度 -->
         <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 12px; color: var(--text-muted);">3D 视差强度:</label>
-          <input type="range" id="depth-strength" min="5" max="60" value="28" style="width: 90px; accent-color: #8b5cf6;">
-          <span id="strength-val" style="font-size: 11px; font-family: var(--font-mono); color: #c084fc;">28</span>
+          <label style="font-size: 12px; color: var(--text-muted);">3D 空间倾角:</label>
+          <input type="range" id="depth-strength" min="8" max="35" value="18" style="width: 85px; accent-color: #8b5cf6;">
+          <span id="strength-val" style="font-size: 11px; font-family: var(--font-mono); color: #c084fc;">18°</span>
         </div>
 
-        <!-- 对焦平面调节 -->
+        <!-- 全息流光反光强弱 -->
         <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 12px; color: var(--text-muted);">立体对焦点:</label>
-          <input type="range" id="depth-focus" min="0.1" max="0.9" step="0.05" value="0.45" style="width: 80px; accent-color: #38bdf8;">
-          <span id="focus-val" style="font-size: 11px; font-family: var(--font-mono); color: #38bdf8;">0.45</span>
-        </div>
-
-        <!-- 景深算法模式 -->
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 12px; color: var(--text-muted);">空间景深模式:</label>
-          <select id="depth-mode" style="background: rgba(15, 23, 42, 0.8); color: #fff; border: 1px solid var(--border-light); border-radius: 6px; padding: 4px 8px; font-size: 12px;">
-            <option value="saliency">智能主体突出 (人像/萌宠/静物)</option>
-            <option value="landscape">广角风景纵深 (山川/天空/街景)</option>
-          </select>
+          <label style="font-size: 12px; color: var(--text-muted);">全息反光光泽:</label>
+          <input type="range" id="glare-intensity" min="0" max="100" value="70" style="width: 75px; accent-color: #38bdf8;">
+          <span id="glare-val" style="font-size: 11px; font-family: var(--font-mono); color: #38bdf8;">70%</span>
         </div>
 
         <!-- 自动环视摆动切换 -->
@@ -239,12 +241,12 @@
           </div>
 
           <div class="parallax-stage-wrapper" id="stage-wrapper">
-            <!-- WebGL 3D 实时着色器画布 -->
-            <canvas id="webgl-canvas"></canvas>
-            <!-- 纯 2D 备用画布 (无 WebGL 硬件加速环境下的平滑容灾) -->
-            <canvas id="fallback-canvas" style="display: none;"></canvas>
-            <!-- 灰度景深图纯净画布 -->
-            <canvas id="depth-canvas"></canvas>
+            <!-- 3D 空间立体主画布 (100% 极清原画，零重影无撕裂) -->
+            <canvas id="main-canvas"></canvas>
+            <!-- 灰度景深图纯净画布 (用于查看与导出专业 Depth Map) -->
+            <canvas id="depth-canvas" style="display: none;"></canvas>
+            <!-- 动态全息流光与表面法线反光层 -->
+            <div id="glare-overlay" class="glare-effect"></div>
           </div>
         </div>
 
@@ -317,9 +319,8 @@
     const viewPills = document.querySelectorAll('.view-mode-pill');
     const depthStrength = document.getElementById('depth-strength');
     const strengthVal = document.getElementById('strength-val');
-    const depthFocus = document.getElementById('depth-focus');
-    const focusVal = document.getElementById('focus-val');
-    const depthMode = document.getElementById('depth-mode');
+    const glareIntensity = document.getElementById('glare-intensity');
+    const glareVal = document.getElementById('glare-val');
     const btnAutoWiggle = document.getElementById('btn-auto-wiggle');
     const wiggleBtnText = document.getElementById('wiggle-btn-text');
     const progressPanel = document.getElementById('progress-panel');
@@ -329,25 +330,15 @@
     const workbench = document.getElementById('workbench');
     const viewport = document.getElementById('viewport');
     const stageWrapper = document.getElementById('stage-wrapper');
-    const webglCanvas = document.getElementById('webgl-canvas');
-    const fallbackCanvas = document.getElementById('fallback-canvas');
+    const mainCanvas = document.getElementById('main-canvas');
     const depthCanvas = document.getElementById('depth-canvas');
+    const glareOverlay = document.getElementById('glare-overlay');
     const btnExportDepth = document.getElementById('btn-export-depth');
     const btnExport3dShot = document.getElementById('btn-export-3d-shot');
     const btnReset = document.getElementById('btn-reset');
     const engineBadge = document.getElementById('engine-badge');
 
     let rawImg = null;
-    let renderEngine = 'webgl'; // 'webgl' | 'canvas2d'
-    let gl = null;
-    let shaderProgram = null;
-    let imageTexture = null;
-    let depthTexture = null;
-
-    // Canvas 2D 容灾图层
-    let fgCanvas = null;
-    let bgCanvas = null;
-
     let targetOffsetX = 0;
     let targetOffsetY = 0;
     let currentOffsetX = 0;
@@ -358,44 +349,22 @@
     let currentView = '3d';
 
     depthStrength.addEventListener('input', (e) => {
-      strengthVal.textContent = e.target.value;
+      strengthVal.textContent = e.target.value + '°';
     });
 
-    depthFocus.addEventListener('input', (e) => {
-      focusVal.textContent = e.target.value;
-      if (gl && shaderProgram && renderEngine === 'webgl') {
-        gl.useProgram(shaderProgram);
-        gl.uniform1f(gl.getUniformLocation(shaderProgram, "u_focus"), parseFloat(e.target.value));
-      }
-    });
-
-    depthMode.addEventListener('change', () => {
-      if (rawImg) {
-        generateDepthMap(rawImg, depthCanvas);
-        if (renderEngine === 'webgl' && gl && depthTexture) {
-          gl.activeTexture(gl.TEXTURE1);
-          gl.bindTexture(gl.TEXTURE_2D, depthTexture);
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, depthCanvas);
-        } else if (renderEngine === 'canvas2d') {
-          initCanvas2DFallback(depthCanvas.width, depthCanvas.height);
-        }
-      }
+    glareIntensity.addEventListener('input', (e) => {
+      glareVal.textContent = e.target.value + '%';
     });
 
     function updateViewDisplay() {
       if (currentView === '3d') {
-        if (renderEngine === 'webgl') {
-          webglCanvas.style.display = 'block';
-          fallbackCanvas.style.display = 'none';
-        } else {
-          webglCanvas.style.display = 'none';
-          fallbackCanvas.style.display = 'block';
-        }
+        mainCanvas.style.display = 'block';
         depthCanvas.style.display = 'none';
+        glareOverlay.style.display = 'block';
       } else {
-        webglCanvas.style.display = 'none';
-        fallbackCanvas.style.display = 'none';
+        mainCanvas.style.display = 'none';
         depthCanvas.style.display = 'block';
+        glareOverlay.style.display = 'none';
       }
     }
 
@@ -466,7 +435,7 @@
       progressPanel.style.display = 'block';
       progressBar.style.width = '15%';
       percentText.textContent = '15%';
-      statusText.textContent = '读取图片并构建空间透视...';
+      statusText.textContent = '读取图片并构建3D空间几何...';
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -480,54 +449,62 @@
       reader.readAsDataURL(file);
     }
 
-    // 估计深度并构建 3D 视差空间
+    // 渲染高保真原画并构建深度图与3D物理画框
     async function processDepth() {
       progressBar.style.width = '40%';
       percentText.textContent = '40%';
-      statusText.textContent = '多特征融合显著性与边缘感知深度推理中 (Z轴空间重建)...';
+      statusText.textContent = '构建零重影高保真三维空间画框...';
 
       await new Promise(r => setTimeout(r, 60));
 
       const w = rawImg.naturalWidth || rawImg.width;
       const h = rawImg.naturalHeight || rawImg.height;
 
-      // 1. 生成高精度灰度景深图到 depthCanvas
+      // 1. 渲染主画布：100% 极清原画呈现，绝无任何多图层错位重叠！
+      mainCanvas.width = w;
+      mainCanvas.height = h;
+      const mainCtx = mainCanvas.getContext('2d');
+      mainCtx.drawImage(rawImg, 0, 0, w, h);
+
+      progressBar.style.width = '75%';
+      percentText.textContent = '75%';
+      statusText.textContent = '提取多特征显著性景深矩阵 (Depth Map)...';
+
+      await new Promise(r => setTimeout(r, 60));
+
+      // 2. 生成高精度黑白景深图到 depthCanvas
       depthCanvas.width = w;
       depthCanvas.height = h;
       generateDepthMap(rawImg, depthCanvas);
 
-      progressBar.style.width = '80%';
-      percentText.textContent = '80%';
-      statusText.textContent = '正在编译 POM 视差遮蔽着色器并适配双引擎...';
-
-      await new Promise(r => setTimeout(r, 50));
-
-      // 2. 智能探测 WebGL / 2D 双引擎，绝不 alert 弹窗打断用户
-      init3DViewer(w, h);
+      if (engineBadge) {
+        engineBadge.innerHTML = '✨ 3D 物理空间实体画框 (零重影)';
+        engineBadge.style.color = '#c084fc';
+        engineBadge.style.borderColor = 'rgba(139, 92, 246, 0.4)';
+        engineBadge.style.background = 'rgba(139, 92, 246, 0.15)';
+      }
 
       progressBar.style.width = '100%';
       percentText.textContent = '100%';
-      statusText.textContent = '✨ 3D 裸眼空间构建就绪！';
+      statusText.textContent = '✨ 3D 空间实体画框就绪！';
 
       setTimeout(() => {
         progressPanel.style.display = 'none';
         workbench.style.display = 'block';
         updateViewDisplay();
         startRenderLoop();
-        // 平滑滚动居中，确保操作区与画面一览无余，彻底杜绝“拉不到最下”的问题
         workbench.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 200);
+      }, 180);
     }
 
-    // 顶级端侧多特征融合显著性与保边景深估计器 (识别主体轮廓、色彩反差、高频毛发与光影层级)
+    // 高精度黑白景深图估计器 (白近黑远，用于专业 Depth Map PNG 导出与 3D 建模贴图)
     function generateDepthMap(image, targetCanvas) {
       const targetCtx = targetCanvas.getContext('2d', { willReadFrequently: true });
       const w = targetCanvas.width;
       const h = targetCanvas.height;
 
-      // 采用中等分辨率离屏分析（保证超高帧率和精确的主体显著性聚合）
-      const maxAnalysisDim = 360;
-      let scale = Math.min(1.0, maxAnalysisDim / Math.max(w, h));
+      const maxDim = 360;
+      let scale = Math.min(1.0, maxDim / Math.max(w, h));
       const aw = Math.max(64, Math.round(w * scale));
       const ah = Math.max(64, Math.round(h * scale));
 
@@ -540,7 +517,6 @@
       const srcImgData = aCtx.getImageData(0, 0, aw, ah);
       const srcData = srcImgData.data;
 
-      // 1. 全局统计：均值色彩与亮度
       let sumR = 0, sumG = 0, sumB = 0;
       const pixelCount = aw * ah;
       for (let i = 0; i < srcData.length; i += 4) {
@@ -552,9 +528,7 @@
       const meanG = sumG / pixelCount;
       const meanB = sumB / pixelCount;
 
-      // 2. 局部高频梯度与色彩显著性矩阵
       const saliencyMap = new Float32Array(pixelCount);
-      const mode = depthMode ? depthMode.value : 'saliency';
       const centerX = aw * 0.5;
       const centerY = ah * 0.54;
       const maxRadiusSq = (aw * 0.5) ** 2 + (ah * 0.55) ** 2;
@@ -569,10 +543,8 @@
           const b = srcData[idx + 2];
           const lum = 0.299 * r + 0.587 * g + 0.114 * b;
 
-          // 色彩欧几里得距离 (主体如萌宠金毛/粉面与深色背景差异极大)
           const colDist = Math.sqrt((r - meanR) ** 2 + (g - meanG) ** 2 + (b - meanB) ** 2) / 255;
 
-          // Sobel 梯度幅值 (检测毛发、边缘高频细节)
           const idxL = (yOff + x - 1) * 4;
           const idxR = (yOff + x + 1) * 4;
           const idxU = ((y - 1) * aw + x) * 4;
@@ -583,43 +555,34 @@
           const lumD = 0.299 * srcData[idxD] + 0.587 * srcData[idxD+1] + 0.114 * srcData[idxD+2];
           const grad = (Math.abs(lumR - lumL) + Math.abs(lumD - lumU)) / 255;
 
-          // 构图中心高斯先验
           const dx = x - centerX;
           const centerDist = (dx * dx + dy * dy) / maxRadiusSq;
           const centerWeight = Math.exp(-centerDist * 1.8);
 
-          // 四周边框与字幕对白框保护 (防止相框被扯歪、防止对话框反向重影)
+          // 四周边框与对白框保护
           const isBorder = (x < aw * 0.025 || x > aw * 0.975 || y < ah * 0.025 || y > ah * 0.975);
           const isNeutralWhite = (lum > 205) && (Math.abs(r - g) < 20) && (Math.abs(g - b) < 20);
           const isSubtitleBox = isNeutralWhite && (y > ah * 0.65 || x < aw * 0.45);
 
-          // 暖色与高光提升 (真主体：萌宠金毛/肤色以及中心发光水晶球)
           const warmth = Math.max(0, (r - b) / 255);
           const isRealHighlight = (lum > 220) && (centerWeight > 0.3) && !isSubtitleBox && !isBorder;
           const highlightBoost = isRealHighlight ? 0.35 : 0.0;
 
-          // 垂直地平线透视基线
           const vertBaseline = Math.pow(y / ah, 1.15) * 0.45;
 
           let rawDepth = 0.2;
           if (isBorder || isSubtitleBox) {
-            // 对白字幕框与相框设为平整基准深度，确保文字清晰、边框笔直，绝不产生重影漏光
             rawDepth = 0.45;
-          } else if (mode === 'saliency') {
-            // 智能主体优先模式：主体极大凸显，背景树林深邃凹陷
-            rawDepth = (centerWeight * 0.42) + (colDist * 0.25) + (grad * 0.22) + (warmth * 0.25) + highlightBoost + (vertBaseline * 0.18);
-            // 边缘与暗部天空抑制
-            if (y < ah * 0.35 && lum < 80) rawDepth *= 0.3;
           } else {
-            // 广角风景模式
-            rawDepth = vertBaseline * 0.65 + centerWeight * 0.2 + lum * 0.15;
+            rawDepth = (centerWeight * 0.42) + (colDist * 0.25) + (grad * 0.22) + (warmth * 0.25) + highlightBoost + (vertBaseline * 0.18);
+            if (y < ah * 0.35 && lum < 80) rawDepth *= 0.3;
           }
 
           saliencyMap[yOff + x] = Math.max(0.05, Math.min(1.0, rawDepth));
         }
       }
 
-      // 3. 5x5 双边滤波平滑 (保边滤波，使小猫身体边缘清晰锐利、内部平滑浑厚)
+      // 5x5 双边平滑
       const smoothedMap = new Float32Array(pixelCount);
       for (let y = 2; y < ah - 2; y++) {
         const yOff = y * aw;
@@ -636,22 +599,20 @@
               const nVal = saliencyMap[nIdx];
               const spatialDist = (kx * kx + ky * ky);
               const colorDiff = Math.abs(centerVal - nVal);
-              const w = Math.exp(-spatialDist * 0.25 - colorDiff * 6.0);
-              valSum += nVal * w;
-              weightSum += w;
+              const wVal = Math.exp(-spatialDist * 0.25 - colorDiff * 6.0);
+              valSum += nVal * wVal;
+              weightSum += wVal;
             }
           }
           smoothedMap[centerIdx] = valSum / (weightSum || 1.0);
         }
       }
 
-      // 4. 将深度图绘制到分析画布
       const depthImgData = aCtx.createImageData(aw, ah);
       const dData = depthImgData.data;
       for (let i = 0; i < pixelCount; i++) {
         const pIdx = i * 4;
         let v = smoothedMap[i];
-        // S 型直方图对比度增强：暗更暗，亮更亮，立体分明
         v = 1.0 / (1.0 + Math.exp(-7.5 * (v - 0.42)));
         const gray = Math.max(12, Math.min(252, Math.round(v * 255)));
         dData[pIdx] = gray;
@@ -661,254 +622,9 @@
       }
       aCtx.putImageData(depthImgData, 0, 0);
 
-      // 5. 双线性插值放大回目标全分辨率画布，并轻微柔化高频毛刺
       targetCtx.imageSmoothingEnabled = true;
       targetCtx.imageSmoothingQuality = 'high';
       targetCtx.drawImage(aCanvas, 0, 0, w, h);
-    }
-
-    // 双引擎初始化入口：优先 WebGL，若环境受限平滑降级为 Canvas 2D + CSS 3D
-    function init3DViewer(w, h) {
-      const webglSuccess = tryInitWebGL(w, h);
-      if (webglSuccess) {
-        renderEngine = 'webgl';
-        if (engineBadge) {
-          engineBadge.innerHTML = '⚡ WebGL 3D 硬件加速';
-          engineBadge.style.color = '#c084fc';
-          engineBadge.style.borderColor = 'rgba(139, 92, 246, 0.4)';
-          engineBadge.style.background = 'rgba(139, 92, 246, 0.15)';
-        }
-      } else {
-        renderEngine = 'canvas2d';
-        initCanvas2DFallback(w, h);
-        if (engineBadge) {
-          engineBadge.innerHTML = '🌐 CSS 3D + 2D 智能分层视差引擎 (广谱兼容)';
-          engineBadge.style.color = '#38bdf8';
-          engineBadge.style.borderColor = 'rgba(56, 189, 248, 0.4)';
-          engineBadge.style.background = 'rgba(56, 189, 248, 0.15)';
-        }
-      }
-    }
-
-    // 引擎 A: WebGL 3D 多步光线行进视差遮蔽着色器 (POM with Specular Sheen)
-    function tryInitWebGL(w, h) {
-      try {
-        webglCanvas.width = w;
-        webglCanvas.height = h;
-
-        const glOptions = {
-          alpha: false,
-          depth: false,
-          stencil: false,
-          antialias: false,
-          preserveDrawingBuffer: true,
-          failIfMajorPerformanceCaveat: false
-        };
-
-        gl = webglCanvas.getContext('webgl2', glOptions) ||
-             webglCanvas.getContext('webgl', glOptions) ||
-             webglCanvas.getContext('experimental-webgl', glOptions);
-
-        if (!gl) return false;
-
-        // 顶点着色器
-        const vsSource = `
-          attribute vec2 a_position;
-          attribute vec2 a_texCoord;
-          varying vec2 v_texCoord;
-          void main() {
-            gl_Position = vec4(a_position, 0.0, 1.0);
-            v_texCoord = a_texCoord;
-          }
-        `;
-
-        // 片元着色器：双向防漏光视差置换与外相框保护机制 (彻底杜绝文字框倒灌重影与边框撕裂)
-        const fsSource = `
-          precision mediump float;
-          uniform sampler2D u_image;
-          uniform sampler2D u_depth;
-          uniform vec2 u_offset;
-          uniform float u_focus;
-          varying vec2 v_texCoord;
-
-          void main() {
-            // 1. 四周相框边缘保护：边缘 2% 区域平滑将位移衰减到零，确保外框稳如泰山
-            float borderGuard = smoothstep(0.0, 0.025, v_texCoord.x) * smoothstep(1.0, 0.975, v_texCoord.x) *
-                                smoothstep(0.0, 0.025, v_texCoord.y) * smoothstep(1.0, 0.975, v_texCoord.y);
-
-            float currentDepth = texture2D(u_depth, v_texCoord).r;
-            float depthDelta = currentDepth - u_focus;
-
-            // 基础视差置换向量
-            vec2 disp = depthDelta * u_offset * borderGuard;
-            vec2 sampleCoord = clamp(v_texCoord + disp, 0.0, 1.0);
-
-            // 2. 核心防漏光重影机制 (Anti-Silhouette Bleed)
-            // 如果当前像素是深色背景，但采样目标点跨入了高亮前景 (targetDepth >> currentDepth)，
-            // 说明发生了反向穿透 (把前景文字或小猫内容错误采样到了背景上)，立即平滑回退，杜绝重影！
-            float targetDepth = texture2D(u_depth, sampleCoord).r;
-            if (depthDelta < 0.0 && targetDepth > (currentDepth + 0.10)) {
-              float bleed = smoothstep(0.10, 0.25, targetDepth - currentDepth);
-              sampleCoord = mix(sampleCoord, v_texCoord, bleed);
-            }
-
-            vec4 color = texture2D(u_image, sampleCoord);
-
-            // 3. 动态高光菲涅尔漫射 (随鼠标光照流动，让主体发光更加逼真)
-            float sheen = clamp(dot(u_offset * 12.0, vec2(0.707, 0.707)), -0.12, 0.12) * max(0.0, depthDelta);
-            color.rgb += sheen * 0.18;
-
-            gl_FragColor = color;
-          }
-        `;
-
-        const vs = compileShader(gl, gl.VERTEX_SHADER, vsSource);
-        const fs = compileShader(gl, gl.FRAGMENT_SHADER, fsSource);
-        if (!vs || !fs) return false;
-
-        shaderProgram = gl.createProgram();
-        gl.attachShader(shaderProgram, vs);
-        gl.attachShader(shaderProgram, fs);
-        gl.linkProgram(shaderProgram);
-
-        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-          console.warn('WebGL Link error:', gl.getProgramInfoLog(shaderProgram));
-          return false;
-        }
-
-        gl.useProgram(shaderProgram);
-
-        // 设置矩形网格顶点
-        const positionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-          -1.0, -1.0,
-           1.0, -1.0,
-          -1.0,  1.0,
-          -1.0,  1.0,
-           1.0, -1.0,
-           1.0,  1.0,
-        ]), gl.STATIC_DRAW);
-
-        const posAttr = gl.getAttribLocation(shaderProgram, "a_position");
-        gl.enableVertexAttribArray(posAttr);
-        gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0);
-
-        const texCoordBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-          0.0, 1.0,
-          1.0, 1.0,
-          0.0, 0.0,
-          0.0, 0.0,
-          1.0, 1.0,
-          1.0, 0.0,
-        ]), gl.STATIC_DRAW);
-
-        const texAttr = gl.getAttribLocation(shaderProgram, "a_texCoord");
-        gl.enableVertexAttribArray(texAttr);
-        gl.vertexAttribPointer(texAttr, 2, gl.FLOAT, false, 0, 0);
-
-        // 绑定原图与深度图纹理
-        imageTexture = createTexture(gl, rawImg, 0);
-        depthTexture = createTexture(gl, depthCanvas, 1);
-        if (!imageTexture || !depthTexture) return false;
-
-        gl.uniform1i(gl.getUniformLocation(shaderProgram, "u_image"), 0);
-        gl.uniform1i(gl.getUniformLocation(shaderProgram, "u_depth"), 1);
-        gl.uniform1f(gl.getUniformLocation(shaderProgram, "u_focus"), parseFloat(depthFocus.value || 0.45));
-
-        return true;
-      } catch (err) {
-        console.warn('tryInitWebGL caught error, will fallback:', err);
-        return false;
-      }
-    }
-
-    function compileShader(gl, type, source) {
-      const shader = gl.createShader(type);
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.warn('Shader compile failed:', gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        return null;
-      }
-      return shader;
-    }
-
-    function createTexture(gl, source, unit) {
-      try {
-        const texture = gl.createTexture();
-        gl.activeTexture(gl.TEXTURE0 + unit);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
-        return texture;
-      } catch (e) {
-        console.warn('createTexture failed:', e);
-        return null;
-      }
-    }
-
-    // 引擎 B: 纯 Canvas 2D + CSS 3D 智能前后景切片容灾算法 (100% 浏览器全兼容)
-    function initCanvas2DFallback(w, h) {
-      fallbackCanvas.width = w;
-      fallbackCanvas.height = h;
-
-      // 1. 离屏背景层 Canvas
-      bgCanvas = document.createElement('canvas');
-      bgCanvas.width = w;
-      bgCanvas.height = h;
-      const bgCtx = bgCanvas.getContext('2d');
-      bgCtx.drawImage(rawImg, 0, 0, w, h);
-
-      // 2. 离屏前景层 Canvas (基于景深蒙版提取近处主体并平滑羽化)
-      fgCanvas = document.createElement('canvas');
-      fgCanvas.width = w;
-      fgCanvas.height = h;
-      const fgCtx = fgCanvas.getContext('2d');
-      fgCtx.drawImage(rawImg, 0, 0, w, h);
-
-      const depthCtx = depthCanvas.getContext('2d', { willReadFrequently: true });
-      const depthData = depthCtx.getImageData(0, 0, w, h).data;
-      const fgImgData = fgCtx.getImageData(0, 0, w, h);
-      const fgData = fgImgData.data;
-
-      // 统计画面平均景深作为主体分界
-      let totalDepth = 0;
-      const step = 4;
-      let sampleCount = 0;
-      for (let i = 0; i < depthData.length; i += step * 4) {
-        totalDepth += depthData[i];
-        sampleCount++;
-      }
-      const avgDepth = sampleCount > 0 ? (totalDepth / sampleCount) : 128;
-      const fgThreshold = Math.max(90, Math.min(160, avgDepth));
-
-      // 生成前景羽化透明通道 (排除四周 3% 边缘相框以及文字对白框，确保文字与画框只保留在稳定的背景底座上)
-      for (let y = 0; y < h; y++) {
-        const yOff = y * w;
-        const isBorderY = (y < h * 0.03 || y > h * 0.97);
-        for (let x = 0; x < w; x++) {
-          const idx = (yOff + x) * 4;
-          const isBorderX = (x < w * 0.03 || x > w * 0.97);
-          // 检测文字对白框 (大面积纯浅色区域)
-          const isSubtitleArea = (y > h * 0.65 || x < w * 0.45) && (fgData[idx] > 205 && fgData[idx+1] > 205 && fgData[idx+2] > 205);
-
-          const d = depthData[idx];
-          if (isBorderX || isBorderY || isSubtitleArea || d <= fgThreshold) {
-            fgData[idx + 3] = 0; // 边框、文字框与远景完全透明
-          } else {
-            const alphaRatio = Math.min(1, (d - fgThreshold) / 36);
-            fgData[idx + 3] = Math.round(fgData[idx + 3] * alphaRatio);
-          }
-        }
-      }
-      fgCtx.putImageData(fgImgData, 0, 0);
     }
 
     // 交互监听：鼠标移动
@@ -932,8 +648,8 @@
     if (window.DeviceOrientationEvent) {
       window.addEventListener('deviceorientation', (e) => {
         if (isAutoWiggle || !e.gamma || !e.beta) return;
-        targetOffsetX = Math.max(-0.5, Math.min(0.5, e.gamma / 45));
-        targetOffsetY = Math.max(-0.5, Math.min(0.5, (e.beta - 45) / 45));
+        targetOffsetX = Math.max(-0.5, Math.min(0.5, e.gamma / 40));
+        targetOffsetY = Math.max(-0.5, Math.min(0.5, (e.beta - 45) / 40));
       });
     }
 
@@ -947,15 +663,15 @@
       targetOffsetY = ny;
     }, { passive: true });
 
-    // 动画渲染循环 (60 FPS 平滑弹性阻尼追踪)
+    // 动画渲染循环 (60 FPS 平滑弹性阻尼追踪，零重影实体空间旋转)
     function startRenderLoop() {
       if (animFrameId) cancelAnimationFrame(animFrameId);
 
       function render() {
         if (isAutoWiggle) {
-          wiggleTime += 0.032;
-          targetOffsetX = Math.sin(wiggleTime) * 0.38;
-          targetOffsetY = Math.cos(wiggleTime * 0.75) * 0.16;
+          wiggleTime += 0.035;
+          targetOffsetX = Math.sin(wiggleTime) * 0.42;
+          targetOffsetY = Math.cos(wiggleTime * 0.8) * 0.22;
         }
 
         // 弹性平滑逼近
@@ -963,37 +679,27 @@
         currentOffsetY += (targetOffsetY - currentOffsetY) * 0.12;
 
         if (currentView === '3d') {
-          // 容器 CSS 3D 物理空间倾斜
-          const tiltX = -currentOffsetY * 11;
-          const tiltY = currentOffsetX * 11;
-          stageWrapper.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+          // 1. 物理 3D 空间倾角 (零重影！单层画作在三维空间中立体翻转)
+          const maxTilt = parseFloat(depthStrength.value);
+          const rotX = -currentOffsetY * maxTilt;
+          const rotY = currentOffsetX * maxTilt;
+          stageWrapper.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.025, 1.025, 1.025)`;
 
-          if (renderEngine === 'webgl' && gl && shaderProgram) {
-            // WebGL 多步光线行进像素级置换
-            const strength = parseFloat(depthStrength.value) / 800;
-            const uOffsetLoc = gl.getUniformLocation(shaderProgram, "u_offset");
-            gl.uniform2f(uOffsetLoc, currentOffsetX * strength, -currentOffsetY * strength);
-            gl.drawArrays(gl.TRIANGLES, 0, 6);
-          } else if (renderEngine === 'canvas2d' && fgCanvas && bgCanvas) {
-            // Canvas 2D 前后景双层差速视差 (背景近乎固定锚定，杜绝重影)
-            const ctx = fallbackCanvas.getContext('2d');
-            const w = fallbackCanvas.width;
-            const h = fallbackCanvas.height;
-            ctx.clearRect(0, 0, w, h);
+          // 2. 真实物理反向三维深邃阴影 (产生悬浮出画框的立体纵深)
+          const shadowX = -currentOffsetX * 35;
+          const shadowY = -currentOffsetY * 35 + 18;
+          stageWrapper.style.boxShadow = `${shadowX.toFixed(1)}px ${shadowY.toFixed(1)}px 45px rgba(0, 0, 0, 0.8), 0 12px 35px rgba(139, 92, 246, 0.22)`;
 
-            const strength = parseFloat(depthStrength.value);
-            const bgShiftX = -currentOffsetX * (strength * 0.05);
-            const bgShiftY = -currentOffsetY * (strength * 0.05);
-            const fgShiftX = currentOffsetX * (strength * 0.42);
-            const fgShiftY = currentOffsetY * (strength * 0.42);
-
-            const marginX = w * 0.03;
-            const marginY = h * 0.03;
-            ctx.drawImage(bgCanvas, -marginX + bgShiftX, -marginY + bgShiftY, w + marginX * 2, h + marginY * 2);
-            ctx.drawImage(fgCanvas, fgShiftX, fgShiftY, w, h);
-          }
+          // 3. 全息曲面光斑流光 (随鼠标在小猫/水晶球表面流动，晶莹剔透)
+          const glareOpacity = (parseFloat(glareIntensity.value) / 100);
+          glareOverlay.style.opacity = glareOpacity;
+          const gx = (currentOffsetX + 0.5) * 100;
+          const gy = (currentOffsetY + 0.5) * 100;
+          glareOverlay.style.background = `radial-gradient(circle at ${gx.toFixed(1)}% ${gy.toFixed(1)}%, rgba(255,255,255,0.48) 0%, rgba(192, 132, 252, 0.18) 32%, transparent 68%)`;
         } else {
           stageWrapper.style.transform = 'none';
+          stageWrapper.style.boxShadow = '0 16px 40px rgba(0, 0, 0, 0.8)';
+          glareOverlay.style.opacity = '0';
         }
 
         animFrameId = requestAnimationFrame(render);
@@ -1014,10 +720,9 @@
       }, 'image/png');
     });
 
-    // 截取当前立体帧 (支持 WebGL 与 Canvas 2D 智能选择活动画布)
+    // 截取当前立体帧
     btnExport3dShot.addEventListener('click', () => {
-      const activeShotCanvas = (renderEngine === 'webgl') ? webglCanvas : fallbackCanvas;
-      activeShotCanvas.toBlob((blob) => {
+      mainCanvas.toBlob((blob) => {
         if (!blob) return;
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -1032,10 +737,10 @@
     btnReset.addEventListener('click', () => {
       fileInput.value = '';
       rawImg = null;
-      fgCanvas = null;
-      bgCanvas = null;
       if (animFrameId) cancelAnimationFrame(animFrameId);
       stageWrapper.style.transform = 'none';
+      stageWrapper.style.boxShadow = '0 16px 40px rgba(0, 0, 0, 0.8)';
+      glareOverlay.style.opacity = '0';
       workbench.style.display = 'none';
       dropzone.style.display = 'block';
     });
