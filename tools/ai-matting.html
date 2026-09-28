@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>纯前端 AI 离线智能抠图与一键换底 - 825412.xyz</title>
-  <meta name="description" content="基于浏览器本地 WebAssembly / ONNX 深度学习模型，100% 端侧离线运行，0 字节上传云端。一键智能抠除背景，支持 Squoosh 级划线双视窗无级对比、证件照蓝红白底一键替换，直接复制透明 PNG 到剪贴板。">
+  <meta name="description" content="基于浏览器本地 WebAssembly / ONNX 深度学习模型，100% 端侧离线运行，0 字节上传云端。一键智能抠除背景，支持全图合成所见即所得、左右划线对比、证件照蓝红白底一键替换，直接复制透明 PNG 到剪贴板。">
   <meta name="keywords" content="AI抠图, 在线抠图, 纯前端抠图, 离线抠图, 证件照换底色, 商品白底图, 免费抠图, 825412.xyz">
   <link rel="canonical" href="https://825412.xyz/tools/ai-matting">
   <link rel="stylesheet" href="../style.css?v=2.7.0">
@@ -17,7 +17,7 @@
     .matting-viewport {
       position: relative;
       width: 100%;
-      height: 480px;
+      min-height: 440px;
       max-height: 70vh;
       background: #020617;
       border: 1px solid var(--border-light);
@@ -27,34 +27,56 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background-color 0.2s ease;
+      padding: 16px;
     }
-    .matting-bg-checker {
-      background-image: linear-gradient(45deg, rgba(255,255,255,0.06) 25%, transparent 25%), 
-                        linear-gradient(-45deg, rgba(255,255,255,0.06) 25%, transparent 25%), 
-                        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.06) 75%), 
-                        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.06) 75%);
-      background-size: 20px 20px;
-      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    .matting-stage {
+      position: relative;
+      max-width: 100%;
+      max-height: calc(70vh - 32px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+      overflow: hidden;
+      display: inline-flex;
     }
-    .matting-layer {
+    .matting-stage-bg {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      z-index: 1;
+      transition: background-color 0.2s ease;
     }
-    .matting-layer img, .matting-layer canvas {
-      max-width: 100%;
-      max-height: 100%;
+    .matting-bg-checker {
+      background-image: linear-gradient(45deg, rgba(255,255,255,0.08) 25%, transparent 25%), 
+                        linear-gradient(-45deg, rgba(255,255,255,0.08) 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.08) 75%), 
+                        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.08) 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      background-color: #0b1120;
+    }
+    .matting-stage-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .matting-stage-layer img {
+      width: 100%;
+      height: 100%;
       object-fit: contain;
+      display: block;
       pointer-events: none;
     }
-    .matting-layer-cutout {
-      clip-path: inset(0 0 0 50%);
+    #stage-spacer {
+      max-width: 100%;
+      max-height: calc(70vh - 32px);
+      height: auto;
+      display: block;
+      visibility: hidden;
+      pointer-events: none;
     }
     .matting-divider {
       position: absolute;
@@ -63,7 +85,7 @@
       left: 50%;
       width: 3px;
       background: #ec4899;
-      box-shadow: 0 0 14px rgba(236, 72, 153, 0.85);
+      box-shadow: 0 0 14px rgba(236, 72, 153, 0.9);
       cursor: ew-resize;
       z-index: 25;
     }
@@ -72,8 +94,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background: #0f172a;
       border: 2px solid #ec4899;
@@ -86,25 +108,46 @@
     }
     .matting-badge {
       position: absolute;
-      bottom: 16px;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
+      bottom: 12px;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 11px;
       font-weight: 700;
       backdrop-filter: blur(8px);
       z-index: 20;
+      pointer-events: none;
     }
     .matting-badge-left {
-      left: 16px;
+      left: 12px;
       background: rgba(15, 23, 42, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: #94a3b8;
     }
     .matting-badge-right {
-      right: 16px;
+      right: 12px;
       background: rgba(236, 72, 153, 0.2);
       border: 1px solid #ec4899;
       color: #f472b6;
+    }
+    .view-mode-tab {
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      background: transparent;
+      color: var(--text-secondary);
+    }
+    .view-mode-tab.active {
+      background: #ec4899;
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
     }
     .color-swatch-btn {
       width: 36px;
@@ -150,9 +193,9 @@
         <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
           <a href="/" style="color: var(--text-secondary); text-decoration: none;">控制台</a>
           <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none;">极客工具箱</a>
+          <a href="/tools/ai-ocr" style="color: #a78bfa; text-decoration: none; font-weight: 600;">AI 本地 OCR</a>
           <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none;">隔空快传</a>
           <a href="/webhook" style="color: var(--text-secondary); text-decoration: none;">Webhook 调试</a>
-          <a href="/clipboard" style="color: var(--text-secondary); text-decoration: none;">匿名剪贴板</a>
           <a href="/sitemap" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">全站索引</a>
         </nav>
       </div>
@@ -160,6 +203,18 @@
   </header>
 
   <main style="max-width: 1200px; margin: 30px auto; padding: 0 20px;">
+    
+    <!-- 场景提示横幅 -->
+    <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: var(--radius-sm); padding: 10px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #c084fc;">
+        <span class="material-symbols-outlined" style="font-size: 18px;">lightbulb</span>
+        <span><strong>场景提示</strong>：抠图工具专为<strong>人像自拍、证件照换底、电商商品、宠物</strong>等主体分离设计。若要提取网页截图/文档报表中的文字，请使用：</span>
+      </div>
+      <a href="/tools/ai-ocr" class="btn btn-primary" style="padding: 5px 12px; font-size: 12px; background: linear-gradient(135deg, #8b5cf6, #06b6d4); text-decoration: none;">
+        👉 进入 AI 本地 OCR 截图文字提取
+      </a>
+    </div>
+
     <!-- 标头与隐私背书 -->
     <div style="margin-bottom: 24px;">
       <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(236, 72, 153, 0.1); border: 1px solid rgba(236, 72, 153, 0.3); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #f472b6; margin-bottom: 10px; font-weight: 700;">
@@ -184,10 +239,10 @@
           拖拽待处理图片至此 / 点击选择本地图片
         </div>
         <div style="font-size: 13px; color: #f472b6; font-weight: 600; margin-bottom: 6px;">
-          ✨ 支持直接按 Ctrl+V (或 ⌘V) 粘贴截图或相册图片
+          ✨ 支持直接按 Ctrl+V (或 ⌘V) 粘贴照片或截图
         </div>
         <div style="font-size: 12px; color: var(--text-muted);">
-          支持 PNG, JPG, WebP, AVIF, BMP | 纯前端硬件加速秒级分割 | 杜绝任何云端留存
+          支持 PNG, JPG, WebP, AVIF, BMP | 适合人像、证件照、电商产品 | 纯本地计算 杜绝任何云端留存
         </div>
         <input type="file" id="matting-file-input" accept="image/*" style="display: none;">
       </div>
@@ -210,29 +265,59 @@
         </div>
       </div>
 
-      <!-- Squoosh 级划线双视窗无级对比视口 (生成后展示) -->
+      <!-- 视窗展示区 (生成后展示) -->
       <div id="matting-preview-section" style="display: none; margin-bottom: 24px;">
-        <div class="matting-viewport matting-bg-checker" id="matting-viewport">
-          <!-- 原图层 (底) -->
-          <div class="matting-layer" id="matting-layer-orig">
-            <img id="img-matting-orig" alt="原始图片">
+        
+        <!-- 视图模式切换栏 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+          <div style="display: inline-flex; background: rgba(255,255,255,0.06); padding: 3px; border-radius: 8px; border: 1px solid var(--border-light);">
+            <button class="view-mode-tab active" id="tab-mode-full">
+              <span class="material-symbols-outlined" style="font-size: 16px;">visibility</span>
+              <span>🌟 全图合成预览 (所见即所得)</span>
+            </button>
+            <button class="view-mode-tab" id="tab-mode-split">
+              <span class="material-symbols-outlined" style="font-size: 16px;">compare</span>
+              <span>🔀 左右划线对比 (对比原图)</span>
+            </button>
           </div>
-          <!-- 抠图完成图层 (顶，通过 clip-path 划线展示) -->
-          <div class="matting-layer matting-layer-cutout" id="matting-layer-result">
-            <img id="img-matting-result" alt="抠图提取结果">
+          <div id="split-mode-hint" style="display: none; font-size: 12px; color: #f472b6;">
+            💡 左右拖动粉色竖线把手：左侧为原图，右侧为新背景抠图效果
           </div>
-          <!-- 中间拖动把手 -->
-          <div class="matting-divider" id="matting-divider">
-            <div class="matting-handle">
-              <span class="material-symbols-outlined" style="font-size: 20px;">drag_indicator</span>
+        </div>
+
+        <!-- 图像展示舞台 (严格贴合图像真实尺寸，底色不外溢) -->
+        <div class="matting-viewport" id="matting-viewport">
+          <div class="matting-stage" id="matting-stage">
+            <!-- 占位底图 (确立舞台宽高比) -->
+            <img id="stage-spacer" alt="占位">
+
+            <!-- 换底背景层 (在抠图层下方) -->
+            <div class="matting-stage-bg matting-bg-checker" id="matting-stage-bg"></div>
+
+            <!-- 抠图完成图层 (显示扣好的主体) -->
+            <div class="matting-stage-layer" id="layer-result" style="z-index: 2;">
+              <img id="img-matting-result" alt="抠图提取结果">
             </div>
-          </div>
-          <!-- 悬浮指示徽章 -->
-          <div class="matting-badge matting-badge-left">
-            <span>原图层</span>
-          </div>
-          <div class="matting-badge matting-badge-right">
-            <span>AI 分割透明层</span>
+
+            <!-- 原图层 (对比模式下置顶并裁切右侧，左侧显示原图) -->
+            <div class="matting-stage-layer" id="layer-orig" style="z-index: 3; display: none;">
+              <img id="img-matting-orig" alt="原始图片">
+            </div>
+
+            <!-- 中间拖动把手 (对比模式下展示) -->
+            <div class="matting-divider" id="matting-divider" style="display: none;">
+              <div class="matting-handle" title="按住左右拖动对比">
+                <span class="material-symbols-outlined" style="font-size: 18px;">drag_indicator</span>
+              </div>
+            </div>
+
+            <!-- 悬浮指示徽章 (对比模式下展示) -->
+            <div class="matting-badge matting-badge-left" id="badge-orig" style="display: none;">
+              <span>⬅️ 原始图片</span>
+            </div>
+            <div class="matting-badge matting-badge-right" id="badge-result" style="display: none;">
+              <span>换底合成效果 ➡️</span>
+            </div>
           </div>
         </div>
       </div>
@@ -245,14 +330,14 @@
             🎨 实时合成新底色 / 预览背景:
           </label>
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <button class="color-swatch-btn matting-bg-checker active" data-color="transparent" title="标准透明棋盘格"></button>
+            <button class="color-swatch-btn matting-bg-checker active" data-color="transparent" title="标准透明棋盘格 (PNG 透明底)"></button>
             <button class="color-swatch-btn" data-color="#ffffff" style="background: #ffffff;" title="纯白底 (电商商品照标准)"></button>
             <button class="color-swatch-btn" data-color="#438edb" style="background: #438edb;" title="标准证件蓝 (#438EDB)"></button>
             <button class="color-swatch-btn" data-color="#d9001b" style="background: #d9001b;" title="标准证件红 (#D9001B)"></button>
             <button class="color-swatch-btn" data-color="#020617" style="background: #020617; border: 1px solid #334155;" title="极客深黑 (#020617)"></button>
             <button class="color-swatch-btn" data-color="#64748b" style="background: #64748b;" title="中灰影棚色 (#64748B)"></button>
             <div style="position: relative; display: inline-flex; align-items: center;">
-              <input type="color" id="custom-color-picker" value="#8b5cf6" style="opacity: 0; width: 36px; height: 36px; position: absolute; cursor: pointer;">
+              <input type="color" id="custom-color-picker" value="#10b981" style="opacity: 0; width: 36px; height: 36px; position: absolute; cursor: pointer;">
               <button class="color-swatch-btn" id="custom-color-btn" style="background: linear-gradient(135deg, #f43f5e, #8b5cf6, #06b6d4);" title="自定义 RGB 颜色"></button>
             </div>
           </div>
@@ -290,7 +375,7 @@
         </button>
         <button class="btn" id="download-composed-btn" style="display: none; background: var(--surface-high); border: 1px solid var(--border-light); padding: 9px 18px; font-size: 13px; font-weight: 600; color: #fff;">
           <span class="material-symbols-outlined" style="font-size: 16px;">image</span>
-          <span>下载当前合成图 (含新底色)</span>
+          <span id="download-composed-text">下载当前合成图 (含新底色)</span>
         </button>
         <button class="btn" id="reset-btn" style="display: none; background: transparent; border: 1px solid var(--border-light); padding: 9px 16px; font-size: 13px; color: var(--text-muted);">
           重新选择
@@ -299,7 +384,7 @@
 
     </div>
 
-    <!-- 为什么选择纯端侧 AI 抠图深度科普 -->
+    <!-- 深度科普 -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 40px;">
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #f472b6; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
@@ -347,6 +432,9 @@
     let currentCutoutBlob = null;
     let currentCutoutUrl = null;
     let currentBgColor = 'transparent';
+    let currentFeather = 0;
+    let currentMode = 'full'; // 'full' 或 'split'
+    let currentSplitPct = 50;
     let isProcessing = false;
     let timerInterval = null;
     let startTime = 0;
@@ -359,15 +447,27 @@
     const percentText = document.getElementById('matting-percent-text');
     const progressBar = document.getElementById('matting-progress-bar');
     const timerText = document.getElementById('matting-timer-text');
+    
     const previewSection = document.getElementById('matting-preview-section');
-    const viewport = document.getElementById('matting-viewport');
+    const tabFull = document.getElementById('tab-mode-full');
+    const tabSplit = document.getElementById('tab-mode-split');
+    const splitHint = document.getElementById('split-mode-hint');
+
+    const stage = document.getElementById('matting-stage');
+    const stageSpacer = document.getElementById('stage-spacer');
+    const stageBg = document.getElementById('matting-stage-bg');
+    const layerResult = document.getElementById('layer-result');
+    const layerOrig = document.getElementById('layer-orig');
     const imgOrig = document.getElementById('img-matting-orig');
     const imgResult = document.getElementById('img-matting-result');
     const divider = document.getElementById('matting-divider');
-    const layerCutout = document.getElementById('matting-layer-result');
+    const badgeOrig = document.getElementById('badge-orig');
+    const badgeResult = document.getElementById('badge-result');
+
     const copyBtn = document.getElementById('copy-cutout-btn');
     const dlTransBtn = document.getElementById('download-transparent-btn');
     const dlCompBtn = document.getElementById('download-composed-btn');
+    const dlCompText = document.getElementById('download-composed-text');
     const resetBtn = document.getElementById('reset-btn');
     const modelSelect = document.getElementById('matting-model-select');
     const featherSlider = document.getElementById('feather-slider');
@@ -421,7 +521,10 @@
       if (isProcessing) return;
       currentFile = file;
       currentRawImageSrc = URL.createObjectURL(file);
+      
+      // 设置原图与占位图尺寸
       imgOrig.src = currentRawImageSrc;
+      stageSpacer.src = currentRawImageSrc;
       
       // 显示进度面板
       progressPanel.style.display = 'block';
@@ -475,12 +578,14 @@
         currentCutoutUrl = URL.createObjectURL(blobResult);
         imgResult.src = currentCutoutUrl;
 
-        // 显示双视窗对比与操作按钮
+        // 显示舞台与操作按钮，默认为全图预览模式
         previewSection.style.display = 'block';
         copyBtn.style.display = 'inline-flex';
         dlTransBtn.style.display = 'inline-flex';
         dlCompBtn.style.display = 'inline-flex';
         resetBtn.style.display = 'inline-block';
+
+        switchViewMode('full');
         previewSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
       } catch (err) {
@@ -495,16 +600,55 @@
       }
     }
 
-    // Squoosh 级划线双视窗拖动交互
+    // 视图模式切换 (全图预览 vs 左右划线对比)
+    tabFull.addEventListener('click', () => switchViewMode('full'));
+    tabSplit.addEventListener('click', () => switchViewMode('split'));
+
+    function switchViewMode(mode) {
+      currentMode = mode;
+      if (mode === 'full') {
+        tabFull.classList.add('active');
+        tabSplit.classList.remove('active');
+        splitHint.style.display = 'none';
+        
+        // 全图模式：隐藏原图与分割线，100% 完整展示合成结果
+        layerOrig.style.display = 'none';
+        divider.style.display = 'none';
+        badgeOrig.style.display = 'none';
+        badgeResult.style.display = 'none';
+        layerResult.style.clipPath = 'none';
+      } else {
+        tabSplit.classList.add('active');
+        tabFull.classList.remove('active');
+        splitHint.style.display = 'block';
+
+        // 对比模式：开启原图层、分割线与左右徽章
+        layerOrig.style.display = 'block';
+        divider.style.display = 'block';
+        badgeOrig.style.display = 'block';
+        badgeResult.style.display = 'block';
+        updateDividerPos(currentSplitPct);
+      }
+    }
+
+    // 对比模式下的滑块拖动
     let isDraggingDivider = false;
-    function updateDividerPos(clientX) {
-      const rect = viewport.getBoundingClientRect();
-      let pos = (clientX - rect.left) / rect.width;
-      if (pos < 0.05) pos = 0.05;
-      if (pos > 0.95) pos = 0.95;
-      const pct = (pos * 100).toFixed(2);
+
+    function updateDividerPos(pct) {
+      if (pct < 2) pct = 2;
+      if (pct > 98) pct = 98;
+      currentSplitPct = pct;
       divider.style.left = `${pct}%`;
-      layerCutout.style.clipPath = `inset(0 0 0 ${pct}%)`;
+      // 原图只显示左侧 0% ~ pct% (裁切右侧)
+      layerOrig.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+      // 抠图层只显示右侧 pct% ~ 100%
+      layerResult.style.clipPath = 'none';
+    }
+
+    function handleDividerMove(clientX) {
+      const rect = stage.getBoundingClientRect();
+      const pos = ((clientX - rect.left) / rect.width) * 100;
+      updateDividerPos(pos);
     }
 
     divider.addEventListener('mousedown', (e) => {
@@ -513,25 +657,24 @@
     });
     window.addEventListener('mousemove', (e) => {
       if (!isDraggingDivider) return;
-      updateDividerPos(e.clientX);
+      handleDividerMove(e.clientX);
     });
     window.addEventListener('mouseup', () => {
       isDraggingDivider = false;
     });
 
-    // 移动端触摸滑动
     divider.addEventListener('touchstart', (e) => {
       isDraggingDivider = true;
     }, { passive: true });
     window.addEventListener('touchmove', (e) => {
       if (!isDraggingDivider || !e.touches[0]) return;
-      updateDividerPos(e.touches[0].clientX);
+      handleDividerMove(e.touches[0].clientX);
     }, { passive: true });
     window.addEventListener('touchend', () => {
       isDraggingDivider = false;
     });
 
-    // 底色切换
+    // 底色切换逻辑 (作用于 stage 背景)
     const swatchBtns = document.querySelectorAll('.color-swatch-btn');
     swatchBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -553,17 +696,20 @@
     function applyBackgroundColor(color) {
       currentBgColor = color;
       if (color === 'transparent') {
-        viewport.className = 'matting-viewport matting-bg-checker';
-        viewport.style.backgroundColor = '';
+        stageBg.className = 'matting-stage-bg matting-bg-checker';
+        stageBg.style.backgroundColor = '';
+        dlCompText.textContent = '下载透明 PNG (无底色)';
       } else {
-        viewport.className = 'matting-viewport';
-        viewport.style.backgroundColor = color;
+        stageBg.className = 'matting-stage-bg';
+        stageBg.style.backgroundColor = color;
+        dlCompText.textContent = '下载当前合成图 (含新底色)';
       }
     }
 
     // 羽化程度微调
     featherSlider.addEventListener('input', (e) => {
-      const val = e.target.value;
+      const val = parseInt(e.target.value, 10);
+      currentFeather = val;
       featherVal.textContent = val;
       imgResult.style.filter = val > 0 ? `blur(${val * 0.4}px)` : 'none';
     });
@@ -597,7 +743,7 @@
       a.click();
     });
 
-    // 下载含底色合成图
+    // 下载合成图 (底色 + 抠图主体，与预览 100% 绝对一致)
     dlCompBtn.addEventListener('click', () => {
       if (!currentCutoutBlob) return;
       const img = new Image();
@@ -607,9 +753,15 @@
         canvas.height = img.naturalHeight;
         const ctx = canvas.getContext('2d');
 
-        if (currentBgColor !== 'transparent') {
+        // 1. 填充用户选中的新底色
+        if (currentBgColor && currentBgColor !== 'transparent') {
           ctx.fillStyle = currentBgColor;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // 2. 绘制羽化后的抠图主体
+        if (currentFeather > 0) {
+          ctx.filter = `blur(${currentFeather * 0.4}px)`;
         }
         ctx.drawImage(img, 0, 0);
 
@@ -618,7 +770,7 @@
           const a = document.createElement('a');
           a.href = url;
           const baseName = currentFile ? currentFile.name.replace(/\.[^/.]+$/, "") : "cutout";
-          a.download = `${baseName}_composed.png`;
+          a.download = `${baseName}_with_bg.png`;
           a.click();
           setTimeout(() => URL.revokeObjectURL(url), 2000);
         }, 'image/png');
@@ -637,8 +789,7 @@
       dlTransBtn.style.display = 'none';
       dlCompBtn.style.display = 'none';
       resetBtn.style.display = 'none';
-      divider.style.left = '50%';
-      layerCutout.style.clipPath = 'inset(0 0 0 50%)';
+      switchViewMode('full');
     });
 
   </script>
