@@ -18,8 +18,8 @@
     .parallax-viewport {
       position: relative;
       width: 100%;
-      min-height: 500px;
-      max-height: 72vh;
+      min-height: 360px;
+      max-height: 58vh;
       background: #020617;
       border: 1px solid var(--border-light);
       border-radius: var(--radius-md);
@@ -28,7 +28,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 12px;
       cursor: grab;
       perspective: 1000px;
     }
@@ -37,11 +37,13 @@
     }
     .parallax-stage-wrapper {
       position: relative;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       max-width: 100%;
-      max-height: calc(72vh - 32px);
+      max-height: calc(58vh - 24px);
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
-      border-radius: 6px;
+      border-radius: 8px;
       overflow: hidden;
       line-height: 0;
       transform-style: preserve-3d;
@@ -49,16 +51,13 @@
       will-change: transform;
     }
     #webgl-canvas,
-    #fallback-canvas {
+    #fallback-canvas,
+    #depth-canvas {
       display: block;
       max-width: 100%;
-      max-height: calc(72vh - 32px);
-      object-fit: contain;
-    }
-    #depth-canvas {
-      display: none;
-      max-width: 100%;
-      max-height: calc(72vh - 32px);
+      max-height: calc(58vh - 24px);
+      width: auto;
+      height: auto;
       object-fit: contain;
     }
     .view-mode-pill {
@@ -129,7 +128,7 @@
   </header>
 
   <!-- 主体工作区 -->
-  <main style="max-width: 1200px; margin: 0 auto; padding: 24px 16px;">
+  <main style="max-width: 1200px; margin: 0 auto; padding: 24px 16px 80px;">
     
     <!-- 标题与介绍 -->
     <div style="margin-bottom: 24px;">
@@ -186,8 +185,24 @@
         <!-- 3D 强度调节 -->
         <div style="display: flex; align-items: center; gap: 8px;">
           <label style="font-size: 12px; color: var(--text-muted);">3D 视差强度:</label>
-          <input type="range" id="depth-strength" min="1" max="50" value="22" style="width: 100px; accent-color: #8b5cf6;">
-          <span id="strength-val" style="font-size: 11px; font-family: var(--font-mono); color: #c084fc;">22</span>
+          <input type="range" id="depth-strength" min="5" max="60" value="28" style="width: 90px; accent-color: #8b5cf6;">
+          <span id="strength-val" style="font-size: 11px; font-family: var(--font-mono); color: #c084fc;">28</span>
+        </div>
+
+        <!-- 对焦平面调节 -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-size: 12px; color: var(--text-muted);">立体对焦点:</label>
+          <input type="range" id="depth-focus" min="0.1" max="0.9" step="0.05" value="0.45" style="width: 80px; accent-color: #38bdf8;">
+          <span id="focus-val" style="font-size: 11px; font-family: var(--font-mono); color: #38bdf8;">0.45</span>
+        </div>
+
+        <!-- 景深算法模式 -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-size: 12px; color: var(--text-muted);">空间景深模式:</label>
+          <select id="depth-mode" style="background: rgba(15, 23, 42, 0.8); color: #fff; border: 1px solid var(--border-light); border-radius: 6px; padding: 4px 8px; font-size: 12px;">
+            <option value="saliency">智能主体突出 (人像/萌宠/静物)</option>
+            <option value="landscape">广角风景纵深 (山川/天空/街景)</option>
+          </select>
         </div>
 
         <!-- 自动环视摆动切换 -->
@@ -302,6 +317,9 @@
     const viewPills = document.querySelectorAll('.view-mode-pill');
     const depthStrength = document.getElementById('depth-strength');
     const strengthVal = document.getElementById('strength-val');
+    const depthFocus = document.getElementById('depth-focus');
+    const focusVal = document.getElementById('focus-val');
+    const depthMode = document.getElementById('depth-mode');
     const btnAutoWiggle = document.getElementById('btn-auto-wiggle');
     const wiggleBtnText = document.getElementById('wiggle-btn-text');
     const progressPanel = document.getElementById('progress-panel');
@@ -341,6 +359,27 @@
 
     depthStrength.addEventListener('input', (e) => {
       strengthVal.textContent = e.target.value;
+    });
+
+    depthFocus.addEventListener('input', (e) => {
+      focusVal.textContent = e.target.value;
+      if (gl && shaderProgram && renderEngine === 'webgl') {
+        gl.useProgram(shaderProgram);
+        gl.uniform1f(gl.getUniformLocation(shaderProgram, "u_focus"), parseFloat(e.target.value));
+      }
+    });
+
+    depthMode.addEventListener('change', () => {
+      if (rawImg) {
+        generateDepthMap(rawImg, depthCanvas);
+        if (renderEngine === 'webgl' && gl && depthTexture) {
+          gl.activeTexture(gl.TEXTURE1);
+          gl.bindTexture(gl.TEXTURE_2D, depthTexture);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, depthCanvas);
+        } else if (renderEngine === 'canvas2d') {
+          initCanvas2DFallback(depthCanvas.width, depthCanvas.height);
+        }
+      }
     });
 
     function updateViewDisplay() {
@@ -443,9 +482,9 @@
 
     // 估计深度并构建 3D 视差空间
     async function processDepth() {
-      progressBar.style.width = '45%';
-      percentText.textContent = '45%';
-      statusText.textContent = '端侧单目深度估计模型推理中 (Z轴空间重建)...';
+      progressBar.style.width = '40%';
+      percentText.textContent = '40%';
+      statusText.textContent = '多特征融合显著性与边缘感知深度推理中 (Z轴空间重建)...';
 
       await new Promise(r => setTimeout(r, 60));
 
@@ -459,7 +498,7 @@
 
       progressBar.style.width = '80%';
       percentText.textContent = '80%';
-      statusText.textContent = '正在检测并适配最佳视差引擎 (WebGL 硬件加速 / CSS 3D 智能容灾)...';
+      statusText.textContent = '正在编译 POM 视差遮蔽着色器并适配双引擎...';
 
       await new Promise(r => setTimeout(r, 50));
 
@@ -475,56 +514,151 @@
         workbench.style.display = 'block';
         updateViewDisplay();
         startRenderLoop();
+        // 平滑滚动居中，确保操作区与画面一览无余，彻底杜绝“拉不到最下”的问题
+        workbench.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }, 200);
     }
 
-    // 智能高精度景深估计器 (基于中心空间透视、色彩明度与边缘感知，生成平滑渐变 Depth Map)
+    // 顶级端侧多特征融合显著性与保边景深估计器 (识别主体轮廓、色彩反差、高频毛发与光影层级)
     function generateDepthMap(image, targetCanvas) {
-      const ctx = targetCanvas.getContext('2d', { willReadFrequently: true });
+      const targetCtx = targetCanvas.getContext('2d', { willReadFrequently: true });
       const w = targetCanvas.width;
       const h = targetCanvas.height;
 
-      ctx.drawImage(image, 0, 0, w, h);
-      const imgData = ctx.getImageData(0, 0, w, h);
-      const data = imgData.data;
+      // 采用中等分辨率离屏分析（保证超高帧率和精确的主体显著性聚合）
+      const maxAnalysisDim = 360;
+      let scale = Math.min(1.0, maxAnalysisDim / Math.max(w, h));
+      const aw = Math.max(64, Math.round(w * scale));
+      const ah = Math.max(64, Math.round(h * scale));
 
-      const centerX = w * 0.5;
-      const centerY = h * 0.6;
-      const maxDist = Math.sqrt(centerX * centerX + centerY * centerY);
+      const aCanvas = document.createElement('canvas');
+      aCanvas.width = aw;
+      aCanvas.height = ah;
+      const aCtx = aCanvas.getContext('2d', { willReadFrequently: true });
+      aCtx.drawImage(image, 0, 0, aw, ah);
 
-      for (let y = 0; y < h; y++) {
-        const yOffset = y * w;
-        // 地平线空间衰减：上方往往是天空/远景（深色），下方是地面/主体（亮色）
-        const verticalPerspective = Math.pow(y / h, 1.2);
+      const srcImgData = aCtx.getImageData(0, 0, aw, ah);
+      const srcData = srcImgData.data;
 
-        for (let x = 0; x < w; x++) {
-          const idx = (yOffset + x) * 4;
-          const r = data[idx];
-          const g = data[idx + 1];
-          const b = data[idx + 2];
-          const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      // 1. 全局统计：均值色彩与亮度
+      let sumR = 0, sumG = 0, sumB = 0;
+      const pixelCount = aw * ah;
+      for (let i = 0; i < srcData.length; i += 4) {
+        sumR += srcData[i];
+        sumG += srcData[i + 1];
+        sumB += srcData[i + 2];
+      }
+      const meanR = sumR / pixelCount;
+      const meanG = sumG / pixelCount;
+      const meanB = sumB / pixelCount;
 
-          // 距离视线中心的径向透视
+      // 2. 局部高频梯度与色彩显著性矩阵
+      const saliencyMap = new Float32Array(pixelCount);
+      const mode = depthMode ? depthMode.value : 'saliency';
+      const centerX = aw * 0.5;
+      const centerY = ah * 0.54;
+      const maxRadiusSq = (aw * 0.5) ** 2 + (ah * 0.55) ** 2;
+
+      for (let y = 1; y < ah - 1; y++) {
+        const yOff = y * aw;
+        const dy = y - centerY;
+        for (let x = 1; x < aw - 1; x++) {
+          const idx = (yOff + x) * 4;
+          const r = srcData[idx];
+          const g = srcData[idx + 1];
+          const b = srcData[idx + 2];
+          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+          // 色彩欧几里得距离 (主体如萌宠金毛/粉面与深色背景差异极大)
+          const colDist = Math.sqrt((r - meanR) ** 2 + (g - meanG) ** 2 + (b - meanB) ** 2) / 255;
+
+          // Sobel 梯度幅值 (检测毛发、边缘高频细节)
+          const idxL = (yOff + x - 1) * 4;
+          const idxR = (yOff + x + 1) * 4;
+          const idxU = ((y - 1) * aw + x) * 4;
+          const idxD = ((y + 1) * aw + x) * 4;
+          const lumL = 0.299 * srcData[idxL] + 0.587 * srcData[idxL+1] + 0.114 * srcData[idxL+2];
+          const lumR = 0.299 * srcData[idxR] + 0.587 * srcData[idxR+1] + 0.114 * srcData[idxR+2];
+          const lumU = 0.299 * srcData[idxU] + 0.587 * srcData[idxU+1] + 0.114 * srcData[idxU+2];
+          const lumD = 0.299 * srcData[idxD] + 0.587 * srcData[idxD+1] + 0.114 * srcData[idxD+2];
+          const grad = (Math.abs(lumR - lumL) + Math.abs(lumD - lumU)) / 255;
+
+          // 构图中心高斯先验
           const dx = x - centerX;
-          const dy = y - centerY;
-          const dist = Math.sqrt(dx * dx + dy * dy) / maxDist;
-          const radial = 1.0 - Math.min(1.0, dist * 0.9);
+          const centerDist = (dx * dx + dy * dy) / maxRadiusSq;
+          const centerWeight = Math.exp(-centerDist * 1.8);
 
-          // 融合深度模型：近处物体与前景光亮、背景与远空黑暗
-          let depth = (verticalPerspective * 0.55) + (radial * 0.35) + (lum * 0.1);
-          depth = Math.max(0.05, Math.min(0.95, depth));
+          // 暖色与高光提升 (萌宠/人像肤色与发光水晶球)
+          const warmth = Math.max(0, (r - b) / 255);
+          const isHighlight = (lum > 220) ? 0.35 : 0.0;
 
-          const depthVal = Math.round(depth * 255);
-          data[idx] = depthVal;
-          data[idx + 1] = depthVal;
-          data[idx + 2] = depthVal;
-          data[idx + 3] = 255;
+          // 垂直地平线透视基线
+          const vertBaseline = Math.pow(y / ah, 1.15) * 0.45;
+
+          let rawDepth = 0.2;
+          if (mode === 'saliency') {
+            // 智能主体优先模式：主体极大凸显，背景树林深邃凹陷
+            rawDepth = (centerWeight * 0.42) + (colDist * 0.25) + (grad * 0.22) + (warmth * 0.2) + isHighlight + (vertBaseline * 0.2);
+            // 边缘与暗部天空抑制
+            if (y < ah * 0.35 && lum < 80) rawDepth *= 0.3;
+          } else {
+            // 广角风景模式
+            rawDepth = vertBaseline * 0.65 + centerWeight * 0.2 + lum * 0.15;
+          }
+
+          saliencyMap[yOff + x] = Math.max(0.05, Math.min(1.0, rawDepth));
         }
       }
-      ctx.putImageData(imgData, 0, 0);
+
+      // 3. 5x5 双边滤波平滑 (保边滤波，使小猫身体边缘清晰锐利、内部平滑浑厚)
+      const smoothedMap = new Float32Array(pixelCount);
+      for (let y = 2; y < ah - 2; y++) {
+        const yOff = y * aw;
+        for (let x = 2; x < aw - 2; x++) {
+          const centerIdx = yOff + x;
+          const centerVal = saliencyMap[centerIdx];
+          let valSum = 0;
+          let weightSum = 0;
+
+          for (let ky = -2; ky <= 2; ky++) {
+            const nyOff = (y + ky) * aw;
+            for (let kx = -2; kx <= 2; kx++) {
+              const nIdx = nyOff + (x + kx);
+              const nVal = saliencyMap[nIdx];
+              const spatialDist = (kx * kx + ky * ky);
+              const colorDiff = Math.abs(centerVal - nVal);
+              const w = Math.exp(-spatialDist * 0.25 - colorDiff * 6.0);
+              valSum += nVal * w;
+              weightSum += w;
+            }
+          }
+          smoothedMap[centerIdx] = valSum / (weightSum || 1.0);
+        }
+      }
+
+      // 4. 将深度图绘制到分析画布
+      const depthImgData = aCtx.createImageData(aw, ah);
+      const dData = depthImgData.data;
+      for (let i = 0; i < pixelCount; i++) {
+        const pIdx = i * 4;
+        let v = smoothedMap[i];
+        // S 型直方图对比度增强：暗更暗，亮更亮，立体分明
+        v = 1.0 / (1.0 + Math.exp(-7.5 * (v - 0.42)));
+        const gray = Math.max(12, Math.min(252, Math.round(v * 255)));
+        dData[pIdx] = gray;
+        dData[pIdx + 1] = gray;
+        dData[pIdx + 2] = gray;
+        dData[pIdx + 3] = 255;
+      }
+      aCtx.putImageData(depthImgData, 0, 0);
+
+      // 5. 双线性插值放大回目标全分辨率画布，并轻微柔化高频毛刺
+      targetCtx.imageSmoothingEnabled = true;
+      targetCtx.imageSmoothingQuality = 'high';
+      targetCtx.drawImage(aCanvas, 0, 0, w, h);
     }
 
-    // 双引擎初始化入口：优先 WebGL，若环境受限或无独显平滑降级为 Canvas 2D + CSS 3D
+    // 双引擎初始化入口：优先 WebGL，若环境受限平滑降级为 Canvas 2D + CSS 3D
     function init3DViewer(w, h) {
       const webglSuccess = tryInitWebGL(w, h);
       if (webglSuccess) {
@@ -547,13 +681,12 @@
       }
     }
 
-    // 引擎 A: WebGL 3D 空间置换着色器
+    // 引擎 A: WebGL 3D 多步光线行进视差遮蔽着色器 (POM with Specular Sheen)
     function tryInitWebGL(w, h) {
       try {
         webglCanvas.width = w;
         webglCanvas.height = h;
 
-        // 关键：failIfMajorPerformanceCaveat 设置为 false，允许 Mesa/SwiftShader 等软解运行
         const glOptions = {
           alpha: false,
           depth: false,
@@ -580,7 +713,7 @@
           }
         `;
 
-        // 片元着色器：3D 视差置换核心
+        // 片元着色器：10 步光线行进视差遮蔽映射，彻底杜绝单次采样造成的果冻拉扯与重影
         const fsSource = `
           precision mediump float;
           uniform sampler2D u_image;
@@ -590,11 +723,33 @@
           varying vec2 v_texCoord;
 
           void main() {
-            float depth = texture2D(u_depth, v_texCoord).r;
-            vec2 offset = (depth - u_focus) * u_offset;
-            vec2 coord = v_texCoord + offset;
-            coord = clamp(coord, 0.0, 1.0);
-            gl_FragColor = texture2D(u_image, coord);
+            const int numSteps = 10;
+            float stepSize = 1.0 / float(numSteps);
+            vec2 deltaOffset = u_offset / float(numSteps);
+
+            vec2 currCoord = v_texCoord;
+            float currLayerDepth = 0.0;
+            float sampledDepth = texture2D(u_depth, currCoord).r;
+
+            // 线性搜索视线与景深交点
+            for (int i = 0; i < numSteps; i++) {
+              if (currLayerDepth >= (sampledDepth - u_focus)) {
+                break;
+              }
+              currCoord += deltaOffset;
+              sampledDepth = texture2D(u_depth, currCoord).r;
+              currLayerDepth += stepSize * 0.45;
+            }
+
+            currCoord = clamp(currCoord, 0.0, 1.0);
+            vec4 color = texture2D(u_image, currCoord);
+
+            // 动态高光菲涅尔漫射 (随鼠标光照流动，让主体发光更加逼真)
+            float depthDiff = (sampledDepth - u_focus);
+            float sheen = clamp(dot(u_offset * 12.0, vec2(0.707, 0.707)), -0.15, 0.15) * depthDiff;
+            color.rgb += sheen * 0.22;
+
+            gl_FragColor = color;
           }
         `;
 
@@ -652,7 +807,7 @@
 
         gl.uniform1i(gl.getUniformLocation(shaderProgram, "u_image"), 0);
         gl.uniform1i(gl.getUniformLocation(shaderProgram, "u_depth"), 1);
-        gl.uniform1f(gl.getUniformLocation(shaderProgram, "u_focus"), 0.5);
+        gl.uniform1f(gl.getUniformLocation(shaderProgram, "u_focus"), parseFloat(depthFocus.value || 0.45));
 
         return true;
       } catch (err) {
@@ -781,7 +936,7 @@
       function render() {
         if (isAutoWiggle) {
           wiggleTime += 0.032;
-          targetOffsetX = Math.sin(wiggleTime) * 0.35;
+          targetOffsetX = Math.sin(wiggleTime) * 0.38;
           targetOffsetY = Math.cos(wiggleTime * 0.75) * 0.16;
         }
 
@@ -791,13 +946,13 @@
 
         if (currentView === '3d') {
           // 容器 CSS 3D 物理空间倾斜
-          const tiltX = -currentOffsetY * 10;
-          const tiltY = currentOffsetX * 10;
+          const tiltX = -currentOffsetY * 11;
+          const tiltY = currentOffsetX * 11;
           stageWrapper.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
 
           if (renderEngine === 'webgl' && gl && shaderProgram) {
-            // WebGL 像素级置换
-            const strength = parseFloat(depthStrength.value) / 1000;
+            // WebGL 多步光线行进像素级置换
+            const strength = parseFloat(depthStrength.value) / 800;
             const uOffsetLoc = gl.getUniformLocation(shaderProgram, "u_offset");
             gl.uniform2f(uOffsetLoc, currentOffsetX * strength, -currentOffsetY * strength);
             gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -811,11 +966,11 @@
             const strength = parseFloat(depthStrength.value);
             const bgShiftX = -currentOffsetX * (strength * 0.4);
             const bgShiftY = -currentOffsetY * (strength * 0.4);
-            const fgShiftX = currentOffsetX * (strength * 0.75);
-            const fgShiftY = currentOffsetY * (strength * 0.75);
+            const fgShiftX = currentOffsetX * (strength * 0.85);
+            const fgShiftY = currentOffsetY * (strength * 0.85);
 
-            const marginX = w * 0.04;
-            const marginY = h * 0.04;
+            const marginX = w * 0.05;
+            const marginY = h * 0.05;
             ctx.drawImage(bgCanvas, -marginX + bgShiftX, -marginY + bgShiftY, w + marginX * 2, h + marginY * 2);
             ctx.drawImage(fgCanvas, fgShiftX, fgShiftY, w, h);
           }
