@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 照片人脸智能打码与隐私脱敏 - 极客端侧离线 AI 工坊 | 825412.xyz</title>
+  <meta name="description" content="基于轻量级端侧神经网络，100% 浏览器本地毫秒级检测所有人脸。支持像素马赛克、高斯模糊、墨镜/Emoji 贴纸遮挡与黑条脱敏，支持手动拉框打码车牌与敏感信息，零隐私数据上云。">
+  <meta name="keywords" content="AI打码, 人脸打码, 智能马赛克, 照片脱敏, 车牌打码, 隐私保护, 纯前端打码, 825412.xyz">
+  <link rel="canonical" href="https://825412.xyz/tools/ai-face-blur">
+  <link rel="stylesheet" href="../style.css?v=2.7.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5943907597157682" crossorigin="anonymous"></script>
+
+  <!-- 轻量端侧人脸检测引擎 face-api.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+
+  <style>
+    .face-viewport {
+      position: relative;
+      width: 100%;
+      min-height: 480px;
+      max-height: 72vh;
+      background: #020617;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .face-stage-wrapper {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      max-height: calc(72vh - 32px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+      overflow: hidden;
+      line-height: 0;
+    }
+    #main-canvas {
+      display: block;
+      max-width: 100%;
+      max-height: calc(72vh - 32px);
+      object-fit: contain;
+      cursor: crosshair;
+    }
+    /* SVG 交互控制层 */
+    #face-svg-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .face-box {
+      fill: rgba(236, 72, 153, 0.15);
+      stroke: #ec4899;
+      stroke-width: 2;
+      stroke-dasharray: 4 2;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: all 0.15s ease;
+    }
+    .face-box:hover {
+      fill: rgba(236, 72, 153, 0.3);
+      stroke: #f472b6;
+      stroke-width: 3;
+    }
+    .face-box.disabled {
+      fill: rgba(16, 185, 129, 0.1);
+      stroke: #10b981;
+      stroke-dasharray: none;
+    }
+    .face-tag {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      fill: #fff;
+      pointer-events: none;
+    }
+    .mode-tab {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--surface-high);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .mode-tab:hover {
+      color: #fff;
+      border-color: #ec4899;
+    }
+    .mode-tab.active {
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35);
+    }
+  </style>
+</head>
+<body style="background: var(--bg-color); color: var(--text-primary); font-family: var(--font-sans); margin: 0; padding: 0;">
+
+  <!-- 顶部面包屑导航 -->
+  <header style="padding: 16px 24px; border-bottom: 1px solid var(--border-light); background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 4px;">
+          <span class="material-symbols-outlined" style="font-size: 18px;">home</span>
+          <span>控制台</span>
+        </a>
+        <span style="color: var(--text-muted);">/</span>
+        <a href="/toolbox" style="color: var(--text-muted); text-decoration: none; font-size: 13px;">极客工具箱</a>
+        <span style="color: var(--text-muted);">/</span>
+        <span style="color: #f472b6; font-size: 13px; font-weight: 600;">AI 人脸打码与隐私脱敏</span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); font-weight: 700;">
+          ⚡ 100% 浏览器本地运算 零人脸数据泄露
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体工作区 -->
+  <main style="max-width: 1200px; margin: 0 auto; padding: 24px 16px;">
+    
+    <!-- 标题与介绍 -->
+    <div style="margin-bottom: 24px;">
+      <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(236, 72, 153, 0.1); border: 1px solid rgba(236, 72, 153, 0.3); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #f472b6; margin-bottom: 10px; font-weight: 700;">
+        <span class="material-symbols-outlined" style="font-size: 16px;">visibility_off</span>
+        <span>端侧人脸视觉隐私脱敏工坊 · 毫秒级检测 自由交互</span>
+      </div>
+      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px;">
+        AI 照片人脸智能打码与隐私脱敏
+      </h1>
+      <p style="font-size: 14px; color: var(--text-secondary); margin: 0; line-height: 1.6;">
+        分享合影、街拍或生活照前一键保护隐私！端侧轻量神经模型秒级自动锁定所有人脸，支持经典马赛克、高斯模糊、趣味贴纸遮挡与机密黑条。点击人脸可单独开关，也支持直接鼠标拉框为车牌和证件打码。
+      </p>
+    </div>
+
+    <!-- 工作台卡片 -->
+    <div class="glass-card" style="margin-bottom: 30px;">
+
+      <!-- 拖拽上传与粘贴区 -->
+      <div id="dropzone" style="border: 2px dashed rgba(236, 72, 153, 0.4); border-radius: var(--radius-md); padding: 36px 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: rgba(236, 72, 153, 0.03); margin-bottom: 20px;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(236, 72, 153, 0.15); color: #f472b6; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+          <span class="material-symbols-outlined" style="font-size: 32px;">face</span>
+        </div>
+        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+          拖拽图片至此 / 点击选择本地图片
+        </div>
+        <div style="font-size: 13px; color: #f472b6; font-weight: 600; margin-bottom: 6px;">
+          ⚡ 极客推荐：截屏后直接按 Ctrl+V (或 ⌘V) 即可瞬间开始智能人脸打码！
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted);">
+          支持 PNG, JPG, WebP, BMP | 人脸特征 100% 内存本地即时推理 | 绝不上云
+        </div>
+        <input type="file" id="file-input" accept="image/*" style="display: none;">
+      </div>
+
+      <!-- 参数控制栏 (打码样式与强度) -->
+      <div id="control-bar" style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+        
+        <!-- 遮罩风格 -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-size: 13px; font-weight: 700; color: #fff;">🎭 遮罩风格:</label>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button type="button" class="mode-tab active" data-mode="mosaic">
+              <span>🔳 像素马赛克</span>
+            </button>
+            <button type="button" class="mode-tab" data-mode="blur">
+              <span>🌫️ 柔和模糊</span>
+            </button>
+            <button type="button" class="mode-tab" data-mode="sticker">
+              <span>🕶️ 趣味贴纸</span>
+            </button>
+            <button type="button" class="mode-tab" data-mode="blackout">
+              <span>⬛ 黑色隐匿条</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 贴纸子选项 (仅在贴纸模式显示) -->
+        <div id="sticker-selector" style="display: none; align-items: center; gap: 6px;">
+          <label style="font-size: 12px; color: var(--text-muted);">贴纸样式:</label>
+          <select id="sticker-type" class="custom-select" style="padding: 4px 10px; border-radius: 6px; background: var(--surface-high); border: 1px solid var(--border-light); color: #fff; font-size: 13px;">
+            <option value="sunglasses">🕶️ 酷炫墨镜</option>
+            <option value="cool">😎 墨镜笑脸</option>
+            <option value="mask">😷 防护口罩</option>
+            <option value="cat">🐱 可爱猫咪</option>
+            <option value="ghost">👻 搞怪幽灵</option>
+            <option value="heart">💖 爱心遮挡</option>
+          </select>
+        </div>
+
+        <!-- 模糊强度滑块 -->
+        <div id="intensity-wrapper" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+          <label style="font-size: 12px; color: var(--text-muted);" id="intensity-label">马赛克粒度:</label>
+          <input type="range" id="intensity-range" min="6" max="36" value="16" style="width: 90px; accent-color: #ec4899;">
+          <span id="intensity-val" style="font-size: 11px; font-family: var(--font-mono); color: #f472b6;">16px</span>
+        </div>
+
+      </div>
+
+      <!-- 运算进度条面板 -->
+      <div id="progress-panel" style="display: none; margin-bottom: 24px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(236, 72, 153, 0.3); border-radius: var(--radius-md); padding: 18px 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #f472b6;">
+            <span class="material-symbols-outlined" style="font-size: 18px; animation: spin 1.5s linear infinite;">hourglass_top</span>
+            <span id="status-text">正在初始化端侧 TinyFace 视觉神经检测模型...</span>
+          </div>
+          <span id="percent-text" style="font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: #fff;">0%</span>
+        </div>
+        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
+          <div id="progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ec4899, #8b5cf6); transition: width 0.15s ease;"></div>
+        </div>
+      </div>
+
+      <!-- 交互工作区 -->
+      <div id="workbench" style="display: none;">
+        
+        <!-- 操作提示与人脸统计 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="face-count-badge" style="font-size: 12px; font-weight: 700; background: rgba(236, 72, 153, 0.15); color: #f472b6; padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(236, 72, 153, 0.3);">
+              🎉 自动识别到 0 张人脸
+            </span>
+            <span style="font-size: 11px; color: var(--text-muted);">
+              💡 提示：点击图上粉色虚线框可取消/恢复该人脸打码；鼠标直接拖拽可手动为车牌/敏感文字画框打码
+            </span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-toggle-all" class="btn" style="background: rgba(255,255,255,0.06); padding: 4px 12px; font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border-light);">
+              全部脱敏 / 全部保留
+            </button>
+            <button id="btn-clear-custom" class="btn" style="background: rgba(255,255,255,0.06); padding: 4px 12px; font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border-light);">
+              清除手动划框
+            </button>
+          </div>
+        </div>
+
+        <!-- 画布视口 -->
+        <div class="face-viewport">
+          <div class="face-stage-wrapper" id="stage-wrapper">
+            <canvas id="main-canvas"></canvas>
+            <svg id="face-svg-overlay"></svg>
+          </div>
+        </div>
+
+        <!-- 导出动作栏 -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 20px; justify-content: flex-end;">
+          <button class="btn btn-primary" id="btn-copy" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); padding: 9px 20px; font-size: 13px; font-weight: 700;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+            <span>复制脱敏图片到剪贴板</span>
+          </button>
+          <button class="btn btn-primary" id="btn-download" style="background: linear-gradient(135deg, #10b981, #06b6d4); padding: 9px 20px; font-size: 13px; font-weight: 700;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
+            <span>下载脱敏后图片</span>
+          </button>
+          <button class="btn" id="btn-reset" style="background: transparent; border: 1px solid var(--border-light); padding: 9px 16px; font-size: 13px; color: var(--text-muted);">
+            上传新图片
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- 为什么选择端侧离线人脸脱敏 -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 40px;">
+      <div class="glass-card">
+        <h3 style="font-size: 16px; font-weight: 700; color: #f472b6; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <span class="material-symbols-outlined">fingerprint</span>
+          <span>高敏感生物信息 0 泄露风险</span>
+        </h3>
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+          人脸属于极其关键的个人生物隐私。普通美图软件或云端打码平台会将您的原图上传到服务器进行模型识别，存在暗中留存用于训练或被拖库泄露的风险。本工具基于纯浏览器内存运算，人脸数据绝不出您的本机。
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <h3 style="font-size: 16px; font-weight: 700; color: #a78bfa; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <span class="material-symbols-outlined">touch_app</span>
+          <span>自由交互：想留谁就留谁</span>
+        </h3>
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+          在景区自拍或聚餐合影中，常常需要保留自己或核心好友的面孔，仅对背景里的路人与陌生人进行打码。本工具支持鼠标单点切换开关，无需手动一点点涂抹。
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <h3 style="font-size: 16px; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <span class="material-symbols-outlined">directions_car</span>
+          <span>车牌与敏感证件一键划框</span>
+        </h3>
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+          除了人脸之外，街拍中的汽车车牌号、合同里的印章签名、门牌号和二维码也是高危隐私点。本工具支持鼠标在画面上直接拖拽画框，同等享受平滑打码效果。
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="text-align: center; padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; color: var(--text-muted);">
+    <p>© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
+  </footer>
+
+  <style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+
+  <script>
+    // DOM 元素
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const modeTabs = document.querySelectorAll('.mode-tab');
+    const stickerSelector = document.getElementById('sticker-selector');
+    const stickerType = document.getElementById('sticker-type');
+    const intensityRange = document.getElementById('intensity-range');
+    const intensityVal = document.getElementById('intensity-val');
+    const intensityLabel = document.getElementById('intensity-label');
+    const progressPanel = document.getElementById('progress-panel');
+    const progressBar = document.getElementById('progress-bar');
+    const percentText = document.getElementById('percent-text');
+    const statusText = document.getElementById('status-text');
+    const workbench = document.getElementById('workbench');
+    const mainCanvas = document.getElementById('main-canvas');
+    const svgOverlay = document.getElementById('face-svg-overlay');
+    const faceCountBadge = document.getElementById('face-count-badge');
+    const btnToggleAll = document.getElementById('btn-toggle-all');
+    const btnClearCustom = document.getElementById('btn-clear-custom');
+    const btnCopy = document.getElementById('btn-copy');
+    const btnDownload = document.getElementById('btn-download');
+    const btnReset = document.getElementById('btn-reset');
+
+    let rawImage = null;
+    let isModelLoaded = false;
+    let currentMode = 'mosaic'; // 'mosaic' | 'blur' | 'sticker' | 'blackout'
+    let detectedFaces = []; // { x, y, width, height, active: true }
+    let customBoxes = [];   // { x, y, width, height }
+    let isDrawingCustom = false;
+    let drawStart = { x: 0, y: 0 };
+    let tempSvgRect = null;
+
+    // 模式切换
+    modeTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        modeTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentMode = tab.getAttribute('data-mode');
+
+        if (currentMode === 'sticker') {
+          stickerSelector.style.display = 'flex';
+          intensityRange.parentElement.style.display = 'none';
+        } else {
+          stickerSelector.style.display = 'none';
+          intensityRange.parentElement.style.display = 'flex';
+          if (currentMode === 'mosaic') {
+            intensityLabel.textContent = '马赛克粒度:';
+            intensityRange.min = 6; intensityRange.max = 36;
+          } else if (currentMode === 'blur') {
+            intensityLabel.textContent = '模糊半径:';
+            intensityRange.min = 4; intensityRange.max = 30;
+          } else if (currentMode === 'blackout') {
+            intensityRange.parentElement.style.display = 'none';
+          }
+        }
+        renderCanvas();
+      });
+    });
+
+    intensityRange.addEventListener('input', (e) => {
+      intensityVal.textContent = `${e.target.value}px`;
+      renderCanvas();
+    });
+
+    stickerType.addEventListener('change', () => renderCanvas());
+
+    // 拖拽与文件输入
+    dropzone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+    });
+
+    ['dragenter', 'dragover'].forEach(n => {
+      dropzone.addEventListener(n, (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = '#ec4899';
+        dropzone.style.background = 'rgba(236, 72, 153, 0.12)';
+      });
+    });
+    ['dragleave', 'drop'].forEach(n => {
+      dropzone.addEventListener(n, (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = 'rgba(236, 72, 153, 0.4)';
+        dropzone.style.background = 'rgba(236, 72, 153, 0.03)';
+      });
+    });
+    dropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // Ctrl+V 粘贴
+    window.addEventListener('paste', (e) => {
+      const items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            handleFile(file);
+            break;
+          }
+        }
+      }
+    });
+
+    // 初始化模型
+    async function ensureModelLoaded() {
+      if (isModelLoaded) return;
+      statusText.textContent = '正在下载并预热端侧轻量 TinyFace 人脸模型 (约 190KB)...';
+      progressBar.style.width = '30%';
+      percentText.textContent = '30%';
+
+      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+      isModelLoaded = true;
+
+      progressBar.style.width = '60%';
+      percentText.textContent = '60%';
+    }
+
+    // 处理新图片
+    async function handleFile(file) {
+      progressPanel.style.display = 'block';
+      progressBar.style.width = '10%';
+      percentText.textContent = '10%';
+      statusText.textContent = '读取图片像素数据...';
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const img = new Image();
+        img.onload = async () => {
+          rawImage = img;
+          await processImageFaces();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 人脸检测与工作区激活
+    async function processImageFaces() {
+      try {
+        await ensureModelLoaded();
+
+        statusText.textContent = '端侧神经卷积检测定位人脸中...';
+        progressBar.style.width = '75%';
+        percentText.textContent = '75%';
+
+        // 使用 TinyFaceDetectorOptions 极速检测
+        const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.35 });
+        const detections = await faceapi.detectAllFaces(rawImage, options);
+
+        detectedFaces = detections.map(d => ({
+          x: Math.max(0, d.box.x),
+          y: Math.max(0, d.box.y),
+          width: Math.min(rawImage.width - d.box.x, d.box.width),
+          height: Math.min(rawImage.height - d.box.y, d.box.height),
+          active: true
+        }));
+
+        customBoxes = [];
+
+        progressBar.style.width = '100%';
+        percentText.textContent = '100%';
+        statusText.textContent = `检测完成！定位到 ${detectedFaces.length} 处人脸区域`;
+
+        setTimeout(() => {
+          progressPanel.style.display = 'none';
+          workbench.style.display = 'block';
+          updateStatsBadge();
+          renderCanvas();
+          renderSvgBoxes();
+        }, 200);
+
+      } catch (err) {
+        console.error('人脸检测异常:', err);
+        statusText.textContent = '⚠️ 模型检测异常，已为您开启纯手动划框打码模式';
+        detectedFaces = [];
+        progressPanel.style.display = 'none';
+        workbench.style.display = 'block';
+        updateStatsBadge();
+        renderCanvas();
+        renderSvgBoxes();
+      }
+    }
+
+    function updateStatsBadge() {
+      const activeCount = detectedFaces.filter(f => f.active).length;
+      faceCountBadge.textContent = `🎉 识别到 ${detectedFaces.length} 张人脸 (${activeCount} 处打码保护中${customBoxes.length ? `，${customBoxes.length} 处自定义划框` : ''})`;
+    }
+
+    // 渲染主画布
+    function renderCanvas() {
+      if (!rawImage) return;
+
+      mainCanvas.width = rawImage.naturalWidth || rawImage.width;
+      mainCanvas.height = rawImage.naturalHeight || rawImage.height;
+      const ctx = mainCanvas.getContext('2d');
+
+      // 绘制原始底图
+      ctx.drawImage(rawImage, 0, 0);
+
+      // 合并待打码区域：激活的人脸 + 用户自定义画框
+      const boxesToMask = [
+        ...detectedFaces.filter(f => f.active),
+        ...customBoxes
+      ];
+
+      const intensity = parseInt(intensityRange.value, 10);
+
+      boxesToMask.forEach(box => {
+        applyMaskToArea(ctx, box.x, box.y, box.width, box.height, currentMode, intensity);
+      });
+    }
+
+    // 核心区域脱敏遮罩渲染
+    function applyMaskToArea(ctx, x, y, width, height, mode, intensity) {
+      // 稍微外扩 8% 确保轮廓与边缘完全覆盖
+      const padX = width * 0.08;
+      const padY = height * 0.08;
+      const rx = Math.max(0, x - padX);
+      const ry = Math.max(0, y - padY);
+      const rw = Math.min(mainCanvas.width - rx, width + padX * 2);
+      const rh = Math.min(mainCanvas.height - ry, height + padY * 2);
+
+      ctx.save();
+
+      if (mode === 'mosaic') {
+        // 经典像素马赛克
+        const blockSize = Math.max(4, intensity);
+        const subW = Math.max(1, Math.floor(rw / blockSize));
+        const subH = Math.max(1, Math.floor(rh / blockSize));
+
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = subW;
+        tempCanvas.height = subH;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.imageSmoothingEnabled = false;
+        tempCtx.drawImage(mainCanvas, rx, ry, rw, rh, 0, 0, subW, subH);
+
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(tempCanvas, 0, 0, subW, subH, rx, ry, rw, rh);
+
+      } else if (mode === 'blur') {
+        // 高斯柔和模糊
+        ctx.beginPath();
+        ctx.rect(rx, ry, rw, rh);
+        ctx.clip();
+        ctx.filter = `blur(${Math.max(4, intensity)}px)`;
+        ctx.drawImage(mainCanvas, 0, 0);
+
+      } else if (mode === 'blackout') {
+        // 机密黑条
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(rx, ry, rw, rh);
+        // 加微弱机密斜纹
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = -rh; i < rw; i += 12) {
+          ctx.moveTo(rx + i, ry);
+          ctx.lineTo(rx + i + rh, ry + rh);
+        }
+        ctx.stroke();
+
+      } else if (mode === 'sticker') {
+        // 趣味贴纸
+        const sType = stickerType.value;
+        const emojiMap = {
+          sunglasses: '🕶️',
+          cool: '😎',
+          mask: '😷',
+          cat: '🐱',
+          ghost: '👻',
+          heart: '💖'
+        };
+        const emoji = emojiMap[sType] || '🕶️';
+        const fontSize = Math.min(rw, rh) * 0.9;
+        ctx.font = `${fontSize}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(emoji, rx + rw / 2, ry + rh / 2);
+      }
+
+      ctx.restore();
+    }
+
+    // 渲染 SVG 交互锚框 (实现点击开关与 hover 提示)
+    function renderSvgBoxes() {
+      if (!rawImage) return;
+      const w = mainCanvas.width;
+      const h = mainCanvas.height;
+
+      svgOverlay.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      svgOverlay.innerHTML = '';
+
+      // 渲染人脸识别框
+      detectedFaces.forEach((face, index) => {
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', face.x);
+        rect.setAttribute('y', face.y);
+        rect.setAttribute('width', face.width);
+        rect.setAttribute('height', face.height);
+        rect.setAttribute('class', `face-box ${face.active ? '' : 'disabled'}`);
+        rect.setAttribute('rx', 4);
+
+        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        title.textContent = `人脸 #${index + 1} (${face.active ? '打码中 - 点击取消' : '已保留 - 点击打码'})`;
+        rect.appendChild(title);
+
+        rect.addEventListener('click', (e) => {
+          e.stopPropagation();
+          face.active = !face.active;
+          renderCanvas();
+          renderSvgBoxes();
+          updateStatsBadge();
+        });
+
+        svgOverlay.appendChild(rect);
+
+        // 标签文字
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', face.x + 4);
+        text.setAttribute('y', face.y + 14);
+        text.setAttribute('class', 'face-tag');
+        text.textContent = face.active ? `🙈 #${index + 1}` : `👀 #${index + 1}`;
+        svgOverlay.appendChild(text);
+      });
+
+      // 渲染用户手动划框
+      customBoxes.forEach((cBox, index) => {
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', cBox.x);
+        rect.setAttribute('y', cBox.y);
+        rect.setAttribute('width', cBox.width);
+        rect.setAttribute('height', cBox.height);
+        rect.setAttribute('style', 'fill: rgba(6, 182, 212, 0.2); stroke: #06b6d4; stroke-width: 2; cursor: pointer; pointer-events: auto;');
+        rect.setAttribute('rx', 3);
+
+        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        title.textContent = '自定义打码区域 (双击删除)';
+        rect.appendChild(title);
+
+        rect.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          customBoxes.splice(index, 1);
+          renderCanvas();
+          renderSvgBoxes();
+          updateStatsBadge();
+        });
+
+        svgOverlay.appendChild(rect);
+      });
+    }
+
+    // 手动拉框自由打码交互 (针对车牌/文字/敏感区域)
+    const stageWrapper = document.getElementById('stage-wrapper');
+
+    stageWrapper.addEventListener('mousedown', (e) => {
+      if (e.target.tagName.toLowerCase() === 'rect') return; // 点击了已有框
+      const rect = mainCanvas.getBoundingClientRect();
+      const scaleX = mainCanvas.width / rect.width;
+      const scaleY = mainCanvas.height / rect.height;
+
+      isDrawingCustom = true;
+      drawStart = {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+
+      tempSvgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      tempSvgRect.setAttribute('x', drawStart.x);
+      tempSvgRect.setAttribute('y', drawStart.y);
+      tempSvgRect.setAttribute('width', 0);
+      tempSvgRect.setAttribute('height', 0);
+      tempSvgRect.setAttribute('style', 'fill: rgba(6, 182, 212, 0.25); stroke: #06b6d4; stroke-width: 2; stroke-dasharray: 4 2;');
+      svgOverlay.appendChild(tempSvgRect);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDrawingCustom || !tempSvgRect) return;
+      const rect = mainCanvas.getBoundingClientRect();
+      const scaleX = mainCanvas.width / rect.width;
+      const scaleY = mainCanvas.height / rect.height;
+
+      const currentX = Math.max(0, Math.min(mainCanvas.width, (e.clientX - rect.left) * scaleX));
+      const currentY = Math.max(0, Math.min(mainCanvas.height, (e.clientY - rect.top) * scaleY));
+
+      const bx = Math.min(drawStart.x, currentX);
+      const by = Math.min(drawStart.y, currentY);
+      const bw = Math.abs(currentX - drawStart.x);
+      const bh = Math.abs(currentY - drawStart.y);
+
+      tempSvgRect.setAttribute('x', bx);
+      tempSvgRect.setAttribute('y', by);
+      tempSvgRect.setAttribute('width', bw);
+      tempSvgRect.setAttribute('height', bh);
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isDrawingCustom) return;
+      isDrawingCustom = false;
+      if (tempSvgRect) {
+        const bw = parseFloat(tempSvgRect.getAttribute('width'));
+        const bh = parseFloat(tempSvgRect.getAttribute('height'));
+        const bx = parseFloat(tempSvgRect.getAttribute('x'));
+        const by = parseFloat(tempSvgRect.getAttribute('y'));
+        svgOverlay.removeChild(tempSvgRect);
+        tempSvgRect = null;
+
+        // 仅当框选尺寸大于 8x8 像素时保存
+        if (bw > 8 && bh > 8) {
+          customBoxes.push({ x: bx, y: by, width: bw, height: bh });
+          renderCanvas();
+          renderSvgBoxes();
+          updateStatsBadge();
+        }
+      }
+    });
+
+    // 辅助动作
+    btnToggleAll.addEventListener('click', () => {
+      const anyActive = detectedFaces.some(f => f.active);
+      detectedFaces.forEach(f => f.active = !anyActive);
+      renderCanvas();
+      renderSvgBoxes();
+      updateStatsBadge();
+    });
+
+    btnClearCustom.addEventListener('click', () => {
+      customBoxes = [];
+      renderCanvas();
+      renderSvgBoxes();
+      updateStatsBadge();
+    });
+
+    // 复制与下载
+    btnCopy.addEventListener('click', () => {
+      mainCanvas.toBlob(async (blob) => {
+        if (!blob) return;
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          const oldTxt = btnCopy.innerHTML;
+          btnCopy.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;">check</span><span>已复制脱敏图片！</span>`;
+          btnCopy.style.background = '#10b981';
+          setTimeout(() => {
+            btnCopy.innerHTML = oldTxt;
+            btnCopy.style.background = 'linear-gradient(135deg, #ec4899, #8b5cf6)';
+          }, 2000);
+        } catch (e) {
+          alert('剪贴板复制失败，请点击右侧下载按钮保存：' + e.message);
+        }
+      }, 'image/png');
+    });
+
+    btnDownload.addEventListener('click', () => {
+      mainCanvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `privacy_blurred_${Date.now()}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    });
+
+    btnReset.addEventListener('click', () => {
+      fileInput.value = '';
+      rawImage = null;
+      detectedFaces = [];
+      customBoxes = [];
+      workbench.style.display = 'none';
+      dropzone.style.display = 'block';
+    });
+  </script>
+</body>
+</html>
