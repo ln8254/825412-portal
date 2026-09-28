@@ -465,12 +465,12 @@
       let noiseCount = 0;
 
       for (const line of retData.lines) {
-        const txt = (line.text || '').trim();
+        let txt = (line.text || '').trim();
         if (!txt) continue;
 
         const conf = typeof line.confidence === 'number' ? line.confidence : 100;
         
-        // 判定背景噪点乱码（发光颗粒、树皮裂纹、花草纹理误判）
+        // 判定整行背景噪点乱码（发光颗粒、树皮裂纹、花草纹理误判）
         // 1. 置信度低于 50% 的极大概率是图像纹理强行二值化的虚假文字
         // 2. 置信度低于 65% 且去除标点符号后没有任何实质汉字、英文字母或数字
         const meaningfulChars = txt.replace(/[\s\p{P}\p{S}]/gu, '');
@@ -478,8 +478,37 @@
 
         if (isNoise) {
           noiseCount++;
-        } else {
-          cleanLines.push(txt);
+          continue;
+        }
+
+        // 细粒度清洗：如果行尾挂着低置信度的背景杂质符号（例如文本框右侧紧挨着的树枝被误认成 =>）
+        if (line.words && line.words.length > 0) {
+          let words = line.words.slice();
+          let strippedTrailing = false;
+          while (words.length > 0) {
+            const lastWord = words[words.length - 1];
+            const wordMeaningful = (lastWord.text || '').replace(/[\s\p{P}\p{S}]/gu, '');
+            // 如果末尾单词置信度极低（<45%），或者置信度<60%且纯属乱码符号
+            if (lastWord.confidence < 45 || (lastWord.confidence < 60 && wordMeaningful.length === 0)) {
+              words.pop();
+              strippedTrailing = true;
+            } else {
+              break;
+            }
+          }
+          if (strippedTrailing && words.length > 0) {
+            txt = words.map(w => w.text).join(' ');
+          }
+        }
+
+        // 智能清洗汉字与中文标点之间的西文分词空格（如 "从 此 ， 绒 球" -> "从此，绒球"）
+        txt = txt.replace(/(?<=[\u4e00-\u9fa5\p{P}])\s+(?=[\u4e00-\u9fa5\p{P}])/gu, '');
+
+        // 清除句末紧跟的残留杂质符号（如句号后的 "=>"、"~"、"_" 等由背景树枝产生的非文字残留）
+        txt = txt.replace(/([。！？…])[\s=>\-_~^|·•]+$/g, '$1');
+
+        if (txt.trim()) {
+          cleanLines.push(txt.trim());
         }
       }
 
