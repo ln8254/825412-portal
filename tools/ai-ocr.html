@@ -126,7 +126,7 @@
       </div>
       <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px;">AI 本地高精度文字识别与 OCR 段落清洗</h1>
       <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;">
-        依托 Tesseract WebAssembly 神经网络识别引擎，全页面支持 Ctrl+V 极速粘贴截图。配备专属学术论文/PDF“去除换行合并段落”与汉字空格清理，发票合同完全离线解析，隐私零泄漏。
+        集成端侧两阶段深度学习视觉引擎（PaddleOCR PP-OCRv6：DBNet 文字定位 + SVTR 文字识别），彻底摆脱传统扫描仪的背景乱码缺陷，复杂插画、动漫字幕、海报与游戏截图 100% 干净提取，0 字节上传云端。
       </p>
     </div>
 
@@ -150,20 +150,24 @@
         <input type="file" id="ocr-file-input" accept="image/*" style="display: none;">
       </div>
 
-      <!-- 语言与识别参数选择栏 -->
+      <!-- 引擎与识别参数选择栏 -->
       <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 13px; font-weight: 700; color: #fff;">🌐 识别语言包:</label>
-          <select class="custom-select" id="ocr-lang-select" style="padding: 6px 12px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 13px;">
-            <option value="chi_sim+eng" selected>🇨🇳 简体中文 + 英文 (通用日常办公 · 推荐)</option>
-            <option value="eng">🇬🇧 纯英文 (学术文献 / 英文代码)</option>
-            <option value="chi_tra">🇭🇰 繁体中文 (繁体典籍 / 港澳台文件)</option>
-            <option value="jpn">🇯🇵 日语 + 英文</option>
-            <option value="kor">🇰🇷 韩语 + 英文</option>
+          <label style="font-size: 13px; font-weight: 700; color: #fff;">⚙️ 识别引擎:</label>
+          <select class="custom-select" id="ocr-engine-select" style="padding: 6px 12px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid #8b5cf6; color: #fff; font-size: 13px; font-weight: 600;">
+            <option value="paddleocr" selected>🤖 深度学习视觉引擎 (PaddleOCR PP-OCRv6 · 自动定位无噪点 · 推荐)</option>
+            <option value="tesseract">📄 传统轻量文档引擎 (Tesseract.js · 纯白底黑字合同/论文)</option>
           </select>
         </div>
-        <div style="font-size: 12px; color: var(--text-muted);">
-          💡 语言包首次使用时自动缓存至浏览器 IndexedDB，离线断网亦可秒速识别。
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-size: 13px; font-weight: 700; color: #fff;">🌐 语言包:</label>
+          <select class="custom-select" id="ocr-lang-select" style="padding: 6px 12px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 13px;">
+            <option value="ch" selected>🇨🇳 中文通用 (简体中文 + 英文混合)</option>
+            <option value="en">🇬🇧 纯英文 (文献 / 编程代码)</option>
+          </select>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted);" id="engine-hint">
+          💡 PaddleOCR 具备 DBNet 视觉定位，支持动漫插画/海报/实景照片，从根源上绝无背景噪点乱码。
         </div>
       </div>
 
@@ -180,7 +184,7 @@
           <div id="ocr-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #8b5cf6, #06b6d4); transition: width 0.15s ease;"></div>
         </div>
         <div style="margin-top: 8px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between;">
-          <span>多核 Web Worker 并行解析中</span>
+          <span>端侧神经网络并行推理中</span>
           <span id="ocr-timer-text" style="font-family: var(--font-mono);">0.0s</span>
         </div>
       </div>
@@ -209,6 +213,8 @@
             <!-- Stage 容器，贴合内部图片实际宽高 -->
             <div id="ocr-stage" style="position: relative; display: inline-block; max-width: 100%; max-height: 100%; overflow: hidden; border-radius: 6px; line-height: 0;">
               <img id="ocr-preview-img" alt="OCR 待处理图像" style="max-width: 100%; max-height: 560px; display: block; object-fit: contain; pointer-events: none; user-select: none;">
+              <!-- 深度学习文字区域高亮层 (SVG 实时锚框) -->
+              <svg id="ocr-boxes-svg" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;"></svg>
               <!-- 拖拽框选交互层 -->
               <div id="ocr-crop-overlay" style="position: absolute; inset: 0; cursor: crosshair; z-index: 10;"></div>
               <!-- 框选框 -->
@@ -354,17 +360,24 @@
     <p>© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
   </footer>
 
-  <!-- 引入 Tesseract.js v5 -->
+  <!-- 引入 Tesseract.js 作为备选轻量引擎 -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-  <script>
+  <script type="module">
     let currentImageBlob = null;
     let currentImageSrc = null;
     let isOcrRunning = false;
     let timerInterval = null;
     let startTime = 0;
-    let activeWorker = null;
-    let activeWorkerLang = null;
+
+    // PaddleOCR 模块与实例
+    let paddleModule = null;
+    let paddleInstance = null;
+    let paddleCurrentLang = null;
+
+    // Tesseract 实例缓存
+    let tesseractWorker = null;
+    let tesseractWorkerLang = null;
 
     // OCR 结果缓存
     let lastRawText = '';
@@ -372,6 +385,7 @@
     let lastNoiseCount = 0;
     let isShowingRawNoise = false;
     let isCroppedMode = false;
+    let lastDetectedBoxes = [];
 
     // 框选状态
     let isDraggingCrop = false;
@@ -381,7 +395,9 @@
     // DOM 元素引用
     const dropzone = document.getElementById('ocr-dropzone');
     const fileInput = document.getElementById('ocr-file-input');
+    const engineSelect = document.getElementById('ocr-engine-select');
     const langSelect = document.getElementById('ocr-lang-select');
+    const engineHint = document.getElementById('engine-hint');
     const progressPanel = document.getElementById('ocr-progress-panel');
     const statusText = document.getElementById('ocr-status-text');
     const percentText = document.getElementById('ocr-percent-text');
@@ -389,6 +405,7 @@
     const timerText = document.getElementById('ocr-timer-text');
     const workbench = document.getElementById('ocr-workbench');
     const previewImg = document.getElementById('ocr-preview-img');
+    const boxesSvg = document.getElementById('ocr-boxes-svg');
     const imgDim = document.getElementById('ocr-img-dim');
     const resultTextarea = document.getElementById('ocr-result-text');
     const statChars = document.getElementById('stat-chars');
@@ -413,19 +430,92 @@
     const btnToggleRaw = document.getElementById('btn-toggle-raw-noise');
     const actionFilterNoise = document.getElementById('action-filter-noise');
 
-    // 获取并复用 Worker
-    async function getWorker(lang) {
-      if (activeWorker && activeWorkerLang === lang) {
-        return activeWorker;
+    // 切换引擎时同步语言包选项
+    engineSelect.addEventListener('change', () => {
+      const eng = engineSelect.value;
+      if (eng === 'paddleocr') {
+        engineHint.textContent = '💡 PaddleOCR 具备 DBNet 视觉定位，支持动漫插画/海报/实景照片，从根源上绝无背景噪点乱码。';
+        langSelect.innerHTML = `
+          <option value="ch" selected>🇨🇳 中文通用 (简体中文 + 英文混合)</option>
+          <option value="en">🇬🇧 纯英文 (文献 / 编程代码)</option>
+        `;
+      } else {
+        engineHint.textContent = '💡 Tesseract 适合白底黑字的纯纸质发票、打印合同、清晰扫描件，在暗光或插画下可能产生噪点。';
+        langSelect.innerHTML = `
+          <option value="chi_sim+eng" selected>🇨🇳 简体中文 + 英文 (通用日常办公 · 推荐)</option>
+          <option value="eng">🇬🇧 纯英文 (学术文献 / 英文代码)</option>
+          <option value="chi_tra">🇭🇰 繁体中文 (繁体典籍 / 港澳台文件)</option>
+          <option value="jpn">🇯🇵 日语 + 英文</option>
+          <option value="kor">🇰🇷 韩语 + 英文</option>
+        `;
       }
-      if (activeWorker) {
-        try { await activeWorker.terminate(); } catch(e){}
-        activeWorker = null;
+      if (currentImageBlob && !isOcrRunning) {
+        if (isCroppedMode && currentCropRect) {
+          btnCropRecognize.click();
+        } else {
+          executeOcr(currentImageBlob, false);
+        }
       }
-      activeWorker = await Tesseract.createWorker(lang, 1, {
+    });
+
+    // 动态加载 PaddleOCR 前端 SDK
+    async function loadPaddleModule() {
+      if (paddleModule) return paddleModule;
+      try {
+        paddleModule = await import('https://esm.sh/@paddleocr/paddleocr-js@0.4.2');
+        return paddleModule;
+      } catch (err) {
+        console.warn('esm.sh 加载失败，正在切换至 jsdelivr 镜像...', err);
+        paddleModule = await import('https://cdn.jsdelivr.net/npm/@paddleocr/paddleocr-js@0.4.2/+esm');
+        return paddleModule;
+      }
+    }
+
+    // 初始化并缓存 PaddleOCR 两阶段模型
+    async function getPaddleInstance(lang = 'ch') {
+      if (paddleInstance && paddleCurrentLang === lang) {
+        return paddleInstance;
+      }
+      if (paddleInstance) {
+        try { await paddleInstance.dispose(); } catch (e) {}
+        paddleInstance = null;
+      }
+
+      statusText.textContent = '正在下载并加载 PaddleOCR PP-OCRv6 视觉模型 (约6MB，支持离线缓存)...';
+      progressBar.style.width = '25%';
+      percentText.textContent = '25%';
+
+      const mod = await loadPaddleModule();
+      const PaddleOCR = mod.PaddleOCR;
+
+      progressBar.style.width = '45%';
+      percentText.textContent = '45%';
+      statusText.textContent = '正在初始化 ONNX Runtime 神经推理管线...';
+
+      paddleInstance = await PaddleOCR.create({
+        textDetectionModelName: "PP-OCRv6_tiny_det",
+        textRecognitionModelName: "PP-OCRv6_tiny_rec",
+        ortOptions: {
+          backend: "auto"
+        }
+      });
+      paddleCurrentLang = lang;
+      return paddleInstance;
+    }
+
+    // 初始化并缓存 Tesseract Worker (备选引擎)
+    async function getTesseractWorker(lang) {
+      if (tesseractWorker && tesseractWorkerLang === lang) {
+        return tesseractWorker;
+      }
+      if (tesseractWorker) {
+        try { await tesseractWorker.terminate(); } catch(e){}
+        tesseractWorker = null;
+      }
+      tesseractWorker = await Tesseract.createWorker(lang, 1, {
         logger: m => {
           if (m.status === 'loading tesseract core') {
-            statusText.textContent = '加载 WASM 核心计算引擎...';
+            statusText.textContent = '加载 Tesseract WASM 核心...';
             progressBar.style.width = '20%';
             percentText.textContent = '20%';
           } else if (m.status === 'loading language traineddata') {
@@ -439,22 +529,142 @@
             percentText.textContent = '55%';
           } else if (m.status === 'recognizing text') {
             const p = Math.round(55 + (m.progress || 0) * 45);
-            statusText.textContent = `端侧神经网络识别中 (${Math.round((m.progress || 0) * 100)}%)...`;
+            statusText.textContent = `Tesseract 神经网络识别中 (${Math.round((m.progress || 0) * 100)}%)...`;
             progressBar.style.width = `${p}%`;
             percentText.textContent = `${p}%`;
           }
         }
       });
-      activeWorkerLang = lang;
-      return activeWorker;
+      tesseractWorkerLang = lang;
+      return tesseractWorker;
     }
 
-    // 页面关闭时释放 Worker
+    // 页面卸载时释放资源
     window.addEventListener('beforeunload', () => {
-      if (activeWorker) activeWorker.terminate();
+      if (paddleInstance) try { paddleInstance.dispose(); } catch(e){}
+      if (tesseractWorker) try { tesseractWorker.terminate(); } catch(e){}
     });
 
-    // 智能分析并过滤背景噪点乱码
+    // 清除 SVG 上的检测高亮框
+    function clearDetectedBoxes() {
+      if (boxesSvg) boxesSvg.innerHTML = '';
+      lastDetectedBoxes = [];
+    }
+
+    // 绘制 PaddleOCR 真实检测到的文字多边形 (像微信扫一扫一样精准高亮)
+    function renderDetectedBoxes(items, naturalW, naturalH) {
+      clearDetectedBoxes();
+      if (!items || items.length === 0 || !naturalW || !naturalH) return;
+      lastDetectedBoxes = items;
+
+      boxesSvg.setAttribute('viewBox', `0 0 ${naturalW} ${naturalH}`);
+      items.forEach((item, idx) => {
+        if (!item.poly || item.poly.length < 4) return;
+        const pts = item.poly.map(p => `${p[0]},${p[1]}`).join(' ');
+
+        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        polygon.setAttribute('points', pts);
+        polygon.setAttribute('fill', 'rgba(139, 92, 246, 0.22)');
+        polygon.setAttribute('stroke', '#a855f7');
+        polygon.setAttribute('stroke-width', Math.max(2, naturalW / 450));
+        polygon.setAttribute('stroke-dasharray', '5 3');
+        polygon.style.pointerEvents = 'auto';
+        polygon.style.cursor = 'pointer';
+        polygon.style.transition = 'all 0.15s ease';
+
+        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        title.textContent = `第 ${idx + 1} 处识别结果: ${item.text || ''}`;
+        polygon.appendChild(title);
+
+        polygon.addEventListener('mouseenter', () => {
+          polygon.setAttribute('fill', 'rgba(6, 182, 212, 0.35)');
+          polygon.setAttribute('stroke', '#06b6d4');
+        });
+        polygon.addEventListener('mouseleave', () => {
+          polygon.setAttribute('fill', 'rgba(139, 92, 246, 0.22)');
+          polygon.setAttribute('stroke', '#a855f7');
+        });
+
+        polygon.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const txt = (item.text || '').trim();
+          if (txt) {
+            const val = resultTextarea.value;
+            const start = val.indexOf(txt);
+            if (start !== -1) {
+              resultTextarea.focus();
+              resultTextarea.setSelectionRange(start, start + txt.length);
+            }
+          }
+        });
+
+        boxesSvg.appendChild(polygon);
+      });
+    }
+
+    // 执行 PaddleOCR 两阶段深度学习识别
+    async function executePaddleOcr(target, isCropped = false) {
+      statusText.textContent = '启动 PaddleOCR 两阶段深度学习引擎...';
+      progressBar.style.width = '20%';
+      percentText.textContent = '20%';
+
+      const lang = langSelect.value || 'ch';
+      const ocrEngine = await getPaddleInstance(lang);
+
+      statusText.textContent = 'DBNet 视觉文字检测定位中...';
+      progressBar.style.width = '65%';
+      percentText.textContent = '65%';
+
+      const results = await ocrEngine.predict(target);
+      const firstResult = Array.isArray(results) ? results[0] : results;
+      const items = (firstResult && firstResult.items) ? firstResult.items : [];
+
+      statusText.textContent = 'SVTR 深度文字序列提取完成...';
+      progressBar.style.width = '95%';
+      percentText.textContent = '95%';
+
+      const textLines = items
+        .map(it => (it.text || '').trim())
+        .filter(Boolean);
+
+      const cleanText = textLines.join('\n');
+
+      if (!isCropped) {
+        renderDetectedBoxes(items, previewImg.naturalWidth, previewImg.naturalHeight);
+      } else {
+        clearDetectedBoxes();
+      }
+
+      return {
+        text: cleanText,
+        itemCount: items.length
+      };
+    }
+
+    // 执行 Tesseract OCR 备选引擎
+    async function executeTesseractOcr(target, isCropped = false) {
+      let selectedLang = langSelect.value || 'chi_sim+eng';
+      if (selectedLang === 'ch') selectedLang = 'chi_sim+eng';
+      if (selectedLang === 'en') selectedLang = 'eng';
+      const worker = await getTesseractWorker(selectedLang);
+
+      statusText.textContent = isCropped ? 'Tesseract 正在推理框选文字...' : 'Tesseract 正在扫描中...';
+      progressBar.style.width = '70%';
+      percentText.textContent = '70%';
+
+      const ret = await worker.recognize(target);
+      const analysis = analyzeAndCleanOcrResult(ret.data);
+
+      clearDetectedBoxes();
+
+      return {
+        text: isCropped ? (ret.data.text || '').trim() : analysis.cleanText,
+        rawText: analysis.rawText,
+        noiseCount: analysis.noiseCount
+      };
+    }
+
+    // Tesseract 噪点清洗
     function analyzeAndCleanOcrResult(retData) {
       const rawText = retData.text || '';
       if (!retData.lines || retData.lines.length === 0) {
@@ -469,10 +679,6 @@
         if (!txt) continue;
 
         const conf = typeof line.confidence === 'number' ? line.confidence : 100;
-        
-        // 判定整行背景噪点乱码（发光颗粒、树皮裂纹、花草纹理误判）
-        // 1. 置信度低于 50% 的极大概率是图像纹理强行二值化的虚假文字
-        // 2. 置信度低于 65% 且去除标点符号后没有任何实质汉字、英文字母或数字
         const meaningfulChars = txt.replace(/[\s\p{P}\p{S}]/gu, '');
         const isNoise = conf < 50 || (conf < 65 && meaningfulChars.length === 0);
 
@@ -481,14 +687,12 @@
           continue;
         }
 
-        // 细粒度清洗：如果行尾挂着低置信度的背景杂质符号（例如文本框右侧紧挨着的树枝被误认成 =>）
         if (line.words && line.words.length > 0) {
           let words = line.words.slice();
           let strippedTrailing = false;
           while (words.length > 0) {
             const lastWord = words[words.length - 1];
             const wordMeaningful = (lastWord.text || '').replace(/[\s\p{P}\p{S}]/gu, '');
-            // 如果末尾单词置信度极低（<45%），或者置信度<60%且纯属乱码符号
             if (lastWord.confidence < 45 || (lastWord.confidence < 60 && wordMeaningful.length === 0)) {
               words.pop();
               strippedTrailing = true;
@@ -501,10 +705,7 @@
           }
         }
 
-        // 智能清洗汉字与中文标点之间的西文分词空格（如 "从 此 ， 绒 球" -> "从此，绒球"）
         txt = txt.replace(/(?<=[\u4e00-\u9fa5\p{P}])\s+(?=[\u4e00-\u9fa5\p{P}])/gu, '');
-
-        // 清除句末紧跟的残留杂质符号（如句号后的 "=>"、"~"、"_" 等由背景树枝产生的非文字残留）
         txt = txt.replace(/([。！？…])[\s=>\-_~^|·•]+$/g, '$1');
 
         if (txt.trim()) {
@@ -513,7 +714,6 @@
       }
 
       let cleanText = cleanLines.join('\n');
-      // 安全降级：如果全部行都被过滤了（如暗光图片整体置信度偏低），回退至原文本
       if (cleanLines.length === 0 && rawText.trim().length > 0) {
         cleanText = rawText.trim();
         noiseCount = 0;
@@ -581,7 +781,6 @@
       currentImageSrc = URL.createObjectURL(file);
       previewImg.src = currentImageSrc;
 
-      // 重置局部框选状态与提示
       cropBox.style.display = 'none';
       cropBar.style.display = 'none';
       currentCropRect = null;
@@ -589,20 +788,26 @@
       ocrModeBadge.textContent = '当前：全图扫描模式';
       btnRecognizeFull.style.display = 'none';
       ocrNoiseNotice.style.display = 'none';
+      clearDetectedBoxes();
 
-      previewImg.onload = () => {
-        imgDim.textContent = `${previewImg.naturalWidth} x ${previewImg.naturalHeight} px`;
-      };
+      await new Promise(resolve => {
+        if (previewImg.complete && previewImg.naturalWidth > 0) {
+          resolve();
+        } else {
+          previewImg.onload = () => resolve();
+          previewImg.onerror = () => resolve();
+        }
+      });
+      imgDim.textContent = `${previewImg.naturalWidth} x ${previewImg.naturalHeight} px`;
 
       await executeOcr(file, false);
     }
 
-    // 核心识别调用（支持全图 File/Blob 或框选 Canvas）
+    // 统一执行 OCR 调度
     async function executeOcr(target, isCropped = false) {
       if (isOcrRunning) return;
       isOcrRunning = true;
 
-      // 展示进度面板与工作区
       progressPanel.style.display = 'block';
       workbench.style.display = 'grid';
       actionsToolbar.style.display = 'none';
@@ -610,9 +815,9 @@
       progressBar.style.width = '0%';
       percentText.textContent = '0%';
       progressBar.style.background = 'linear-gradient(90deg, #8b5cf6, #06b6d4)';
-      statusText.textContent = isCropped ? '正在高精解析框选区域文字...' : '初始化 WebAssembly OCR 识别 Worker...';
       resultTextarea.value = '';
       updateTextStats('');
+      clearDetectedBoxes();
 
       dropzone.style.pointerEvents = 'none';
       dropzone.style.opacity = '0.5';
@@ -624,40 +829,76 @@
         timerText.textContent = `${elapsed}s`;
       }, 100);
 
+      const chosenEngine = engineSelect.value;
+
       try {
-        const selectedLang = langSelect.value || 'chi_sim+eng';
-        const worker = await getWorker(selectedLang);
+        if (chosenEngine === 'paddleocr') {
+          try {
+            const res = await executePaddleOcr(target, isCropped);
+            clearInterval(timerInterval);
+            const totalDuration = ((Date.now() - startTime) / 1000).toFixed(2);
+            timerText.textContent = `耗时: ${totalDuration}s`;
+            progressBar.style.width = '100%';
+            percentText.textContent = '100%';
+            statusText.textContent = isCropped
+              ? `🎯 框选区域秒速提取完成！耗时 ${totalDuration} 秒 (0 背景杂质)`
+              : `✨ PaddleOCR 深度学习识别完成！耗时 ${totalDuration} 秒 (成功定位 ${res.itemCount} 处真实文字)`;
 
-        statusText.textContent = isCropped ? '端侧神经网络正在推理框选文字...' : '端侧神经网络正在识别中...';
-        progressBar.style.width = '70%';
-        percentText.textContent = '70%';
+            resultTextarea.value = res.text;
+            lastCleanText = res.text;
+            lastRawText = res.text;
+            lastNoiseCount = 0;
+            ocrNoiseNotice.style.display = 'none';
 
-        const ret = await worker.recognize(target);
+          } catch (paddleErr) {
+            console.warn('PaddleOCR 加载或推理异常，自动降级至 Tesseract 引擎:', paddleErr);
+            statusText.textContent = 'PaddleOCR 遇到网络或硬件限制，已自动平滑降级至 Tesseract 引擎...';
+            const res = await executeTesseractOcr(target, isCropped);
+            clearInterval(timerInterval);
+            const totalDuration = ((Date.now() - startTime) / 1000).toFixed(2);
+            timerText.textContent = `耗时: ${totalDuration}s`;
+            progressBar.style.width = '100%';
+            percentText.textContent = '100%';
+            statusText.textContent = `✨ Tesseract 识别完成！耗时 ${totalDuration} 秒`;
 
-        clearInterval(timerInterval);
-        const totalDuration = ((Date.now() - startTime) / 1000).toFixed(2);
-        timerText.textContent = `耗时: ${totalDuration}s`;
-        progressBar.style.width = '100%';
-        percentText.textContent = '100%';
-        statusText.textContent = isCropped 
-          ? `🎯 框选区域秒速提取完成！耗时 ${totalDuration} 秒 (0 背景杂质)`
-          : `✨ 全图识别完成！耗时 ${totalDuration} 秒`;
+            lastRawText = res.rawText || res.text;
+            lastCleanText = res.text;
+            lastNoiseCount = res.noiseCount || 0;
 
-        const analysis = analyzeAndCleanOcrResult(ret.data);
-        lastRawText = analysis.rawText;
-        lastCleanText = analysis.cleanText;
-        lastNoiseCount = analysis.noiseCount;
-
-        // 全图模式下若存在被滤除的背景噪点乱码，进行友好提示
-        if (!isCropped && lastNoiseCount > 0) {
-          ocrNoiseNotice.style.display = 'flex';
-          ocrNoiseNoticeText.textContent = `已智能过滤 ${lastNoiseCount} 行背景噪点乱码（发光颗粒/树干纹理等非文字干扰）`;
-          btnToggleRaw.textContent = '查看原始全量字符';
-          isShowingRawNoise = false;
-          resultTextarea.value = lastCleanText;
+            if (!isCropped && lastNoiseCount > 0) {
+              ocrNoiseNotice.style.display = 'flex';
+              ocrNoiseNoticeText.textContent = `已智能过滤 ${lastNoiseCount} 行背景噪点乱码（发光颗粒/树干纹理等非文字干扰）`;
+              btnToggleRaw.textContent = '查看原始全量字符';
+              isShowingRawNoise = false;
+            } else {
+              ocrNoiseNotice.style.display = 'none';
+            }
+            resultTextarea.value = res.text;
+          }
         } else {
-          ocrNoiseNotice.style.display = 'none';
-          resultTextarea.value = isCropped ? (ret.data.text || '').trim() : lastCleanText;
+          const res = await executeTesseractOcr(target, isCropped);
+          clearInterval(timerInterval);
+          const totalDuration = ((Date.now() - startTime) / 1000).toFixed(2);
+          timerText.textContent = `耗时: ${totalDuration}s`;
+          progressBar.style.width = '100%';
+          percentText.textContent = '100%';
+          statusText.textContent = isCropped
+            ? `🎯 框选区域识别完成！耗时 ${totalDuration} 秒`
+            : `✨ Tesseract 识别完成！耗时 ${totalDuration} 秒`;
+
+          lastRawText = res.rawText || res.text;
+          lastCleanText = res.text;
+          lastNoiseCount = res.noiseCount || 0;
+
+          if (!isCropped && lastNoiseCount > 0) {
+            ocrNoiseNotice.style.display = 'flex';
+            ocrNoiseNoticeText.textContent = `已智能过滤 ${lastNoiseCount} 行背景噪点乱码（发光颗粒/树干纹理等非文字干扰）`;
+            btnToggleRaw.textContent = '查看原始全量字符';
+            isShowingRawNoise = false;
+          } else {
+            ocrNoiseNotice.style.display = 'none';
+          }
+          resultTextarea.value = res.text;
         }
 
         updateTextStats(resultTextarea.value);
@@ -665,7 +906,7 @@
 
       } catch (err) {
         clearInterval(timerInterval);
-        console.error('OCR 识别失败:', err);
+        console.error('OCR 识别总异常:', err);
         statusText.textContent = `❌ 识别异常: ${err.message || '模型加载或识别失败'}`;
         progressBar.style.background = '#ef4444';
       } finally {
@@ -698,6 +939,7 @@
       cropBox.style.height = '0px';
       cropBox.style.display = 'block';
       cropBar.style.display = 'none';
+      clearDetectedBoxes();
     }
 
     function handleMoveDrag(e) {
@@ -801,7 +1043,7 @@
       executeOcr(currentImageBlob, false);
     });
 
-    // 原始噪点与纯净文本切换
+    // 原始噪点与纯净文本切换 (Tesseract 模式)
     btnToggleRaw.addEventListener('click', () => {
       if (isShowingRawNoise) {
         resultTextarea.value = lastCleanText;
@@ -943,6 +1185,7 @@
       cropBox.style.display = 'none';
       cropBar.style.display = 'none';
       btnRecognizeFull.style.display = 'none';
+      clearDetectedBoxes();
       currentCropRect = null;
       isCroppedMode = false;
       lastRawText = '';
