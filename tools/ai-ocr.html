@@ -189,12 +189,50 @@
       <div class="ocr-workbench" id="ocr-workbench" style="display: none;">
         <!-- 左侧：图像预览与缩放观察 -->
         <div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-size: 13px; font-weight: 700; color: var(--text-secondary);">🖼️ 待识别源图</span>
-            <span id="ocr-img-dim" style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">0 x 0</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 13px; font-weight: 700; color: var(--text-secondary);">🖼️ 待识别源图</span>
+              <span style="font-size: 11px; background: rgba(139, 92, 246, 0.15); color: #c084fc; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3);">
+                🖱️ 支持鼠标拖拽局部框选
+              </span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button id="btn-recognize-full" class="quick-action-pill" style="display: none; padding: 3px 8px; font-size: 11px;" title="重新扫描整张图片">
+                <span class="material-symbols-outlined" style="font-size: 14px;">fullscreen</span>
+                <span>全图扫描</span>
+              </button>
+              <span id="ocr-img-dim" style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">0 x 0</span>
+            </div>
           </div>
-          <div class="ocr-preview-box" id="ocr-preview-box">
-            <img id="ocr-preview-img" alt="OCR 待处理图像">
+
+          <div class="ocr-preview-box" id="ocr-preview-box" style="position: relative; user-select: none;">
+            <!-- Stage 容器，贴合内部图片实际宽高 -->
+            <div id="ocr-stage" style="position: relative; display: inline-block; max-width: 100%; max-height: 100%; overflow: hidden; border-radius: 6px; line-height: 0;">
+              <img id="ocr-preview-img" alt="OCR 待处理图像" style="max-width: 100%; max-height: 560px; display: block; object-fit: contain; pointer-events: none; user-select: none;">
+              <!-- 拖拽框选交互层 -->
+              <div id="ocr-crop-overlay" style="position: absolute; inset: 0; cursor: crosshair; z-index: 10;"></div>
+              <!-- 框选框 -->
+              <div id="ocr-crop-box" style="position: absolute; display: none; border: 2px dashed #a855f7; background: rgba(168, 85, 247, 0.15); box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55); pointer-events: none; z-index: 15;">
+                <div id="ocr-crop-size-tag" style="position: absolute; top: -24px; left: 0; background: rgba(15, 23, 42, 0.9); color: #c084fc; font-size: 10px; padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(168, 85, 247, 0.3); font-family: var(--font-mono); white-space: nowrap; line-height: 1.4;">0 × 0 px</div>
+              </div>
+            </div>
+
+            <!-- 浮动操作条 (选定后弹出) -->
+            <div id="ocr-crop-bar" style="display: none; position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 30; background: rgba(15, 23, 42, 0.95); border: 1px solid #8b5cf6; box-shadow: 0 8px 30px rgba(0,0,0,0.8); border-radius: 30px; padding: 6px 14px; align-items: center; gap: 8px; backdrop-filter: blur(12px); white-space: nowrap;">
+              <span style="font-size: 12px; color: #cbd5e1; font-weight: 600;">已划定局部区域</span>
+              <button id="btn-crop-recognize" class="btn btn-primary" type="button" style="padding: 5px 14px; font-size: 12px; background: linear-gradient(135deg, #8b5cf6, #06b6d4); border-radius: 20px; font-weight: 700; cursor: pointer;">
+                <span class="material-symbols-outlined" style="font-size: 15px;">crop</span>
+                <span>🎯 仅识别框选区域</span>
+              </button>
+              <button id="btn-crop-cancel" class="btn" type="button" style="padding: 5px 10px; font-size: 12px; background: rgba(255,255,255,0.1); color: #94a3b8; border-radius: 20px; cursor: pointer;">
+                <span>取消</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <span>💡 提示：在图片上直接按住鼠标左键拖拽拉框，即可秒速提取字幕/对话框/局部文本</span>
+            <span id="ocr-mode-badge" style="color: #38bdf8; font-weight: 600;">当前：全图扫描模式</span>
           </div>
         </div>
 
@@ -207,6 +245,18 @@
               <span>行数: <strong id="stat-lines" style="color: #fff;">0</strong></span>
             </div>
           </div>
+
+          <!-- 噪点智能过滤提示栏 -->
+          <div id="ocr-noise-notice" style="display: none; margin-bottom: 8px; padding: 7px 12px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: var(--radius-sm); font-size: 12px; color: #fbbf24; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">auto_fix_high</span>
+              <span id="ocr-noise-notice-text">已智能过滤背景噪点乱码（发光颗粒/树干纹理等非文字干扰）</span>
+            </div>
+            <button id="btn-toggle-raw-noise" type="button" style="background: transparent; border: none; color: #38bdf8; cursor: pointer; text-decoration: underline; font-size: 12px; font-weight: 600; padding: 0;">
+              查看原始全量字符
+            </button>
+          </div>
+
           <textarea class="ocr-editor-textarea" id="ocr-result-text" placeholder="识别完成后，文字将显示在此处，可直接编辑微调..."></textarea>
         </div>
       </div>
@@ -216,6 +266,10 @@
         <div style="margin-bottom: 12px;">
           <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-right: 8px;">⚡ 极客快捷文本清洗 (点击即生效):</span>
           <div style="display: inline-flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+            <button class="quick-action-pill" id="action-filter-noise" title="过滤掉低于50%置信度的背景纹理或非文字乱码">
+              <span class="material-symbols-outlined" style="font-size: 15px; color: #f59e0b;">filter_alt</span>
+              <span id="label-filter-noise">过滤背景噪点乱码</span>
+            </button>
             <button class="quick-action-pill" id="action-merge-lines" title="解决从 PDF 或论文复制文字时每行强制断行导致的破碎阅读体验">
               <span class="material-symbols-outlined" style="font-size: 15px; color: #10b981;">magic_button</span>
               <span>合并断行 / 段落重构 (论文/PDF 必备)</span>
@@ -309,6 +363,20 @@
     let isOcrRunning = false;
     let timerInterval = null;
     let startTime = 0;
+    let activeWorker = null;
+    let activeWorkerLang = null;
+
+    // OCR 结果缓存
+    let lastRawText = '';
+    let lastCleanText = '';
+    let lastNoiseCount = 0;
+    let isShowingRawNoise = false;
+    let isCroppedMode = false;
+
+    // 框选状态
+    let isDraggingCrop = false;
+    let cropStartX = 0, cropStartY = 0;
+    let currentCropRect = null; // { x, y, width, height } in overlay space
 
     // DOM 元素引用
     const dropzone = document.getElementById('ocr-dropzone');
@@ -331,7 +399,101 @@
     const dlMdBtn = document.getElementById('download-md-btn');
     const resetBtn = document.getElementById('ocr-reset-btn');
 
-    // 拖拽与点击触发
+    // 选区与降噪 DOM 引用
+    const cropOverlay = document.getElementById('ocr-crop-overlay');
+    const cropBox = document.getElementById('ocr-crop-box');
+    const cropSizeTag = document.getElementById('ocr-crop-size-tag');
+    const cropBar = document.getElementById('ocr-crop-bar');
+    const btnCropRecognize = document.getElementById('btn-crop-recognize');
+    const btnCropCancel = document.getElementById('btn-crop-cancel');
+    const btnRecognizeFull = document.getElementById('btn-recognize-full');
+    const ocrModeBadge = document.getElementById('ocr-mode-badge');
+    const ocrNoiseNotice = document.getElementById('ocr-noise-notice');
+    const ocrNoiseNoticeText = document.getElementById('ocr-noise-notice-text');
+    const btnToggleRaw = document.getElementById('btn-toggle-raw-noise');
+    const actionFilterNoise = document.getElementById('action-filter-noise');
+
+    // 获取并复用 Worker
+    async function getWorker(lang) {
+      if (activeWorker && activeWorkerLang === lang) {
+        return activeWorker;
+      }
+      if (activeWorker) {
+        try { await activeWorker.terminate(); } catch(e){}
+        activeWorker = null;
+      }
+      activeWorker = await Tesseract.createWorker(lang, 1, {
+        logger: m => {
+          if (m.status === 'loading tesseract core') {
+            statusText.textContent = '加载 WASM 核心计算引擎...';
+            progressBar.style.width = '20%';
+            percentText.textContent = '20%';
+          } else if (m.status === 'loading language traineddata') {
+            const p = Math.round(20 + (m.progress || 0) * 30);
+            statusText.textContent = `下载/读取语言字典模型 (${Math.round((m.progress || 0) * 100)}%)...`;
+            progressBar.style.width = `${p}%`;
+            percentText.textContent = `${p}%`;
+          } else if (m.status === 'initializing api') {
+            statusText.textContent = '初始化神经推理管线...';
+            progressBar.style.width = '55%';
+            percentText.textContent = '55%';
+          } else if (m.status === 'recognizing text') {
+            const p = Math.round(55 + (m.progress || 0) * 45);
+            statusText.textContent = `端侧神经网络识别中 (${Math.round((m.progress || 0) * 100)}%)...`;
+            progressBar.style.width = `${p}%`;
+            percentText.textContent = `${p}%`;
+          }
+        }
+      });
+      activeWorkerLang = lang;
+      return activeWorker;
+    }
+
+    // 页面关闭时释放 Worker
+    window.addEventListener('beforeunload', () => {
+      if (activeWorker) activeWorker.terminate();
+    });
+
+    // 智能分析并过滤背景噪点乱码
+    function analyzeAndCleanOcrResult(retData) {
+      const rawText = retData.text || '';
+      if (!retData.lines || retData.lines.length === 0) {
+        return { cleanText: rawText.trim(), rawText, noiseCount: 0 };
+      }
+
+      const cleanLines = [];
+      let noiseCount = 0;
+
+      for (const line of retData.lines) {
+        const txt = (line.text || '').trim();
+        if (!txt) continue;
+
+        const conf = typeof line.confidence === 'number' ? line.confidence : 100;
+        
+        // 判定背景噪点乱码（发光颗粒、树皮裂纹、花草纹理误判）
+        // 1. 置信度低于 50% 的极大概率是图像纹理强行二值化的虚假文字
+        // 2. 置信度低于 65% 且去除标点符号后没有任何实质汉字、英文字母或数字
+        const meaningfulChars = txt.replace(/[\s\p{P}\p{S}]/gu, '');
+        const isNoise = conf < 50 || (conf < 65 && meaningfulChars.length === 0);
+
+        if (isNoise) {
+          noiseCount++;
+        } else {
+          cleanLines.push(txt);
+        }
+      }
+
+      let cleanText = cleanLines.join('\n');
+      // 安全降级：如果全部行都被过滤了（如暗光图片整体置信度偏低），回退至原文本
+      if (cleanLines.length === 0 && rawText.trim().length > 0) {
+        cleanText = rawText.trim();
+        noiseCount = 0;
+      }
+
+      return { cleanText, rawText, noiseCount };
+    }
+
+    // 拖拽与点击上传
     dropzone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files[0]) handleSelectedFile(e.target.files[0]);
@@ -372,25 +534,59 @@
       }
     });
 
-    // 选中图像并执行 OCR
+    // 语言切换监听
+    langSelect.addEventListener('change', () => {
+      if (currentImageBlob && !isOcrRunning) {
+        if (isCroppedMode && currentCropRect) {
+          btnCropRecognize.click();
+        } else {
+          executeOcr(currentImageBlob, false);
+        }
+      }
+    });
+
+    // 处理新图片输入
     async function handleSelectedFile(file) {
       if (isOcrRunning) return;
       currentImageBlob = file;
       currentImageSrc = URL.createObjectURL(file);
       previewImg.src = currentImageSrc;
+
+      // 重置局部框选状态与提示
+      cropBox.style.display = 'none';
+      cropBar.style.display = 'none';
+      currentCropRect = null;
+      isCroppedMode = false;
+      ocrModeBadge.textContent = '当前：全图扫描模式';
+      btnRecognizeFull.style.display = 'none';
+      ocrNoiseNotice.style.display = 'none';
+
       previewImg.onload = () => {
         imgDim.textContent = `${previewImg.naturalWidth} x ${previewImg.naturalHeight} px`;
       };
+
+      await executeOcr(file, false);
+    }
+
+    // 核心识别调用（支持全图 File/Blob 或框选 Canvas）
+    async function executeOcr(target, isCropped = false) {
+      if (isOcrRunning) return;
+      isOcrRunning = true;
 
       // 展示进度面板与工作区
       progressPanel.style.display = 'block';
       workbench.style.display = 'grid';
       actionsToolbar.style.display = 'none';
+      ocrNoiseNotice.style.display = 'none';
       progressBar.style.width = '0%';
       percentText.textContent = '0%';
-      statusText.textContent = '初始化 WebAssembly OCR 识别 Worker...';
+      progressBar.style.background = 'linear-gradient(90deg, #8b5cf6, #06b6d4)';
+      statusText.textContent = isCropped ? '正在高精解析框选区域文字...' : '初始化 WebAssembly OCR 识别 Worker...';
       resultTextarea.value = '';
       updateTextStats('');
+
+      dropzone.style.pointerEvents = 'none';
+      dropzone.style.opacity = '0.5';
 
       startTime = Date.now();
       clearInterval(timerInterval);
@@ -399,51 +595,44 @@
         timerText.textContent = `${elapsed}s`;
       }, 100);
 
-      isOcrRunning = true;
-      dropzone.style.pointerEvents = 'none';
-      dropzone.style.opacity = '0.5';
-
       try {
         const selectedLang = langSelect.value || 'chi_sim+eng';
-        
-        const worker = await Tesseract.createWorker(selectedLang, 1, {
-          logger: m => {
-            if (m.status === 'loading tesseract core') {
-              statusText.textContent = '加载 WASM 核心计算引擎...';
-              progressBar.style.width = '20%';
-              percentText.textContent = '20%';
-            } else if (m.status === 'loading language traineddata') {
-              const p = Math.round(20 + (m.progress || 0) * 30);
-              statusText.textContent = `下载/读取语言字典模型 (${Math.round((m.progress || 0) * 100)}%)...`;
-              progressBar.style.width = `${p}%`;
-              percentText.textContent = `${p}%`;
-            } else if (m.status === 'initializing api') {
-              statusText.textContent = '初始化神经推理管线...';
-              progressBar.style.width = '55%';
-              percentText.textContent = '55%';
-            } else if (m.status === 'recognizing text') {
-              const p = Math.round(55 + (m.progress || 0) * 45);
-              statusText.textContent = `端侧神经网络识别中 (${Math.round((m.progress || 0) * 100)}%)...`;
-              progressBar.style.width = `${p}%`;
-              percentText.textContent = `${p}%`;
-            }
-          }
-        });
+        const worker = await getWorker(selectedLang);
 
-        const ret = await worker.recognize(file);
-        await worker.terminate();
+        statusText.textContent = isCropped ? '端侧神经网络正在推理框选文字...' : '端侧神经网络正在识别中...';
+        progressBar.style.width = '70%';
+        percentText.textContent = '70%';
+
+        const ret = await worker.recognize(target);
 
         clearInterval(timerInterval);
         const totalDuration = ((Date.now() - startTime) / 1000).toFixed(2);
         timerText.textContent = `耗时: ${totalDuration}s`;
         progressBar.style.width = '100%';
         percentText.textContent = '100%';
-        statusText.textContent = `✨ 识别完成！耗时 ${totalDuration} 秒`;
+        statusText.textContent = isCropped 
+          ? `🎯 框选区域秒速提取完成！耗时 ${totalDuration} 秒 (0 背景杂质)`
+          : `✨ 全图识别完成！耗时 ${totalDuration} 秒`;
 
-        resultTextarea.value = ret.data.text || '';
-        updateTextStats(ret.data.text || '');
+        const analysis = analyzeAndCleanOcrResult(ret.data);
+        lastRawText = analysis.rawText;
+        lastCleanText = analysis.cleanText;
+        lastNoiseCount = analysis.noiseCount;
+
+        // 全图模式下若存在被滤除的背景噪点乱码，进行友好提示
+        if (!isCropped && lastNoiseCount > 0) {
+          ocrNoiseNotice.style.display = 'flex';
+          ocrNoiseNoticeText.textContent = `已智能过滤 ${lastNoiseCount} 行背景噪点乱码（发光颗粒/树干纹理等非文字干扰）`;
+          btnToggleRaw.textContent = '查看原始全量字符';
+          isShowingRawNoise = false;
+          resultTextarea.value = lastCleanText;
+        } else {
+          ocrNoiseNotice.style.display = 'none';
+          resultTextarea.value = isCropped ? (ret.data.text || '').trim() : lastCleanText;
+        }
+
+        updateTextStats(resultTextarea.value);
         actionsToolbar.style.display = 'block';
-        workbench.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
       } catch (err) {
         clearInterval(timerInterval);
@@ -457,6 +646,158 @@
       }
     }
 
+    // 鼠标/触控拖拽框选逻辑
+    function getOverlayCoords(e) {
+      const rect = cropOverlay.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+      const y = Math.max(0, Math.min(clientY - rect.top, rect.height));
+      return { x, y, rect };
+    }
+
+    function handleStartDrag(e) {
+      if (isOcrRunning || !previewImg.src || !previewImg.naturalWidth) return;
+      isDraggingCrop = true;
+      const { x, y } = getOverlayCoords(e);
+      cropStartX = x;
+      cropStartY = y;
+      currentCropRect = { x, y, width: 0, height: 0 };
+      cropBox.style.left = `${x}px`;
+      cropBox.style.top = `${y}px`;
+      cropBox.style.width = '0px';
+      cropBox.style.height = '0px';
+      cropBox.style.display = 'block';
+      cropBar.style.display = 'none';
+    }
+
+    function handleMoveDrag(e) {
+      if (!isDraggingCrop) return;
+      if (e.cancelable) e.preventDefault();
+      const { x, y, rect } = getOverlayCoords(e);
+      const left = Math.min(cropStartX, x);
+      const top = Math.min(cropStartY, y);
+      const width = Math.abs(x - cropStartX);
+      const height = Math.abs(y - cropStartY);
+
+      currentCropRect = { x: left, y: top, width, height };
+
+      cropBox.style.left = `${left}px`;
+      cropBox.style.top = `${top}px`;
+      cropBox.style.width = `${width}px`;
+      cropBox.style.height = `${height}px`;
+
+      if (previewImg.naturalWidth && rect.width) {
+        const scaleX = previewImg.naturalWidth / rect.width;
+        const scaleY = previewImg.naturalHeight / rect.height;
+        const realW = Math.round(width * scaleX);
+        const realH = Math.round(height * scaleY);
+        cropSizeTag.textContent = `${realW} × ${realH} px`;
+
+        if (top < 28) {
+          cropSizeTag.style.top = 'auto';
+          cropSizeTag.style.bottom = '-24px';
+        } else {
+          cropSizeTag.style.top = '-24px';
+          cropSizeTag.style.bottom = 'auto';
+        }
+      }
+    }
+
+    function handleEndDrag(e) {
+      if (!isDraggingCrop) return;
+      isDraggingCrop = false;
+      if (!currentCropRect || currentCropRect.width < 15 || currentCropRect.height < 15) {
+        cropBox.style.display = 'none';
+        cropBar.style.display = 'none';
+        currentCropRect = null;
+        return;
+      }
+      cropBar.style.display = 'flex';
+    }
+
+    cropOverlay.addEventListener('mousedown', handleStartDrag);
+    window.addEventListener('mousemove', handleMoveDrag);
+    window.addEventListener('mouseup', handleEndDrag);
+
+    cropOverlay.addEventListener('touchstart', handleStartDrag, { passive: false });
+    window.addEventListener('touchmove', handleMoveDrag, { passive: false });
+    window.addEventListener('touchend', handleEndDrag);
+
+    // 取消框选
+    btnCropCancel.addEventListener('click', () => {
+      cropBox.style.display = 'none';
+      cropBar.style.display = 'none';
+      currentCropRect = null;
+    });
+
+    // 执行框选区域识别
+    btnCropRecognize.addEventListener('click', () => {
+      if (!currentCropRect || isOcrRunning) return;
+      const rect = cropOverlay.getBoundingClientRect();
+      const scaleX = previewImg.naturalWidth / rect.width;
+      const scaleY = previewImg.naturalHeight / rect.height;
+
+      const cropX = Math.max(0, Math.round(currentCropRect.x * scaleX));
+      const cropY = Math.max(0, Math.round(currentCropRect.y * scaleY));
+      const cropW = Math.min(previewImg.naturalWidth - cropX, Math.round(currentCropRect.width * scaleX));
+      const cropH = Math.min(previewImg.naturalHeight - cropY, Math.round(currentCropRect.height * scaleY));
+
+      if (cropW < 5 || cropH < 5) return;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = cropW;
+      canvas.height = cropH;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(previewImg, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+      cropBar.style.display = 'none';
+      isCroppedMode = true;
+      ocrModeBadge.textContent = `当前：框选局部模式 (${cropW}×${cropH} px)`;
+      btnRecognizeFull.style.display = 'inline-flex';
+
+      executeOcr(canvas, true);
+    });
+
+    // 重新全图扫描
+    btnRecognizeFull.addEventListener('click', () => {
+      if (!currentImageBlob || isOcrRunning) return;
+      cropBox.style.display = 'none';
+      cropBar.style.display = 'none';
+      currentCropRect = null;
+      isCroppedMode = false;
+      ocrModeBadge.textContent = '当前：全图扫描模式';
+      btnRecognizeFull.style.display = 'none';
+
+      executeOcr(currentImageBlob, false);
+    });
+
+    // 原始噪点与纯净文本切换
+    btnToggleRaw.addEventListener('click', () => {
+      if (isShowingRawNoise) {
+        resultTextarea.value = lastCleanText;
+        btnToggleRaw.textContent = '查看原始全量字符';
+        isShowingRawNoise = false;
+      } else {
+        resultTextarea.value = lastRawText;
+        btnToggleRaw.textContent = '还原过滤噪点';
+        isShowingRawNoise = true;
+      }
+      updateTextStats(resultTextarea.value);
+    });
+
+    // 快捷清洗：过滤背景噪点
+    actionFilterNoise.addEventListener('click', () => {
+      if (lastCleanText) {
+        resultTextarea.value = lastCleanText;
+        isShowingRawNoise = false;
+        if (lastNoiseCount > 0) {
+          btnToggleRaw.textContent = '查看原始全量字符';
+        }
+        updateTextStats(lastCleanText);
+      }
+    });
+
     // 统计字符数与行数
     function updateTextStats(text) {
       statChars.textContent = text.length;
@@ -467,16 +808,13 @@
       updateTextStats(resultTextarea.value);
     });
 
-    // 快捷文本处理功能 1: 合并换行 / 重构段落 (专为论文与 PDF 打造)
+    // 快捷清洗：合并断行 / 重构段落 (专为论文与 PDF 打造)
     document.getElementById('action-merge-lines').addEventListener('click', () => {
       let text = resultTextarea.value;
       if (!text) return;
-      // 保持空行为段落分隔符，合并同段内部多余换行
       const paragraphs = text.split(/\n\s*\n/);
       const merged = paragraphs.map(p => {
-        // 如果是中文字符结尾与开头，直接相连；如果是英文字符，补充一个空格
         return p.replace(/([^\n])\n([^\n])/g, (match, p1, p2) => {
-          // 判断是否涉及汉字
           const isP1CJK = /[\u4e00-\u9fa5]/.test(p1);
           const isP2CJK = /[\u4e00-\u9fa5]/.test(p2);
           if (isP1CJK || isP2CJK) {
@@ -489,11 +827,10 @@
       updateTextStats(merged);
     });
 
-    // 快捷文本处理功能 2: 清理汉字之间多余空格
+    // 快捷清洗：清理汉字之间多余空格
     document.getElementById('action-clean-cjk-spaces').addEventListener('click', () => {
       let text = resultTextarea.value;
       if (!text) return;
-      // 移除汉字与汉字之间的空格: [\u4e00-\u9fa5]\s+[\u4e00-\u9fa5]
       const cleaned = text.replace(/([\u4e00-\u9fa5])\s+([\u4e00-\u9fa5])/g, '$1$2')
                           .replace(/([\u4e00-\u9fa5])\s+([，。！？；：、“”‘’（）《》])/g, '$1$2')
                           .replace(/([，。！？；：、“”‘’（）《》])\s+([\u4e00-\u9fa5])/g, '$1$2');
@@ -573,6 +910,15 @@
       workbench.style.display = 'none';
       progressPanel.style.display = 'none';
       actionsToolbar.style.display = 'none';
+      ocrNoiseNotice.style.display = 'none';
+      cropBox.style.display = 'none';
+      cropBar.style.display = 'none';
+      btnRecognizeFull.style.display = 'none';
+      currentCropRect = null;
+      isCroppedMode = false;
+      lastRawText = '';
+      lastCleanText = '';
+      lastNoiseCount = 0;
       resultTextarea.value = '';
     });
   </script>
