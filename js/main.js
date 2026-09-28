@@ -737,8 +737,10 @@ const CommandPalette = {
   selectedIndex: 0,
   items: [
     { title: '控制台概览 (Dashboard Overview)', icon: 'dashboard', badge: 'Tab 1', action: () => triggerTabSwitch('dashboard-view') },
-    { title: '极客隔空快传 (WebRTC P2P AirDrop)', icon: 'near_me', badge: 'Tab 2', action: () => triggerTabSwitch('airdrop-view') },
-    { title: '极客开发者工具箱 (Geek Toolbox)', icon: 'construction', badge: 'Tab 3', action: () => triggerTabSwitch('toolbox-view') },
+    { title: 'AI 智能离线一键抠图换底 (AI Background Remover)', icon: 'photo_auto_merge', badge: 'AI Tool', action: () => { window.location.href = '/tools/ai-matting'; } },
+    { title: 'AI 本地高精度文字提取与段落清洗 (Local OCR)', icon: 'document_scanner', badge: 'AI Tool', action: () => { window.location.href = '/tools/ai-ocr'; } },
+    { title: '极客开发者工具箱 (Geek Toolbox)', icon: 'construction', badge: 'Tab 2', action: () => triggerTabSwitch('toolbox-view') },
+    { title: '极客隔空快传 (WebRTC P2P AirDrop)', icon: 'near_me', badge: 'Tab 3', action: () => triggerTabSwitch('airdrop-view') },
     { title: '匿名云剪贴板 (Anonymous Pastebin)', icon: 'content_paste', badge: 'Tab 4', action: () => triggerTabSwitch('clipboard-view') },
     { title: 'Webhook 调试桩 (Webhook Inspector)', icon: 'terminal', badge: 'Tab 5', action: () => triggerTabSwitch('webhook-view') },
     { title: 'AI 智能助手 (Gemini Chat)', icon: 'smart_toy', badge: 'Tab 6', action: () => triggerTabSwitch('ai-view') },
