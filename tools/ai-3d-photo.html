@@ -588,17 +588,26 @@
           const centerDist = (dx * dx + dy * dy) / maxRadiusSq;
           const centerWeight = Math.exp(-centerDist * 1.8);
 
-          // 暖色与高光提升 (萌宠/人像肤色与发光水晶球)
+          // 四周边框与字幕对白框保护 (防止相框被扯歪、防止对话框反向重影)
+          const isBorder = (x < aw * 0.025 || x > aw * 0.975 || y < ah * 0.025 || y > ah * 0.975);
+          const isNeutralWhite = (lum > 205) && (Math.abs(r - g) < 20) && (Math.abs(g - b) < 20);
+          const isSubtitleBox = isNeutralWhite && (y > ah * 0.65 || x < aw * 0.45);
+
+          // 暖色与高光提升 (真主体：萌宠金毛/肤色以及中心发光水晶球)
           const warmth = Math.max(0, (r - b) / 255);
-          const isHighlight = (lum > 220) ? 0.35 : 0.0;
+          const isRealHighlight = (lum > 220) && (centerWeight > 0.3) && !isSubtitleBox && !isBorder;
+          const highlightBoost = isRealHighlight ? 0.35 : 0.0;
 
           // 垂直地平线透视基线
           const vertBaseline = Math.pow(y / ah, 1.15) * 0.45;
 
           let rawDepth = 0.2;
-          if (mode === 'saliency') {
+          if (isBorder || isSubtitleBox) {
+            // 对白字幕框与相框设为平整基准深度，确保文字清晰、边框笔直，绝不产生重影漏光
+            rawDepth = 0.45;
+          } else if (mode === 'saliency') {
             // 智能主体优先模式：主体极大凸显，背景树林深邃凹陷
-            rawDepth = (centerWeight * 0.42) + (colDist * 0.25) + (grad * 0.22) + (warmth * 0.2) + isHighlight + (vertBaseline * 0.2);
+            rawDepth = (centerWeight * 0.42) + (colDist * 0.25) + (grad * 0.22) + (warmth * 0.25) + highlightBoost + (vertBaseline * 0.18);
             // 边缘与暗部天空抑制
             if (y < ah * 0.35 && lum < 80) rawDepth *= 0.3;
           } else {
@@ -713,7 +722,7 @@
           }
         `;
 
-        // 片元着色器：10 步光线行进视差遮蔽映射，彻底杜绝单次采样造成的果冻拉扯与重影
+        // 片元着色器：双向防漏光视差置换与外相框保护机制 (彻底杜绝文字框倒灌重影与边框撕裂)
         const fsSource = `
           precision mediump float;
           uniform sampler2D u_image;
@@ -723,31 +732,31 @@
           varying vec2 v_texCoord;
 
           void main() {
-            const int numSteps = 10;
-            float stepSize = 1.0 / float(numSteps);
-            vec2 deltaOffset = u_offset / float(numSteps);
+            // 1. 四周相框边缘保护：边缘 2% 区域平滑将位移衰减到零，确保外框稳如泰山
+            float borderGuard = smoothstep(0.0, 0.025, v_texCoord.x) * smoothstep(1.0, 0.975, v_texCoord.x) *
+                                smoothstep(0.0, 0.025, v_texCoord.y) * smoothstep(1.0, 0.975, v_texCoord.y);
 
-            vec2 currCoord = v_texCoord;
-            float currLayerDepth = 0.0;
-            float sampledDepth = texture2D(u_depth, currCoord).r;
+            float currentDepth = texture2D(u_depth, v_texCoord).r;
+            float depthDelta = currentDepth - u_focus;
 
-            // 线性搜索视线与景深交点
-            for (int i = 0; i < numSteps; i++) {
-              if (currLayerDepth >= (sampledDepth - u_focus)) {
-                break;
-              }
-              currCoord += deltaOffset;
-              sampledDepth = texture2D(u_depth, currCoord).r;
-              currLayerDepth += stepSize * 0.45;
+            // 基础视差置换向量
+            vec2 disp = depthDelta * u_offset * borderGuard;
+            vec2 sampleCoord = clamp(v_texCoord + disp, 0.0, 1.0);
+
+            // 2. 核心防漏光重影机制 (Anti-Silhouette Bleed)
+            // 如果当前像素是深色背景，但采样目标点跨入了高亮前景 (targetDepth >> currentDepth)，
+            // 说明发生了反向穿透 (把前景文字或小猫内容错误采样到了背景上)，立即平滑回退，杜绝重影！
+            float targetDepth = texture2D(u_depth, sampleCoord).r;
+            if (depthDelta < 0.0 && targetDepth > (currentDepth + 0.10)) {
+              float bleed = smoothstep(0.10, 0.25, targetDepth - currentDepth);
+              sampleCoord = mix(sampleCoord, v_texCoord, bleed);
             }
 
-            currCoord = clamp(currCoord, 0.0, 1.0);
-            vec4 color = texture2D(u_image, currCoord);
+            vec4 color = texture2D(u_image, sampleCoord);
 
-            // 动态高光菲涅尔漫射 (随鼠标光照流动，让主体发光更加逼真)
-            float depthDiff = (sampledDepth - u_focus);
-            float sheen = clamp(dot(u_offset * 12.0, vec2(0.707, 0.707)), -0.15, 0.15) * depthDiff;
-            color.rgb += sheen * 0.22;
+            // 3. 动态高光菲涅尔漫射 (随鼠标光照流动，让主体发光更加逼真)
+            float sheen = clamp(dot(u_offset * 12.0, vec2(0.707, 0.707)), -0.12, 0.12) * max(0.0, depthDelta);
+            color.rgb += sheen * 0.18;
 
             gl_FragColor = color;
           }
@@ -880,14 +889,23 @@
       const avgDepth = sampleCount > 0 ? (totalDepth / sampleCount) : 128;
       const fgThreshold = Math.max(90, Math.min(160, avgDepth));
 
-      // 生成前景羽化透明通道
-      for (let i = 0; i < fgData.length; i += 4) {
-        const d = depthData[i];
-        if (d <= fgThreshold) {
-          fgData[i + 3] = 0; // 远景透明
-        } else {
-          const alphaRatio = Math.min(1, (d - fgThreshold) / 36);
-          fgData[i + 3] = Math.round(fgData[i + 3] * alphaRatio);
+      // 生成前景羽化透明通道 (排除四周 3% 边缘相框以及文字对白框，确保文字与画框只保留在稳定的背景底座上)
+      for (let y = 0; y < h; y++) {
+        const yOff = y * w;
+        const isBorderY = (y < h * 0.03 || y > h * 0.97);
+        for (let x = 0; x < w; x++) {
+          const idx = (yOff + x) * 4;
+          const isBorderX = (x < w * 0.03 || x > w * 0.97);
+          // 检测文字对白框 (大面积纯浅色区域)
+          const isSubtitleArea = (y > h * 0.65 || x < w * 0.45) && (fgData[idx] > 205 && fgData[idx+1] > 205 && fgData[idx+2] > 205);
+
+          const d = depthData[idx];
+          if (isBorderX || isBorderY || isSubtitleArea || d <= fgThreshold) {
+            fgData[idx + 3] = 0; // 边框、文字框与远景完全透明
+          } else {
+            const alphaRatio = Math.min(1, (d - fgThreshold) / 36);
+            fgData[idx + 3] = Math.round(fgData[idx + 3] * alphaRatio);
+          }
         }
       }
       fgCtx.putImageData(fgImgData, 0, 0);
@@ -957,20 +975,20 @@
             gl.uniform2f(uOffsetLoc, currentOffsetX * strength, -currentOffsetY * strength);
             gl.drawArrays(gl.TRIANGLES, 0, 6);
           } else if (renderEngine === 'canvas2d' && fgCanvas && bgCanvas) {
-            // Canvas 2D 前后景双层差速视差
+            // Canvas 2D 前后景双层差速视差 (背景近乎固定锚定，杜绝重影)
             const ctx = fallbackCanvas.getContext('2d');
             const w = fallbackCanvas.width;
             const h = fallbackCanvas.height;
             ctx.clearRect(0, 0, w, h);
 
             const strength = parseFloat(depthStrength.value);
-            const bgShiftX = -currentOffsetX * (strength * 0.4);
-            const bgShiftY = -currentOffsetY * (strength * 0.4);
-            const fgShiftX = currentOffsetX * (strength * 0.85);
-            const fgShiftY = currentOffsetY * (strength * 0.85);
+            const bgShiftX = -currentOffsetX * (strength * 0.05);
+            const bgShiftY = -currentOffsetY * (strength * 0.05);
+            const fgShiftX = currentOffsetX * (strength * 0.42);
+            const fgShiftY = currentOffsetY * (strength * 0.42);
 
-            const marginX = w * 0.05;
-            const marginY = h * 0.05;
+            const marginX = w * 0.03;
+            const marginY = h * 0.03;
             ctx.drawImage(bgCanvas, -marginX + bgShiftX, -marginY + bgShiftY, w + marginX * 2, h + marginY * 2);
             ctx.drawImage(fgCanvas, fgShiftX, fgShiftY, w, h);
           }
