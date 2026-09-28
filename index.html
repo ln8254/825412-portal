@@ -374,10 +374,52 @@
         </div>
       </div>
       
-      <!-- 快捷入口卡片组 (7大极客工具一键直达) -->
+      <!-- 端侧离线 AI 专属高光入口 -->
+      <div class="glass-card" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(139, 92, 246, 0.08)); border: 1px solid rgba(236, 72, 153, 0.25);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #ec4899, #8b5cf6); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; flex-shrink: 0; box-shadow: 0 0 16px rgba(236, 72, 153, 0.4);">
+              <span class="material-symbols-outlined">auto_awesome</span>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h3 style="font-size: 16px; font-weight: 800; color: #fff; margin: 0;">全新上线：端侧离线 AI 极客工坊 (Client-side AI Studio)</h3>
+                <span style="font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px; background: #ec4899; color: #fff;">100% 隐私零上云</span>
+              </div>
+              <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; margin-bottom: 0;">
+                基于 WebAssembly 与 ONNX 深度学习模型，完全由浏览器在本地硬件执行。零服务器依赖，永久免费不限次。
+              </p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/tools/ai-matting" class="btn btn-primary" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); padding: 7px 16px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 14px;">photo_auto_merge</span>
+              <span>进入 AI 抠图</span>
+            </a>
+            <a href="/tools/ai-ocr" class="btn btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #06b6d4); padding: 7px 16px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 14px;">document_scanner</span>
+              <span>进入 AI 离线 OCR</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快捷入口卡片组 (11大极客工具一键直达) -->
       <div class="glass-card">
         <h3 style="margin-bottom: 20px; font-weight: 700; color: var(--color-secondary);" data-i18n="dash_toolbox_title">快捷工具箱</h3>
-                <div class="dashboard-features">
+        <div class="dashboard-features">
+          <a href="/tools/ai-matting" class="feature-shortcut" style="text-decoration: none; color: inherit; border: 1px solid rgba(236, 72, 153, 0.3); background: rgba(236, 72, 153, 0.05);">
+            <div class="shortcut-icon" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;">
+              <span class="material-symbols-outlined">photo_auto_merge</span>
+            </div>
+            <h4 style="color: #f472b6;">⚡ AI 离线抠图</h4>
+          </a>
+          <a href="/tools/ai-ocr" class="feature-shortcut" style="text-decoration: none; color: inherit; border: 1px solid rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.05);">
+            <div class="shortcut-icon" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">
+              <span class="material-symbols-outlined">document_scanner</span>
+            </div>
+            <h4 style="color: #a78bfa;">⚡ AI 本地 OCR</h4>
+          </a>
           <a href="/tools/password-generator" class="feature-shortcut" style="text-decoration: none; color: inherit;">
             <div class="shortcut-icon" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">
               <span class="material-symbols-outlined">lock</span>

@@ -177,16 +177,67 @@
 
     <!-- 分类筛选导航条 -->
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;">
-      <button class="filter-btn active" data-filter="all">🌟 全部工具 (<span id="count-all">10</span>)</button>
+      <button class="filter-btn active" data-filter="all">🌟 全部工具 (<span id="count-all">12</span>)</button>
+      <button class="filter-btn" data-filter="ai" style="border-color: rgba(236, 72, 153, 0.5); color: #f472b6;">🤖 端侧离线 AI (2)</button>
       <button class="filter-btn" data-filter="security">🔐 安全与密码 (3)</button>
       <button class="filter-btn" data-filter="dev">🔤 格式与开发 (3)</button>
       <button class="filter-btn" data-filter="media">🖼️ 多媒体图像 (2)</button>
       <button class="filter-btn" data-filter="hardware">🖥️ 硬件与外设 (2)</button>
     </div>
 
-    <!-- 10 大独立工具网格矩阵 -->
+    <!-- 12 大独立工具网格矩阵 -->
     <div class="hub-grid" id="hub-tool-grid">
-      
+
+      <!-- AI 1. AI 智能一键抠图 -->
+      <a href="/tools/ai-matting" class="hub-card" data-category="ai" style="--accent-color: #ec4899; border: 1px solid rgba(236, 72, 153, 0.3);">
+        <div>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;">
+              <span class="material-symbols-outlined">photo_auto_merge</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #f472b6; background: rgba(236, 72, 153, 0.15); font-weight: 800;">⚡ 端侧 AI</span>
+                <span class="hub-tag">ONNX / WASM</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">AI 智能离线抠图与换底</h2>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            基于本地神经网络模型进行发丝级人像与商品边缘分离。支持 Squoosh 级左右无级划线比对、一键换证件蓝/红/白底，支持直接复制透明 PNG。
+          </p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #f472b6;">
+          <span>进入 AI 独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+        </div>
+      </a>
+
+      <!-- AI 2. AI 本地 OCR -->
+      <a href="/tools/ai-ocr" class="hub-card" data-category="ai" style="--accent-color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3);">
+        <div>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">
+              <span class="material-symbols-outlined">document_scanner</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #a78bfa; background: rgba(139, 92, 246, 0.15); font-weight: 800;">⚡ 端侧 AI</span>
+                <span class="hub-tag">Tesseract.js</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">AI 本地离线 OCR 与清洗</h2>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            支持全页面 Ctrl+V 极速粘贴截图识字，多核并行计算。内嵌学术论文/PDF“去除换行合并段落”与汉字空格清理算法，合同发票 0 泄露。
+          </p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #a78bfa;">
+          <span>进入 AI 独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+        </div>
+      </a>
+
       <!-- 1. 密码生成器 -->
       <a href="/tools/password-generator" class="hub-card" data-category="security" style="--accent-color: #8b5cf6;">
         <div>
