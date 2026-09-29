@@ -54,7 +54,8 @@ body {
   color: var(--text-primary);
   font-family: var(--font-sans);
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   
   /* Cyberpunk 风格的霓虹氛围背景 */
@@ -141,6 +142,9 @@ input, button, textarea, select {
   z-index: 100;
   background-color: rgba(11, 19, 38, 0.4);
   backdrop-filter: blur(20px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 }
 
 .logo-container {

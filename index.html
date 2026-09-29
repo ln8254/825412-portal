@@ -160,7 +160,20 @@
         </a>
       </li>
       <!-- 端侧 AI 极客工坊专属导航条目 -->
-      <li style="margin: 4px 0 2px 0;">
+      <li style="margin: 8px 0 4px 0; padding: 0 16px;">
+        <span style="font-size: 11px; font-weight: 800; color: #a78bfa; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.05em;">
+          <span class="material-symbols-outlined" style="font-size: 14px; color: #ec4899;">auto_awesome</span>
+          <span>端侧离线 AI (6)</span>
+        </span>
+      </li>
+      <li style="margin: 2px 0;">
+        <a href="/tools/pdf-to-markdown" style="display: flex; align-items: center; gap: 12px; width: 100%; color: #38bdf8; text-decoration: none; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; transition: background 0.15s; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.4); box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);">
+          <span class="material-symbols-outlined" style="font-size: 18px; color: #38bdf8;">article</span>
+          <span>AI PDF 转 Markdown</span>
+          <span style="font-size: 9px; padding: 1px 6px; border-radius: 8px; background: #ec4899; color: #fff; margin-left: auto; font-weight: 800;">NEW</span>
+        </a>
+      </li>
+      <li style="margin: 2px 0;">
         <a href="/tools/ai-matting" style="display: flex; align-items: center; gap: 12px; width: 100%; color: #f472b6; text-decoration: none; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; transition: background 0.15s; background: rgba(236, 72, 153, 0.08); border: 1px solid rgba(236, 72, 153, 0.25);">
           <span class="material-symbols-outlined" style="font-size: 18px; color: #ec4899;">photo_auto_merge</span>
           <span>AI 智能抠图换底</span>
@@ -188,18 +201,11 @@
           <span style="font-size: 9px; padding: 1px 6px; border-radius: 8px; background: linear-gradient(135deg, #ec4899, #8b5cf6); color: #fff; margin-left: auto; font-weight: 800;">AI</span>
         </a>
       </li>
-      <li style="margin: 2px 0;">
+      <li style="margin: 2px 0 6px 0;">
         <a href="/tools/ai-3d-photo" style="display: flex; align-items: center; gap: 12px; width: 100%; color: #c084fc; text-decoration: none; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; transition: background 0.15s; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.25);">
           <span class="material-symbols-outlined" style="font-size: 18px; color: #8b5cf6;">3d_rotation</span>
           <span>AI 2D转3D视差壁纸</span>
           <span style="font-size: 9px; padding: 1px 6px; border-radius: 8px; background: linear-gradient(135deg, #8b5cf6, #ec4899); color: #fff; margin-left: auto; font-weight: 800;">AI</span>
-        </a>
-      </li>
-      <li style="margin: 2px 0 6px 0;">
-        <a href="/tools/pdf-to-markdown" style="display: flex; align-items: center; gap: 12px; width: 100%; color: #38bdf8; text-decoration: none; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; transition: background 0.15s; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25);">
-          <span class="material-symbols-outlined" style="font-size: 18px; color: #38bdf8;">article</span>
-          <span>AI PDF 转 Markdown</span>
-          <span style="font-size: 9px; padding: 1px 6px; border-radius: 8px; background: linear-gradient(135deg, #0284c7, #8b5cf6); color: #fff; margin-left: auto; font-weight: 800;">WASM</span>
         </a>
       </li>
       <li class="nav-item" data-target="airdrop-view">
@@ -279,6 +285,11 @@
             </div>
           </div>
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/tools/pdf-to-markdown" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #8b5cf6); padding: 7px 14px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 0 14px rgba(2, 132, 199, 0.6); border: 1px solid #38bdf8;">
+              <span class="material-symbols-outlined" style="font-size: 15px;">article</span>
+              <span>PDF转Markdown</span>
+              <span style="font-size: 9px; padding: 1px 5px; border-radius: 8px; background: #ec4899; color: #fff; font-weight: 800;">NEW</span>
+            </a>
             <a href="/tools/ai-matting" class="btn btn-primary" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); padding: 7px 14px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
               <span class="material-symbols-outlined" style="font-size: 15px;">photo_auto_merge</span>
               <span>抠图换底</span>
@@ -298,10 +309,6 @@
             <a href="/tools/ai-3d-photo" class="btn btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #ec4899); padding: 7px 14px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
               <span class="material-symbols-outlined" style="font-size: 15px;">3d_rotation</span>
               <span>3D 视差壁纸</span>
-            </a>
-            <a href="/tools/pdf-to-markdown" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #8b5cf6); padding: 7px 14px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
-              <span class="material-symbols-outlined" style="font-size: 15px;">article</span>
-              <span>PDF转MD</span>
             </a>
           </div>
         </div>
@@ -467,6 +474,12 @@
       <div class="glass-card">
         <h3 style="margin-bottom: 20px; font-weight: 700; color: var(--color-secondary);" data-i18n="dash_toolbox_title">快捷工具箱</h3>
         <div class="dashboard-features">
+          <a href="/tools/pdf-to-markdown" class="feature-shortcut" style="text-decoration: none; color: inherit; border: 1px solid rgba(56, 189, 248, 0.45); background: rgba(56, 189, 248, 0.08); box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);">
+            <div class="shortcut-icon" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">
+              <span class="material-symbols-outlined">article</span>
+            </div>
+            <h4 style="color: #38bdf8; display: flex; align-items: center; justify-content: center; gap: 4px;">⚡ AI PDF 转 MD <span style="font-size: 9px; padding: 1px 5px; border-radius: 6px; background: #ec4899; color: #fff; font-weight: 800;">NEW</span></h4>
+          </a>
           <a href="/tools/ai-matting" class="feature-shortcut" style="text-decoration: none; color: inherit; border: 1px solid rgba(236, 72, 153, 0.3); background: rgba(236, 72, 153, 0.05);">
             <div class="shortcut-icon" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;">
               <span class="material-symbols-outlined">photo_auto_merge</span>
@@ -496,12 +509,6 @@
               <span class="material-symbols-outlined">3d_rotation</span>
             </div>
             <h4 style="color: #c084fc;">⚡ AI 3D 视差壁纸</h4>
-          </a>
-          <a href="/tools/pdf-to-markdown" class="feature-shortcut" style="text-decoration: none; color: inherit; border: 1px solid rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05);">
-            <div class="shortcut-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
-              <span class="material-symbols-outlined">article</span>
-            </div>
-            <h4 style="color: #38bdf8;">⚡ AI PDF 转 MD</h4>
           </a>
           <a href="/tools/password-generator" class="feature-shortcut" style="text-decoration: none; color: inherit;">
             <div class="shortcut-icon" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">
