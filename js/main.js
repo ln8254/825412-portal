@@ -742,6 +742,7 @@ const CommandPalette = {
     { title: 'AI 动漫与照片 4x 无损超清放大 (AI Super Resolution)', icon: 'photo_size_select_large', badge: 'AI Tool', action: () => { window.location.href = '/tools/ai-upscale'; } },
     { title: 'AI 照片人脸智能打码与隐私脱敏 (Face Blur & Privacy)', icon: 'visibility_off', badge: 'AI Tool', action: () => { window.location.href = '/tools/ai-face-blur'; } },
     { title: 'AI 2D 照片转 3D 裸眼视差壁纸 (3D Photo Parallax)', icon: '3d_rotation', badge: 'AI Tool', action: () => { window.location.href = '/tools/ai-3d-photo'; } },
+    { title: 'AI PDF 智能解析与 Markdown 导出 (PDF to Markdown WASM)', icon: 'article', badge: 'AI Tool', action: () => { window.location.href = '/tools/pdf-to-markdown'; } },
     { title: '极客开发者工具箱 (Geek Toolbox)', icon: 'construction', badge: 'Tab 2', action: () => triggerTabSwitch('toolbox-view') },
     { title: '极客隔空快传 (WebRTC P2P AirDrop)', icon: 'near_me', badge: 'Tab 3', action: () => triggerTabSwitch('airdrop-view') },
     { title: '匿名云剪贴板 (Anonymous Pastebin)', icon: 'content_paste', badge: 'Tab 4', action: () => triggerTabSwitch('clipboard-view') },

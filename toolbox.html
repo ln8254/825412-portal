@@ -177,8 +177,8 @@
 
     <!-- 分类筛选导航条 -->
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;">
-      <button class="filter-btn active" data-filter="all">🌟 全部工具 (<span id="count-all">15</span>)</button>
-      <button class="filter-btn" data-filter="ai" style="border-color: rgba(236, 72, 153, 0.5); color: #f472b6;">🤖 端侧离线 AI (5)</button>
+      <button class="filter-btn active" data-filter="all">🌟 全部工具 (<span id="count-all">16</span>)</button>
+      <button class="filter-btn" data-filter="ai" style="border-color: rgba(236, 72, 153, 0.5); color: #f472b6;">🤖 端侧离线 AI (6)</button>
       <button class="filter-btn" data-filter="security">🔐 安全与密码 (3)</button>
       <button class="filter-btn" data-filter="dev">🔤 格式与开发 (3)</button>
       <button class="filter-btn" data-filter="media">🖼️ 多媒体图像 (2)</button>
@@ -308,6 +308,31 @@
           </p>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #a78bfa;">
+          <span>进入 AI 独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+        </div>
+      </a>
+
+      <!-- AI 6. AI PDF 转 Markdown -->
+      <a href="/tools/pdf-to-markdown" class="hub-card" data-category="ai" style="--accent-color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">
+        <div>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+              <span class="material-symbols-outlined">article</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #38bdf8; background: rgba(56, 189, 248, 0.15); font-weight: 800;">⚡ 端侧 AI</span>
+                <span class="hub-tag">Rust / WASM</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">AI PDF 智能解析与 Markdown 导出</h2>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            基于 Firecrawl pdf-inspector-wasm 纯浏览器端解析，智能还原表格排版与多栏阅读顺序。秒级检测文档类型，支持实时富文本预览与一键导出 .md。
+          </p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #38bdf8;">
           <span>进入 AI 独立工作台</span>
           <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>

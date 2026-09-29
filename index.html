@@ -188,11 +188,18 @@
           <span style="font-size: 9px; padding: 1px 6px; border-radius: 8px; background: linear-gradient(135deg, #ec4899, #8b5cf6); color: #fff; margin-left: auto; font-weight: 800;">AI</span>
         </a>
       </li>
-      <li style="margin: 2px 0 6px 0;">
+      <li style="margin: 2px 0;">
         <a href="/tools/ai-3d-photo" style="display: flex; align-items: center; gap: 12px; width: 100%; color: #c084fc; text-decoration: none; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; transition: background 0.15s; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.25);">
           <span class="material-symbols-outlined" style="font-size: 18px; color: #8b5cf6;">3d_rotation</span>
           <span>AI 2D转3D视差壁纸</span>
           <span style="font-size: 9px; padding: 1px 6px; border-radius: 8px; background: linear-gradient(135deg, #8b5cf6, #ec4899); color: #fff; margin-left: auto; font-weight: 800;">AI</span>
+        </a>
+      </li>
+      <li style="margin: 2px 0 6px 0;">
+        <a href="/tools/pdf-to-markdown" style="display: flex; align-items: center; gap: 12px; width: 100%; color: #38bdf8; text-decoration: none; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; transition: background 0.15s; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25);">
+          <span class="material-symbols-outlined" style="font-size: 18px; color: #38bdf8;">article</span>
+          <span>AI PDF 转 Markdown</span>
+          <span style="font-size: 9px; padding: 1px 6px; border-radius: 8px; background: linear-gradient(135deg, #0284c7, #8b5cf6); color: #fff; margin-left: auto; font-weight: 800;">WASM</span>
         </a>
       </li>
       <li class="nav-item" data-target="airdrop-view">
@@ -291,6 +298,10 @@
             <a href="/tools/ai-3d-photo" class="btn btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #ec4899); padding: 7px 14px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
               <span class="material-symbols-outlined" style="font-size: 15px;">3d_rotation</span>
               <span>3D 视差壁纸</span>
+            </a>
+            <a href="/tools/pdf-to-markdown" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #8b5cf6); padding: 7px 14px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+              <span class="material-symbols-outlined" style="font-size: 15px;">article</span>
+              <span>PDF转MD</span>
             </a>
           </div>
         </div>
@@ -486,6 +497,12 @@
             </div>
             <h4 style="color: #c084fc;">⚡ AI 3D 视差壁纸</h4>
           </a>
+          <a href="/tools/pdf-to-markdown" class="feature-shortcut" style="text-decoration: none; color: inherit; border: 1px solid rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05);">
+            <div class="shortcut-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+              <span class="material-symbols-outlined">article</span>
+            </div>
+            <h4 style="color: #38bdf8;">⚡ AI PDF 转 MD</h4>
+          </a>
           <a href="/tools/password-generator" class="feature-shortcut" style="text-decoration: none; color: inherit;">
             <div class="shortcut-icon" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">
               <span class="material-symbols-outlined">lock</span>
@@ -671,6 +688,7 @@
               <a href="/tools/ai-upscale" style="color: var(--text-secondary); text-decoration: none;">AI 动漫与照片 4x 超清放大</a>
               <a href="/tools/ai-face-blur" style="color: var(--text-secondary); text-decoration: none;">AI 照片人脸打码与隐私脱敏</a>
               <a href="/tools/ai-3d-photo" style="color: var(--text-secondary); text-decoration: none;">AI 2D 照片转 3D 视差壁纸</a>
+              <a href="/tools/pdf-to-markdown" style="color: var(--text-secondary); text-decoration: none;">AI PDF 智能解析与 Markdown 导出</a>
             </div>
           </div>
           <div>
@@ -799,8 +817,8 @@
 
     <!-- 分类筛选导航条 -->
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;">
-      <button class="filter-btn active" data-filter="all">🌟 全部工具 (<span id="count-all">15</span>)</button>
-      <button class="filter-btn" data-filter="ai" style="border-color: rgba(236, 72, 153, 0.5); color: #f472b6;">🤖 端侧离线 AI (5)</button>
+      <button class="filter-btn active" data-filter="all">🌟 全部工具 (<span id="count-all">16</span>)</button>
+      <button class="filter-btn" data-filter="ai" style="border-color: rgba(236, 72, 153, 0.5); color: #f472b6;">🤖 端侧离线 AI (6)</button>
       <button class="filter-btn" data-filter="security">🔐 安全与密码 (3)</button>
       <button class="filter-btn" data-filter="dev">🔤 格式与开发 (3)</button>
       <button class="filter-btn" data-filter="media">🖼️ 多媒体图像 (2)</button>
@@ -930,6 +948,31 @@
           </p>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #a78bfa;">
+          <span>进入 AI 独立工作台</span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+        </div>
+      </a>
+
+      <!-- AI 6. AI PDF 转 Markdown -->
+      <a href="/tools/pdf-to-markdown" class="hub-card" data-category="ai" style="--accent-color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">
+        <div>
+          <div class="hub-card-header">
+            <div class="hub-card-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+              <span class="material-symbols-outlined">article</span>
+            </div>
+            <div>
+              <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+                <span class="hub-tag" style="color: #38bdf8; background: rgba(56, 189, 248, 0.15); font-weight: 800;">⚡ 端侧 AI</span>
+                <span class="hub-tag">Rust / WASM</span>
+              </div>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">AI PDF 智能解析与 Markdown 导出</h2>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            基于 Firecrawl pdf-inspector-wasm 纯浏览器端解析，智能还原表格排版与多栏阅读顺序。秒级检测文档类型，支持实时富文本预览与一键导出 .md。
+          </p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #38bdf8;">
           <span>进入 AI 独立工作台</span>
           <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>

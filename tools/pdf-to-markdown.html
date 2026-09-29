@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI PDF 智能解析与 Markdown 导出工坊 - 极客端侧离线 AI 工坊 | 825412.xyz</title>
+  <meta name="description" content="基于纯浏览器端侧 WebAssembly 技术（@firecrawl/pdf-inspector-wasm），100% 本地运算，0 字节数据上传云端。毫秒级快速检测 PDF 类型（原生纯文本/扫描件/混合图文），智能提取多栏排版与复杂表格并转换为干净的 Markdown，支持一键复制与 .md 文件导出。">
+  <meta name="keywords" content="PDF转Markdown, PDF提取, 本地PDF解析, pdf-inspector, 端侧AI, WebAssembly, 纯前端PDF解析, 825412.xyz">
+  <link rel="canonical" href="https://825412.xyz/tools/pdf-to-markdown">
+  <link rel="stylesheet" href="../style.css?v=2.7.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5943907597157682" crossorigin="anonymous"></script>
+
+  <!-- 轻量 Markdown 渲染库 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    .pdf-workbench-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      min-height: 540px;
+      max-height: 72vh;
+    }
+    @media (max-width: 900px) {
+      .pdf-workbench-grid {
+        grid-template-columns: 1fr;
+        max-height: none;
+      }
+    }
+    .panel-container {
+      background: #090d16;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      position: relative;
+    }
+    #source-textarea {
+      width: 100%;
+      height: 100%;
+      min-height: 420px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e2e8f0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.65;
+      resize: none;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    /* Markdown 预览样式增强 */
+    .markdown-render {
+      color: #cbd5e1;
+      font-size: 14px;
+      line-height: 1.7;
+      word-break: break-word;
+    }
+    .markdown-render h1,
+    .markdown-render h2,
+    .markdown-render h3,
+    .markdown-render h4 {
+      color: #f8fafc;
+      font-weight: 700;
+      margin-top: 1.4em;
+      margin-bottom: 0.6em;
+      line-height: 1.3;
+    }
+    .markdown-render h1 {
+      font-size: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+      color: #a855f7;
+    }
+    .markdown-render h2 {
+      font-size: 17px;
+      color: #38bdf8;
+    }
+    .markdown-render h3 {
+      font-size: 15px;
+      color: #34d399;
+    }
+    .markdown-render p {
+      margin-bottom: 1em;
+    }
+    .markdown-render table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    .markdown-render th,
+    .markdown-render td {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    .markdown-render th {
+      background: rgba(168, 85, 247, 0.15);
+      color: #f1f5f9;
+      font-weight: 700;
+    }
+    .markdown-render tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .markdown-render pre {
+      background: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      margin: 14px 0;
+    }
+    .markdown-render code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #ec4899;
+      background: rgba(236, 72, 153, 0.1);
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    .markdown-render pre code {
+      color: #e2e8f0;
+      background: transparent;
+      padding: 0;
+    }
+    .markdown-render blockquote {
+      border-left: 3px solid #8b5cf6;
+      margin: 14px 0;
+      padding: 4px 14px;
+      color: #94a3b8;
+      background: rgba(139, 92, 246, 0.05);
+      border-radius: 0 4px 4px 0;
+    }
+    .markdown-render ul,
+    .markdown-render ol {
+      padding-left: 20px;
+      margin-bottom: 1em;
+    }
+    .markdown-render li {
+      margin-bottom: 4px;
+    }
+    .diag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+    .diag-badge-text {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+    .diag-badge-scanned {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+    .diag-badge-mixed {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+    .diag-badge-image {
+      background: rgba(236, 72, 153, 0.15);
+      color: #f472b6;
+      border-color: rgba(236, 72, 153, 0.3);
+    }
+    .view-pill {
+      padding: 5px 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--surface-high);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+    .view-pill:hover {
+      color: #fff;
+      border-color: #8b5cf6;
+    }
+    .view-pill.active {
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+    }
+  </style>
+</head>
+<body style="background: var(--bg-color); color: var(--text-primary); font-family: var(--font-sans); margin: 0; padding: 0;">
+
+  <!-- 顶部面包屑导航 -->
+  <header style="padding: 16px 24px; border-bottom: 1px solid var(--border-light); background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 4px;">
+          <span class="material-symbols-outlined" style="font-size: 18px;">home</span>
+          <span>控制台</span>
+        </a>
+        <span style="color: var(--text-muted);">/</span>
+        <a href="/toolbox" style="color: var(--text-muted); text-decoration: none; font-size: 13px;">极客工具箱</a>
+        <span style="color: var(--text-muted);">/</span>
+        <span style="color: #a855f7; font-size: 13px; font-weight: 600;">AI PDF 转 Markdown</span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span id="engine-badge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); font-weight: 700;">
+          ⚡ Rust WebAssembly 本地解析
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体工作区 -->
+  <main style="max-width: 1200px; margin: 0 auto; padding: 24px 16px 80px;">
+    
+    <!-- 标题与介绍 -->
+    <div style="margin-bottom: 24px;">
+      <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #c084fc; margin-bottom: 10px; font-weight: 700;">
+        <span class="material-symbols-outlined" style="font-size: 16px;">document_scanner</span>
+        <span>端侧离线 AI 工坊 · Firecrawl pdf-inspector-wasm 原生驱动</span>
+      </div>
+      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px;">
+        AI PDF 智能解析与 Markdown 导出工坊
+      </h1>
+      <p style="font-size: 14px; color: var(--text-secondary); margin: 0; line-height: 1.6;">
+        专为大模型（LLM）RAG 知识库、学术论文、财务报表与商业合同设计！基于纯浏览器 WebAssembly 引擎在本地毫秒级提取 PDF 原生结构，自动还原复杂表格、双栏阅读流与层级标题。100% 内存本地运行，0 字节上云，商业机密绝不外泄。
+      </p>
+    </div>
+
+    <!-- 工作台卡片 -->
+    <div class="glass-card" style="margin-bottom: 30px;">
+      
+      <!-- 拖拽上传区域 -->
+      <div id="dropzone" style="border: 2px dashed rgba(168, 85, 247, 0.4); border-radius: var(--radius-md); padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: rgba(168, 85, 247, 0.02); margin-bottom: 20px;">
+        <div style="width: 58px; height: 58px; border-radius: 50%; background: rgba(168, 85, 247, 0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #c084fc;">
+          <span class="material-symbols-outlined" style="font-size: 32px;">upload_file</span>
+        </div>
+        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+          拖拽 PDF 文件至此 / 点击选择本地文档
+        </div>
+        <div style="font-size: 13px; color: #c084fc; font-weight: 600; margin-bottom: 6px;">
+          ⚡ 毫秒级提取：支持各类商业财报、合同公文、学术论文、技术白皮书
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted);">
+          100% 浏览器客户端 WebAssembly 本地解析 | 绝对离线 零泄露风险 | 免费无限制
+        </div>
+        <input type="file" id="file-input" accept=".pdf,application/pdf" style="display: none;">
+      </div>
+
+      <!-- 运算进度条面板 -->
+      <div id="progress-panel" style="display: none; margin-bottom: 20px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: var(--radius-md); padding: 18px 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #c084fc;">
+            <span class="material-symbols-outlined" style="font-size: 18px; animation: spin 1.5s linear infinite;">hourglass_top</span>
+            <span id="status-text">正在启动 WebAssembly 解析引擎...</span>
+          </div>
+          <span id="percent-text" style="font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: #fff;">0%</span>
+        </div>
+        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
+          <div id="progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #a855f7, #38bdf8); transition: width 0.15s ease;"></div>
+        </div>
+      </div>
+
+      <!-- 交互工作区 (解析完成后展示) -->
+      <div id="workbench" style="display: none;">
+        
+        <!-- 文档特征诊断条 -->
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; background: rgba(255, 255, 255, 0.02); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+            <span id="diag-type-badge" class="diag-badge diag-badge-text">
+              <span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span>
+              <span id="diag-type-text">TextBased 原生文本</span>
+            </span>
+            <span style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 16px; color: #38bdf8;">pages</span>
+              <span id="diag-pages">12 页</span>
+            </span>
+            <span style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 16px; color: #34d399;">speed</span>
+              <span id="diag-time">45 ms</span>
+            </span>
+            <span id="diag-table-tag" style="display: none; font-size: 12px; color: #c084fc; background: rgba(168, 85, 247, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(168, 85, 247, 0.3);">
+              📊 包含结构化表格
+            </span>
+            <span id="diag-column-tag" style="display: none; font-size: 12px; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.3);">
+              📰 多栏排版顺序还原
+            </span>
+          </div>
+
+          <!-- 排版模式切换 -->
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <label style="font-size: 12px; color: var(--text-muted);">排版模式:</label>
+            <select id="profile-select" style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-light); color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 6px; outline: none; cursor: pointer;">
+              <option value="fidelity" selected>源版面高保真 (Fidelity)</option>
+              <option value="compact">精简 Token 模式 (大模型友好)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 扫描件 / OCR 建议横幅 (仅当发现有扫描页时触发) -->
+        <div id="ocr-alert-banner" style="display: none; margin-bottom: 16px; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); padding: 12px 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #fbbf24;">
+              <span class="material-symbols-outlined" style="font-size: 18px;">warning</span>
+              <span id="ocr-alert-text">检测到部分页面属于扫描图片，建议联动端侧 OCR 识别！</span>
+            </div>
+            <a href="/tools/ai-ocr" target="_blank" class="btn" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 12px; padding: 4px 12px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font-weight: 700;">
+              <span>前往 AI 离线 OCR 工坊</span>
+              <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 视图切换与动作栏 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+          <div style="display: flex; gap: 6px;">
+            <button type="button" class="view-pill active" data-view="split">
+              <span class="material-symbols-outlined" style="font-size: 15px;">vertical_split</span>
+              <span>双栏并排 (Split)</span>
+            </button>
+            <button type="button" class="view-pill" data-view="source">
+              <span class="material-symbols-outlined" style="font-size: 15px;">code</span>
+              <span>Markdown 源码</span>
+            </button>
+            <button type="button" class="view-pill" data-view="preview">
+              <span class="material-symbols-outlined" style="font-size: 15px;">visibility</span>
+              <span>富文本排版预览</span>
+            </button>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-primary" id="btn-copy-md" style="background: linear-gradient(135deg, #a855f7, #3b82f6); padding: 7px 18px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+              <span id="copy-btn-text">复制 Markdown</span>
+            </button>
+            <button class="btn btn-primary" id="btn-download-md" style="background: linear-gradient(135deg, #3b82f6, #06b6d4); padding: 7px 18px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
+              <span>下载 .md 文件</span>
+            </button>
+            <button class="btn" id="btn-reset" style="background: transparent; border: 1px solid var(--border-light); padding: 7px 14px; font-size: 12px; color: var(--text-muted);">
+              重置
+            </button>
+          </div>
+        </div>
+
+        <!-- 双屏工作台容器 -->
+        <div class="pdf-workbench-grid" id="workbench-grid">
+          
+          <!-- 左侧：源码编辑器 -->
+          <div class="panel-container" id="panel-source">
+            <div class="panel-header">
+              <span style="color: #c084fc; display: flex; align-items: center; gap: 6px;">
+                <span class="material-symbols-outlined" style="font-size: 16px;">terminal</span>
+                <span>Markdown 源码</span>
+              </span>
+              <span id="source-stats" style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">
+                0 字 | 0 字符
+              </span>
+            </div>
+            <div class="panel-body">
+              <textarea id="source-textarea" spellcheck="false" placeholder="解析结果将呈现在此..."></textarea>
+            </div>
+          </div>
+
+          <!-- 右侧：富文本渲染视图 -->
+          <div class="panel-container" id="panel-preview">
+            <div class="panel-header">
+              <span style="color: #38bdf8; display: flex; align-items: center; gap: 6px;">
+                <span class="material-symbols-outlined" style="font-size: 16px;">auto_stories</span>
+                <span>所见即所得富文本渲染</span>
+              </span>
+              <span style="font-size: 11px; color: var(--text-muted);">
+                支持 GFM 表格与排版
+              </span>
+            </div>
+            <div class="panel-body">
+              <div id="preview-container" class="markdown-render"></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- 为什么选择端侧离线 PDF 解析 -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 40px;">
+      <div class="glass-card">
+        <h3 style="font-size: 16px; font-weight: 700; color: #c084fc; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <span class="material-symbols-outlined">verified_user</span>
+          <span>100% 内存运行，商业机密 0 泄露</span>
+        </h3>
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+          市面上的在线 PDF 转换网站通常要求将文件完整上传至其远端服务器，企业财报、涉密合同、个人简历面临巨大的泄密风险。本工具基于 WebAssembly 完全在您浏览器内存中解析，断网可用，绝不上传任何字节。
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <h3 style="font-size: 16px; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <span class="material-symbols-outlined">bolt</span>
+          <span>50 ~ 200ms 毫秒级极速处理</span>
+        </h3>
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+          告别云端排队等待！由 Firecrawl 团队优化的 Rust 原生引擎将数十页复杂的原生 PDF 文档在几十毫秒内秒级解析完成，比传统 Python 方案（如 PyMuPDF4LLM、MarkItDown）快 30 倍以上。
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <h3 style="font-size: 16px; font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <span class="material-symbols-outlined">table_chart</span>
+          <span>复杂财务表格与双栏排版还原</span>
+        </h3>
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+          针对学术论文与报纸的双栏排版自动计算视觉阅读顺序；结合矢量线框与文本对齐算法精准还原表格为标准 GFM Markdown 表格，是喂入大语言模型（LLM）进行 RAG 检索的利器。
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="text-align: center; padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; color: var(--text-muted);">
+    <p>© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
+  </footer>
+
+  <style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+
+  <!-- 业务逻辑脚本 -->
+  <script type="module">
+    // DOM 元素引用
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const progressPanel = document.getElementById('progress-panel');
+    const progressBar = document.getElementById('progress-bar');
+    const percentText = document.getElementById('percent-text');
+    const statusText = document.getElementById('status-text');
+    const workbench = document.getElementById('workbench');
+    const workbenchGrid = document.getElementById('workbench-grid');
+    const panelSource = document.getElementById('panel-source');
+    const panelPreview = document.getElementById('panel-preview');
+    const sourceTextarea = document.getElementById('source-textarea');
+    const previewContainer = document.getElementById('preview-container');
+    const sourceStats = document.getElementById('source-stats');
+    const diagTypeBadge = document.getElementById('diag-type-badge');
+    const diagTypeText = document.getElementById('diag-type-text');
+    const diagPages = document.getElementById('diag-pages');
+    const diagTime = document.getElementById('diag-time');
+    const diagTableTag = document.getElementById('diag-table-tag');
+    const diagColumnTag = document.getElementById('diag-column-tag');
+    const ocrAlertBanner = document.getElementById('ocr-alert-banner');
+    const ocrAlertText = document.getElementById('ocr-alert-text');
+    const profileSelect = document.getElementById('profile-select');
+    const viewPills = document.querySelectorAll('.view-pill');
+    const btnCopyMd = document.getElementById('btn-copy-md');
+    const copyBtnText = document.getElementById('copy-btn-text');
+    const btnDownloadMd = document.getElementById('btn-download-md');
+    const btnReset = document.getElementById('btn-reset');
+    const engineBadge = document.getElementById('engine-badge');
+
+    let currentFile = null;
+    let currentPdfBytes = null;
+    let wasmModule = null;
+    let currentResult = null;
+    let currentView = 'split';
+
+    // 初始化 WebAssembly 模块
+    async function initWasmEngine() {
+      if (wasmModule) return wasmModule;
+      try {
+        const wasmJsUrl = 'https://cdn.jsdelivr.net/npm/@firecrawl/pdf-inspector-wasm@1.25.2/pdf_inspector_wasm.js';
+        const wasmBgUrl = 'https://cdn.jsdelivr.net/npm/@firecrawl/pdf-inspector-wasm@1.25.2/pdf_inspector_wasm_bg.wasm';
+        
+        statusText.textContent = '加载 Rust WebAssembly 引擎...';
+        progressBar.style.width = '35%';
+        percentText.textContent = '35%';
+
+        const mod = await import(wasmJsUrl);
+        await mod.default(wasmBgUrl);
+        wasmModule = mod;
+        return wasmModule;
+      } catch (err) {
+        console.error('WASM 初始化失败:', err);
+        throw new Error('未能加载 PDF WebAssembly 引擎，请检查网络连接或稍后重试');
+      }
+    }
+
+    // 拖拽与点击选择
+    dropzone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) handlePdfFile(e.target.files[0]);
+    });
+
+    ['dragenter', 'dragover'].forEach(n => {
+      dropzone.addEventListener(n, (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = '#c084fc';
+        dropzone.style.background = 'rgba(168, 85, 247, 0.08)';
+      });
+    });
+    ['dragleave', 'drop'].forEach(n => {
+      dropzone.addEventListener(n, (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+        dropzone.style.background = 'rgba(168, 85, 247, 0.02)';
+      });
+    });
+    dropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handlePdfFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // 全局 Ctrl+V 粘贴
+    window.addEventListener('paste', (e) => {
+      const items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].kind === 'file') {
+          const file = items[i].getAsFile();
+          if (file && (file.type === 'application/pdf' || file.name.endsWith('.pdf'))) {
+            handlePdfFile(file);
+            break;
+          }
+        }
+      }
+    });
+
+    // 处理 PDF 文件
+    async function handlePdfFile(file) {
+      if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+        alert('请选择有效的 PDF 文件！');
+        return;
+      }
+
+      currentFile = file;
+      progressPanel.style.display = 'block';
+      progressBar.style.width = '15%';
+      percentText.textContent = '15%';
+      statusText.textContent = `读取文件: ${file.name} (${(file.size / 1024).toFixed(1)} KB)...`;
+
+      try {
+        const buffer = await file.arrayBuffer();
+        currentPdfBytes = new Uint8Array(buffer);
+
+        progressBar.style.width = '45%';
+        percentText.textContent = '45%';
+        statusText.textContent = '准备解析核心...';
+
+        const mod = await initWasmEngine();
+
+        progressBar.style.width = '80%';
+        percentText.textContent = '80%';
+        statusText.textContent = '执行多栏排版与表格结构化转换...';
+
+        await new Promise(r => setTimeout(r, 40));
+
+        runParse();
+
+        progressBar.style.width = '100%';
+        percentText.textContent = '100%';
+        statusText.textContent = '✨ 解析完成！';
+
+        setTimeout(() => {
+          progressPanel.style.display = 'none';
+          workbench.style.display = 'block';
+          workbench.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 160);
+
+      } catch (err) {
+        console.error('解析错误:', err);
+        statusText.textContent = `解析失败: ${err.message || err}`;
+        progressBar.style.background = '#ef4444';
+      }
+    }
+
+    // 执行解析
+    function runParse() {
+      if (!wasmModule || !currentPdfBytes) return;
+
+      const profile = profileSelect.value || 'fidelity';
+      const t0 = performance.now();
+      
+      const options = {
+        profile: profile,
+        includePageMarkers: true
+      };
+
+      try {
+        const res = wasmModule.processPdf(currentPdfBytes, options);
+        const t1 = performance.now();
+        const duration = Math.round(t1 - t0);
+        currentResult = res;
+
+        // 渲染文本与预览
+        const mdText = res.markdown || '/* 未在文档中检测到可提取的原生文本 */';
+        sourceTextarea.value = mdText;
+        updateStats(mdText);
+
+        if (window.marked) {
+          previewContainer.innerHTML = marked.parse(mdText);
+        } else {
+          previewContainer.textContent = mdText;
+        }
+
+        // 更新特征诊断条
+        renderDiagnostics(res, duration);
+
+      } catch (err) {
+        console.error('PDF 解析执行异常:', err);
+        alert(`PDF 解析失败: ${err.message || err}`);
+      }
+    }
+
+    // 渲染诊断信息
+    function renderDiagnostics(res, duration) {
+      diagPages.textContent = `${res.pageCount || 1} 页`;
+      diagTime.textContent = `${duration} ms`;
+
+      // 诊断类型
+      diagTypeBadge.className = 'diag-badge';
+      if (res.pdfType === 'TextBased') {
+        diagTypeBadge.classList.add('diag-badge-text');
+        diagTypeText.textContent = `原生电子文本 (${Math.round((res.confidence || 1) * 100)}%)`;
+      } else if (res.pdfType === 'Scanned') {
+        diagTypeBadge.classList.add('diag-badge-scanned');
+        diagTypeText.textContent = '扫描复印件 (需OCR)';
+      } else if (res.pdfType === 'Mixed') {
+        diagTypeBadge.classList.add('diag-badge-mixed');
+        diagTypeText.textContent = '混合图文 (部分需OCR)';
+      } else {
+        diagTypeBadge.classList.add('diag-badge-image');
+        diagTypeText.textContent = '图片文档 (ImageBased)';
+      }
+
+      // 表格与排版标签
+      if (res.layout && res.layout.pagesWithTables && res.layout.pagesWithTables.length > 0) {
+        diagTableTag.style.display = 'inline-block';
+        diagTableTag.textContent = `📊 包含表格 (第 ${res.layout.pagesWithTables.join(', ')} 页)`;
+      } else {
+        diagTableTag.style.display = 'none';
+      }
+
+      if (res.layout && res.layout.pagesWithColumns && res.layout.pagesWithColumns.length > 0) {
+        diagColumnTag.style.display = 'inline-block';
+        diagColumnTag.textContent = `📰 多栏排版顺序还原`;
+      } else {
+        diagColumnTag.style.display = 'none';
+      }
+
+      // OCR 预警横幅
+      if (res.pagesNeedingOcr && res.pagesNeedingOcr.length > 0) {
+        ocrAlertBanner.style.display = 'block';
+        ocrAlertText.textContent = `智能检测提示：文档第 ${res.pagesNeedingOcr.join(', ')} 页属于纯扫描图片，当前纯文本模式无法提取其图内文字。建议对扫描页使用站内 OCR 工具精准识别。`;
+      } else {
+        ocrAlertBanner.style.display = 'none';
+      }
+    }
+
+    // 更新字符统计
+    function updateStats(text) {
+      const charCount = text.length;
+      const wordCount = (text.match(/[\u4e00-\u9fa5]|\b\w+\b/g) || []).length;
+      const lines = text ? text.split(/\r?\n/).length : 0;
+      sourceStats.textContent = `${lines} 行 | ${wordCount} 词 | ${charCount} 字符`;
+    }
+    // 用户在左侧修改源码时同步更新右侧预览与统计
+    sourceTextarea.addEventListener('input', () => {
+      const text = sourceTextarea.value;
+      updateStats(text);
+      if (window.marked) {
+        previewContainer.innerHTML = marked.parse(text);
+      }
+    });
+
+    // 模式切换 (Fidelity vs Compact)
+    profileSelect.addEventListener('change', () => {
+      if (currentPdfBytes) {
+        runParse();
+      }
+    });
+
+    // 视图切换 (双栏 / 纯源码 / 纯预览)
+    viewPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        viewPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentView = pill.getAttribute('data-view');
+
+        if (currentView === 'split') {
+          workbenchGrid.style.gridTemplateColumns = '1fr 1fr';
+          panelSource.style.display = 'flex';
+          panelPreview.style.display = 'flex';
+        } else if (currentView === 'source') {
+          workbenchGrid.style.gridTemplateColumns = '1fr';
+          panelSource.style.display = 'flex';
+          panelPreview.style.display = 'none';
+        } else if (currentView === 'preview') {
+          workbenchGrid.style.gridTemplateColumns = '1fr';
+          panelSource.style.display = 'none';
+          panelPreview.style.display = 'flex';
+        }
+      });
+    });
+
+    // 复制 Markdown
+    btnCopyMd.addEventListener('click', async () => {
+      const text = sourceTextarea.value;
+      if (!text) return;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtnText.textContent = '已复制！';
+        btnCopyMd.style.background = '#10b981';
+        setTimeout(() => {
+          copyBtnText.textContent = '复制 Markdown';
+          btnCopyMd.style.background = 'linear-gradient(135deg, #a855f7, #3b82f6)';
+        }, 1800);
+      } catch (err) {
+        sourceTextarea.select();
+        document.execCommand('copy');
+        alert('已复制到剪贴板！');
+      }
+    });
+
+    // 下载 .md 文件
+    btnDownloadMd.addEventListener('click', () => {
+      const text = sourceTextarea.value;
+      if (!text) return;
+
+      const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const baseName = currentFile ? currentFile.name.replace(/\.[^/.]+$/, "") : 'document';
+      a.href = url;
+      a.download = `${baseName}_parsed.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // 重置
+    btnReset.addEventListener('click', () => {
+      fileInput.value = '';
+      currentFile = null;
+      currentPdfBytes = null;
+      currentResult = null;
+      workbench.style.display = 'none';
+      dropzone.style.display = 'block';
+    });
+  </script>
+</body>
+</html>
