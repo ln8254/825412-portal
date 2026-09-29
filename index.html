@@ -230,8 +230,19 @@
     
     <div class="sidebar-footer">
       <div class="sidebar-footer-menu">
-        <div class="footer-link-item" id="lang-switch-btn" style="color: var(--color-secondary); font-weight: 600; margin-bottom: 6px; padding: 4px 0; cursor: pointer;">
-          🌐 English
+        <div style="margin-bottom: 8px;">
+          <select class="lang-selector custom-select" style="width: 100%; padding: 6px 8px; font-size: 12px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.06); color: var(--color-secondary); border: 1px solid rgba(255,255,255,0.15); cursor: pointer; font-weight: 600;">
+            <option value="zh-CN">🇨🇳 简体中文</option>
+            <option value="en-US">🇺🇸 English</option>
+            <option value="zh-TW">🇹🇼 繁體中文</option>
+            <option value="ja-JP">🇯🇵 日本語</option>
+            <option value="ko-KR">🇰🇷 한국어</option>
+            <option value="es-ES">🇪🇸 Español</option>
+            <option value="fr-FR">🇫🇷 Français</option>
+            <option value="de-DE">🇩🇪 Deutsch</option>
+            <option value="ru-RU">🇷🇺 Русский</option>
+            <option value="pt-BR">🇧🇷 Português</option>
+          </select>
         </div>
         <a href="/about" class="footer-link-item" style="text-decoration: none; color: inherit;">
           <span class="material-symbols-outlined" style="font-size: 18px;">info</span>
@@ -1644,7 +1655,16 @@ function verifyWebhook(rawPayload, signatureHeader, secret) {
       <div class="form-group" style="margin-top: 10px;">
         <label class="form-label" data-i18n="set_lang_label">界面语言 / System Language</label>
         <select class="dropdown-select lang-selector" id="settings-lang-select" style="width: 100%; font-size: 14px; padding: 10px 14px;">
-          <!-- 动态渲染全量语言 -->
+          <option value="zh-CN">🇨🇳 简体中文</option>
+          <option value="en-US">🇺🇸 English</option>
+          <option value="zh-TW">🇹🇼 繁體中文</option>
+          <option value="ja-JP">🇯🇵 日本語</option>
+          <option value="ko-KR">🇰🇷 한국어</option>
+          <option value="es-ES">🇪🇸 Español</option>
+          <option value="fr-FR">🇫🇷 Français</option>
+          <option value="de-DE">🇩🇪 Deutsch</option>
+          <option value="ru-RU">🇷🇺 Русский</option>
+          <option value="pt-BR">🇧🇷 Português</option>
         </select>
       </div>
       
