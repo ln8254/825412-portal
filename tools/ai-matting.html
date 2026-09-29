@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>纯前端 AI 离线智能抠图与一键换底 - 825412.xyz</title>
+  <title data-i18n="tool_matting_title">AI 智能抠图换底工坊 - 825412.xyz</title>
   <meta name="description" content="基于浏览器本地 WebAssembly / ONNX 深度学习模型，100% 端侧离线运行，0 字节上传云端。一键智能抠除背景，支持全图合成所见即所得、左右划线对比、证件照蓝红白底一键替换，直接复制透明 PNG 到剪贴板。">
   <meta name="keywords" content="AI抠图, 在线抠图, 纯前端抠图, 离线抠图, 证件照换底色, 商品白底图, 免费抠图, 825412.xyz">
   <link rel="canonical" href="https://825412.xyz/tools/ai-matting">
@@ -187,46 +187,47 @@
           <span>825412.xyz</span>
         </a>
         <span style="color: #64748b;">/</span>
-        <a href="/toolbox" style="color: #ec4899; font-size: 14px; font-weight: 600; text-decoration: none;">极客工具箱</a>
+        <a href="/toolbox" style="color: #ec4899; font-size: 14px; font-weight: 600; text-decoration: none;" data-i18n="nav_toolbox">极客工具箱</a>
+        <span style="color: #64748b;">/</span>
+        <span style="color: #f472b6; font-size: 14px; font-weight: 700;" data-i18n="nav_tool_matting">AI 抠图</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
         <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
-          <a href="/" style="color: var(--text-secondary); text-decoration: none;">控制台</a>
-          <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none;">全部工具</a>
+          <a href="/" style="color: var(--text-secondary); text-decoration: none;">
+            <span data-i18n="nav_dashboard">控制台</span>
+          </a>
+          <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none;">
+            <span data-i18n="nav_all_tools">全部工具</span>
+          </a>
           <span style="color: rgba(255,255,255,0.15);">|</span>
-          <a href="/tools/pdf-to-markdown" style="color: #38bdf8; text-decoration: none; font-weight: 600;">PDF转MD</a>
-          <a href="/tools/ai-ocr" style="color: #a78bfa; text-decoration: none; font-weight: 600;">AI OCR</a>
-          <a href="/tools/ai-upscale" style="color: #38bdf8; text-decoration: none; font-weight: 600;">4x超清</a>
-          <a href="/tools/ai-face-blur" style="color: #f472b6; text-decoration: none; font-weight: 600;">人脸打码</a>
-          <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600;">3D视差</a>
-          <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none;">隔空快传</a>
+          <a href="/tools/pdf-to-markdown" style="color: #38bdf8; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_pdf">PDF转MD</a>
+          <a href="/tools/ai-ocr" style="color: #a78bfa; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_ocr">AI OCR</a>
+          <a href="/tools/ai-upscale" style="color: #38bdf8; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_upscale">4x超清</a>
+          <a href="/tools/ai-face-blur" style="color: #f472b6; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_face_blur">人脸打码</a>
+          <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_3d">3D视差</a>
+          <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_airdrop">隔空快传</a>
         </nav>
+        <div class="lang-toggle-wrapper">
+          <select class="lang-selector custom-select" style="padding: 4px 10px; font-size: 12px; border-radius: var(--radius-sm); background: var(--surface-high); color: var(--text-primary); border: 1px solid var(--border-light); cursor: pointer;">
+            <option value="zh-CN">🇨🇳 简体中文</option>
+            <option value="en-US">🇺🇸 English</option>
+          </select>
+        </div>
       </div>
     </div>
   </header>
 
   <main style="max-width: 1200px; margin: 30px auto; padding: 0 20px;">
     
-    <!-- 场景提示横幅 -->
-    <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: var(--radius-sm); padding: 10px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-      <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #c084fc;">
-        <span class="material-symbols-outlined" style="font-size: 18px;">lightbulb</span>
-        <span><strong>场景提示</strong>：抠图工具专为<strong>人像自拍、证件照换底、电商商品、宠物</strong>等主体分离设计。若要提取网页截图/文档报表中的文字，请使用：</span>
-      </div>
-      <a href="/tools/ai-ocr" class="btn btn-primary" style="padding: 5px 12px; font-size: 12px; background: linear-gradient(135deg, #8b5cf6, #06b6d4); text-decoration: none;">
-        👉 进入 AI 本地 OCR 截图文字提取
-      </a>
-    </div>
-
     <!-- 标头与隐私背书 -->
     <div style="margin-bottom: 24px;">
       <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(236, 72, 153, 0.1); border: 1px solid rgba(236, 72, 153, 0.3); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #f472b6; margin-bottom: 10px; font-weight: 700;">
         <span class="material-symbols-outlined" style="font-size: 15px;">auto_awesome</span>
-        <span>端侧 AI 引擎 · 100% 浏览器本地运算 · 0 字节上传云端</span>
+        <span data-i18n="matting_hero_badge">端侧离线 AI 视觉引擎 · 100% 本地内存抠图 · 0 字节上传云端</span>
       </div>
-      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px;">AI 智能离线一键抠图与底色合成</h1>
-      <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;">
-        依托本地 WASM / ONNX Runtime Web 深度学习模型，直接在您的高性能设备上运行 AI 主体抠图与发丝级边缘分离。支持全屏 Ctrl+V 极速粘贴，商业机密与私密照零泄露风险。
+      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px;" data-i18n="matting_hero_title">AI 智能抠图与高清换底工坊</h1>
+      <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;" data-i18n="matting_hero_desc">
+        基于深度学习端侧发丝级图像分割模型，毫秒级快速剥离人像、电商商品、宠物、证件照背景。支持纯色换底、红白蓝寸照背景切换、透明度羽化与原分辨率无损导出。
       </p>
     </div>
 
@@ -238,13 +239,13 @@
         <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(236, 72, 153, 0.15); color: #ec4899; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
           <span class="material-symbols-outlined" style="font-size: 32px;">photo_auto_merge</span>
         </div>
-        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;" data-i18n="matting_drop_title">
           拖拽待处理图片至此 / 点击选择本地图片
         </div>
-        <div style="font-size: 13px; color: #f472b6; font-weight: 600; margin-bottom: 6px;">
+        <div style="font-size: 13px; color: #f472b6; font-weight: 600; margin-bottom: 6px;" data-i18n="matting_drop_tip1">
           ✨ 支持直接按 Ctrl+V (或 ⌘V) 粘贴照片或截图
         </div>
-        <div style="font-size: 12px; color: var(--text-muted);">
+        <div style="font-size: 12px; color: var(--text-muted);" data-i18n="matting_drop_tip2">
           支持 PNG, JPG, WebP, AVIF, BMP | 适合人像、证件照、电商产品 | 纯本地计算 杜绝任何云端留存
         </div>
         <input type="file" id="matting-file-input" accept="image/*" style="display: none;">
@@ -255,7 +256,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #f472b6;">
             <span class="material-symbols-outlined pulse-glow" style="font-size: 18px;">hourglass_top</span>
-            <span id="matting-status-text">正在启动端侧 AI 推理引擎...</span>
+            <span id="matting-status-text" data-i18n="matting_status_starting">正在启动端侧 AI 推理引擎...</span>
           </div>
           <span id="matting-percent-text" style="font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: #fff;">0%</span>
         </div>
@@ -263,7 +264,7 @@
           <div id="matting-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ec4899, #8b5cf6); transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);"></div>
         </div>
         <div style="margin-top: 8px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between;">
-          <span>💡 首次使用需从 CDN 自动载入模型权重并持久化在本地浏览器（约 20MB），后续即可秒级离线运行。</span>
+          <span data-i18n="matting_progress_note">💡 首次使用需从 CDN 自动载入模型权重并持久化在本地浏览器（约 20MB），后续即可秒级离线运行。</span>
           <span id="matting-timer-text" style="font-family: var(--font-mono);">0.0s</span>
         </div>
       </div>
@@ -276,14 +277,14 @@
           <div style="display: inline-flex; background: rgba(255,255,255,0.06); padding: 3px; border-radius: 8px; border: 1px solid var(--border-light);">
             <button class="view-mode-tab active" id="tab-mode-full">
               <span class="material-symbols-outlined" style="font-size: 16px;">visibility</span>
-              <span>🌟 全图合成预览 (所见即所得)</span>
+              <span data-i18n="matting_mode_full">🌟 全图合成预览 (所见即所得)</span>
             </button>
             <button class="view-mode-tab" id="tab-mode-split">
               <span class="material-symbols-outlined" style="font-size: 16px;">compare</span>
-              <span>🔀 左右划线对比 (对比原图)</span>
+              <span data-i18n="matting_mode_split">🔀 左右划线对比 (对比原图)</span>
             </button>
           </div>
-          <div id="split-mode-hint" style="display: none; font-size: 12px; color: #f472b6;">
+          <div id="split-mode-hint" style="display: none; font-size: 12px; color: #f472b6;" data-i18n="matting_split_hint">
             💡 左右拖动粉色竖线把手：左侧为原图，右侧为新背景抠图效果
           </div>
         </div>
@@ -316,10 +317,10 @@
 
             <!-- 悬浮指示徽章 (对比模式下展示) -->
             <div class="matting-badge matting-badge-left" id="badge-orig" style="display: none;">
-              <span>⬅️ 原始图片</span>
+              <span data-i18n="matting_badge_orig">⬅️ 原始图片</span>
             </div>
             <div class="matting-badge matting-badge-right" id="badge-result" style="display: none;">
-              <span>换底合成效果 ➡️</span>
+              <span data-i18n="matting_badge_result">换底合成效果 ➡️</span>
             </div>
           </div>
         </div>
@@ -329,7 +330,7 @@
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 20px;">
         <!-- 换底背景色 -->
         <div>
-          <label class="form-label" style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; display: block;">
+          <label class="form-label" style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; display: block;" data-i18n="matting_label_bg">
             🎨 实时合成新底色 / 预览背景:
           </label>
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -348,19 +349,19 @@
 
         <!-- 模型精度档位切换 -->
         <div>
-          <label class="form-label" style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; display: block;">
+          <label class="form-label" style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; display: block;" data-i18n="matting_label_model">
             🧠 AI 推理模型精度:
           </label>
           <select class="custom-select" id="matting-model-select" style="width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 13px;">
-            <option value="medium" selected>🌟 高清精细模式 (Medium · 发丝细节优化)</option>
-            <option value="small">⚡ 极速轻量模式 (Small · 移动端与低配设备加速)</option>
+            <option value="medium" selected data-i18n="matting_opt_medium">🌟 高清精细模式 (Medium · 发丝细节优化)</option>
+            <option value="small" data-i18n="matting_opt_small">⚡ 极速轻量模式 (Small · 移动端与低配设备加速)</option>
           </select>
         </div>
 
         <!-- 图像平滑羽化选项 -->
         <div>
           <label class="form-label" style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; display: block;">
-            边缘羽化平滑: <span id="feather-val" style="color: #f472b6;">0</span> px
+            <span data-i18n="matting_label_feather">边缘羽化平滑:</span> <span id="feather-val" style="color: #f472b6;">0</span> px
           </label>
           <input type="range" class="range-slider" id="feather-slider" min="0" max="6" value="0" style="width: 100%;">
         </div>
@@ -370,17 +371,17 @@
       <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--border-light); padding-top: 18px;">
         <button class="btn btn-primary" id="copy-cutout-btn" style="display: none; background: linear-gradient(135deg, #ec4899, #8b5cf6); padding: 9px 18px; font-size: 13px; font-weight: 700;">
           <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
-          <span>一键复制透明 PNG 到剪贴板</span>
+          <span data-i18n="matting_btn_copy_png">一键复制透明 PNG 到剪贴板</span>
         </button>
         <button class="btn btn-primary" id="download-transparent-btn" style="display: none; background: linear-gradient(135deg, #10b981, #06b6d4); padding: 9px 18px; font-size: 13px; font-weight: 700;">
           <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
-          <span>下载透明 PNG</span>
+          <span data-i18n="matting_btn_download_png">下载透明 PNG</span>
         </button>
         <button class="btn" id="download-composed-btn" style="display: none; background: var(--surface-high); border: 1px solid var(--border-light); padding: 9px 18px; font-size: 13px; font-weight: 600; color: #fff;">
           <span class="material-symbols-outlined" style="font-size: 16px;">image</span>
-          <span id="download-composed-text">下载当前合成图 (含新底色)</span>
+          <span id="download-composed-text" data-i18n="matting_btn_download_bg">下载当前合成图 (含新底色)</span>
         </button>
-        <button class="btn" id="reset-btn" style="display: none; background: transparent; border: 1px solid var(--border-light); padding: 9px 16px; font-size: 13px; color: var(--text-muted);">
+        <button class="btn" id="reset-btn" style="display: none; background: transparent; border: 1px solid var(--border-light); padding: 9px 16px; font-size: 13px; color: var(--text-muted);" data-i18n="matting_btn_reset">
           重新选择
         </button>
       </div>
@@ -392,9 +393,9 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #f472b6; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">security</span>
-          <span>100% 本地运算，私密 0 泄露</span>
+          <span data-i18n="matting_card1_title">100% 本地运算，私密 0 泄露</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="matting_card1_desc">
           市面上大多数抠图平台要求将图片上传至远程云端服务器处理，存在个人肖像、企业未发布商品图、商业合同的泄露隐患。本工具完全运行在您浏览器的 WebAssembly 内存中，断网也可完成推理。
         </p>
       </div>
@@ -402,9 +403,9 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">payments</span>
-          <span>永久免费，告别积分订阅套路</span>
+          <span data-i18n="matting_card2_title">永久免费，告别积分订阅套路</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="matting_card2_desc">
           商业抠图网站普遍实行按次收费或每月几十元订阅制，免费版往往强制添加水印或限制分辨率。我们通过端侧 AI 消除服务器昂贵的 GPU 算力成本，真正做到无限制、全分辨率、免费导出。
         </p>
       </div>
@@ -412,9 +413,9 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">bolt</span>
-          <span>极速工作流，支持剪贴板秒贴</span>
+          <span data-i18n="matting_card3_title">极速工作流，支持剪贴板秒贴</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="matting_card3_desc">
           截图后无需另存为文件，直接在网页按下 Ctrl+V 即可开启抠图。处理完毕后可一键将透明 PNG 写入系统剪贴板，秒速贴入 PowerPoint、Photoshop、Figma 或聊天软件，效率翻倍。
         </p>
       </div>
@@ -423,7 +424,7 @@
   </main>
 
   <footer style="text-align: center; padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; color: var(--text-muted);">
-    <p>© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
+    <p data-i18n="ai_footer_note">© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
   </footer>
 
   <!-- 引入 @imgly/background-removal 与业务脚本 -->
@@ -796,5 +797,7 @@
     });
 
   </script>
+  <script src="../js/storage.js?v=2.8.0"></script>
+  <script src="../js/i18n.js?v=2.8.0"></script>
 </body>
 </html>

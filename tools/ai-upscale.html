@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 动漫与照片 4x 无损超清放大 - 极客端侧离线 AI 工坊 | 825412.xyz</title>
+  <title data-i18n="tool_upscale_title">AI 4x 无损超清放大工坊 - 825412.xyz</title>
   <meta name="description" content="基于纯浏览器端侧 WebGL 与神经网络超分辨率技术，100% 本地运算，0 字节上传云端。一键将模糊二次元动漫插画、表情包、低清照片无损放大 2x/4x，消除噪点与锯齿，支持 Squoosh 级左右无级滑动比对与一键复制超清图。">
   <meta name="keywords" content="AI图片放大, 超分辨率, 无损放大, 动漫插画放大, 4x超分, 端侧AI, 本地放大, 825412.xyz">
   <link rel="canonical" href="https://825412.xyz/tools/ai-upscale">
@@ -128,47 +128,55 @@
           <span>825412.xyz</span>
         </a>
         <span style="color: #64748b;">/</span>
-        <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 600;">极客工具箱</a>
+        <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 600;" data-i18n="nav_toolbox">极客工具箱</a>
         <span style="color: #64748b;">/</span>
-        <span style="color: #38bdf8; font-size: 13px; font-weight: 700;">AI 4x 无损超清放大</span>
+        <span style="color: #38bdf8; font-size: 13px; font-weight: 700;" data-i18n="nav_tool_upscale">AI 4x 无损超清放大</span>
       </div>
 
-      <!-- 右侧：全站入口快捷导航菜单 -->
-      <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
-        <a href="/" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">dashboard</span>
-          <span>控制台</span>
-        </a>
-        <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">build</span>
-          <span>全部工具</span>
-        </a>
-        <span style="color: rgba(255,255,255,0.15);">|</span>
-        <a href="/tools/pdf-to-markdown" style="color: #38bdf8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">article</span>
-          <span>PDF转MD</span>
-        </a>
-        <a href="/tools/ai-ocr" style="color: #a78bfa; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">document_scanner</span>
-          <span>AI OCR</span>
-        </a>
-        <a href="/tools/ai-matting" style="color: #f472b6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">photo_auto_merge</span>
-          <span>AI 抠图</span>
-        </a>
-        <a href="/tools/ai-face-blur" style="color: #f472b6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">visibility_off</span>
-          <span>人脸打码</span>
-        </a>
-        <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">3d_rotation</span>
-          <span>3D视差</span>
-        </a>
-        <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">wifi_tethering</span>
-          <span>隔空快传</span>
-        </a>
-      </nav>
+      <!-- 右侧：全站入口快捷导航菜单与多语言切换 -->
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
+          <a href="/" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">dashboard</span>
+            <span data-i18n="nav_dashboard">控制台</span>
+          </a>
+          <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">build</span>
+            <span data-i18n="nav_all_tools">全部工具</span>
+          </a>
+          <span style="color: rgba(255,255,255,0.15);">|</span>
+          <a href="/tools/pdf-to-markdown" style="color: #38bdf8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">article</span>
+            <span data-i18n="nav_tool_pdf">PDF转MD</span>
+          </a>
+          <a href="/tools/ai-ocr" style="color: #a78bfa; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">document_scanner</span>
+            <span data-i18n="nav_tool_ocr">AI OCR</span>
+          </a>
+          <a href="/tools/ai-matting" style="color: #f472b6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">photo_auto_merge</span>
+            <span data-i18n="nav_tool_matting">AI 抠图</span>
+          </a>
+          <a href="/tools/ai-face-blur" style="color: #f472b6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">visibility_off</span>
+            <span data-i18n="nav_tool_face_blur">人脸打码</span>
+          </a>
+          <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">3d_rotation</span>
+            <span data-i18n="nav_tool_3d">3D视差</span>
+          </a>
+          <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">wifi_tethering</span>
+            <span data-i18n="nav_airdrop">隔空快传</span>
+          </a>
+        </nav>
+        <div class="lang-toggle-wrapper">
+          <select class="lang-selector custom-select" style="padding: 4px 10px; font-size: 12px; border-radius: var(--radius-sm); background: var(--surface-high); color: var(--text-primary); border: 1px solid var(--border-light); cursor: pointer;">
+            <option value="zh-CN">🇨🇳 简体中文</option>
+            <option value="en-US">🇺🇸 English</option>
+          </select>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -179,12 +187,12 @@
     <div style="margin-bottom: 24px;">
       <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #38bdf8; margin-bottom: 10px; font-weight: 700;">
         <span class="material-symbols-outlined" style="font-size: 16px;">auto_awesome</span>
-        <span>端侧超级分辨率工坊 · 零上云 零等待 不限次</span>
+        <span data-i18n="upscale_hero_badge">端侧超级分辨率工坊 · 零上云 零等待 不限次</span>
       </div>
-      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px;">
+      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px;" data-i18n="upscale_hero_title">
         AI 动漫插画与照片 4x 无损超清放大
       </h1>
-      <p style="font-size: 14px; color: var(--text-secondary); margin: 0; line-height: 1.6;">
+      <p style="font-size: 14px; color: var(--text-secondary); margin: 0; line-height: 1.6;" data-i18n="upscale_hero_desc">
         无需上传服务器，直接调用浏览器 GPU 算力！智能重构动漫线条轮廓、抗锯齿并平滑插值，轻松将低清壁纸、头像、表情包秒级放大 2x/4x，呈现锐利超清细节。
       </p>
     </div>
@@ -197,14 +205,14 @@
         <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(6, 182, 212, 0.15); color: #38bdf8; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
           <span class="material-symbols-outlined" style="font-size: 32px;">photo_size_select_large</span>
         </div>
-        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
-          拖拽图片至此 / 点击选择本地图片
+        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;" data-i18n="upscale_drop_title">
+          拖拽待放大图片至此 / 点击选择图片
         </div>
-        <div style="font-size: 13px; color: #38bdf8; font-weight: 600; margin-bottom: 6px;">
-          ⚡ 极客推荐：截屏或复制图片后，直接按 Ctrl+V (或 ⌘V) 即可瞬间开始超清重构！
+        <div style="font-size: 13px; color: #38bdf8; font-weight: 600; margin-bottom: 6px;" data-i18n="upscale_drop_tip1">
+          ⚡ 极客推荐：支持全屏 Ctrl+V 粘贴截图，低清插画老照片一键无损修复
         </div>
-        <div style="font-size: 12px; color: var(--text-muted);">
-          支持 PNG, JPG, WebP, BMP | 100% 浏览器本地 GPU/内存重构 | 永无隐私泄露风险
+        <div style="font-size: 12px; color: var(--text-muted);" data-i18n="upscale_drop_tip2">
+          推荐输入小于 2048x2048 像素的图像以获得最佳浏览器内存性能
         </div>
         <input type="file" id="file-input" accept="image/*" style="display: none;">
       </div>
@@ -212,23 +220,23 @@
       <!-- 参数调优栏 -->
       <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 13px; font-weight: 700; color: #fff;">🎯 图像模式:</label>
+          <label style="font-size: 13px; font-weight: 700; color: #fff;" data-i18n="upscale_label_mode">🎯 图像模式:</label>
           <select class="custom-select" id="model-mode" style="padding: 6px 12px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid #06b6d4; color: #fff; font-size: 13px; font-weight: 600;">
-            <option value="anime" selected>🌸 二次元动漫 / 插画漫画 (锐化线稿 · 去压缩块)</option>
-            <option value="photo">📸 自然风景 / 真实照片 (平滑去噪 · 细节增强)</option>
+            <option value="anime" selected data-i18n="upscale_opt_anime">🌸 二次元动漫 / 插画漫画 (锐化线稿 · 去压缩块)</option>
+            <option value="photo" data-i18n="upscale_opt_photo">📸 自然风景 / 真实照片 (平滑去噪 · 细节增强)</option>
           </select>
         </div>
 
         <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 13px; font-weight: 700; color: #fff;">🔍 放大倍率:</label>
+          <label style="font-size: 13px; font-weight: 700; color: #fff;" data-i18n="upscale_label_scale">🔍 放大倍率:</label>
           <div style="display: flex; gap: 6px;">
-            <button type="button" class="scale-btn active" data-scale="2" style="padding: 5px 14px; border-radius: 16px; font-size: 12px; font-weight: 700; background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #fff; border: none; cursor: pointer;">2x 放大</button>
-            <button type="button" class="scale-btn" data-scale="4" style="padding: 5px 14px; border-radius: 16px; font-size: 12px; font-weight: 600; background: var(--surface-high); color: var(--text-secondary); border: 1px solid var(--border-light); cursor: pointer;">4x 超清</button>
+            <button type="button" class="scale-btn active" data-scale="2" style="padding: 5px 14px; border-radius: 16px; font-size: 12px; font-weight: 700; background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #fff; border: none; cursor: pointer;" data-i18n="upscale_btn_2x">2x 放大</button>
+            <button type="button" class="scale-btn" data-scale="4" style="padding: 5px 14px; border-radius: 16px; font-size: 12px; font-weight: 600; background: var(--surface-high); color: var(--text-secondary); border: 1px solid var(--border-light); cursor: pointer;" data-i18n="upscale_btn_4x">4x 超清</button>
           </div>
         </div>
 
         <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-          <label style="font-size: 12px; color: var(--text-muted);">线条锐度:</label>
+          <label style="font-size: 12px; color: var(--text-muted);" data-i18n="upscale_label_sharpness">线条锐度:</label>
           <input type="range" id="sharpness-range" min="0" max="100" value="70" style="width: 100px; accent-color: #06b6d4;">
           <span id="sharpness-val" style="font-size: 11px; font-family: var(--font-mono); color: #38bdf8;">70%</span>
         </div>
@@ -239,7 +247,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #38bdf8;">
             <span class="material-symbols-outlined" style="font-size: 18px; animation: spin 1.5s linear infinite;">sync</span>
-            <span id="status-text">正在启动 WebGL 超分辨率着色器...</span>
+            <span id="status-text" data-i18n="upscale_status_starting">正在启动 WebGL 超分辨率着色器...</span>
           </div>
           <span id="percent-text" style="font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: #fff;">0%</span>
         </div>
@@ -252,13 +260,13 @@
       <div id="workbench" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 13px; font-weight: 700; color: #38bdf8;">✨ 左右拖拽滑块对比超清效果</span>
+            <span style="font-size: 13px; font-weight: 700; color: #38bdf8;" data-i18n="upscale_compare_title">✨ 左右拖拽滑块对比超清效果</span>
             <span id="res-badge" style="font-size: 11px; font-family: var(--font-mono); background: rgba(6, 182, 212, 0.15); color: #38bdf8; padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(6, 182, 212, 0.3);">
               0x0 ➔ 0x0 px
             </span>
           </div>
           <div style="display: flex; gap: 10px;">
-            <button id="btn-reprocess" class="btn" style="background: rgba(255,255,255,0.06); padding: 5px 12px; font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border-light);">
+            <button id="btn-reprocess" class="btn" style="background: rgba(255,255,255,0.06); padding: 5px 12px; font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border-light);" data-i18n="upscale_btn_reprocess">
               重新渲染
             </button>
           </div>
@@ -271,13 +279,13 @@
             <!-- 原图层 (底图) -->
             <div class="upscale-stage-layer" id="layer-before">
               <img id="img-before" alt="原图">
-              <span class="tag-badge tag-before">放大前 (原始分辨率)</span>
+              <span class="tag-badge tag-before" data-i18n="upscale_tag_before">放大前 (原始分辨率)</span>
             </div>
 
             <!-- 超分超清图层 (通过 clip-path 裁切实现无级划线) -->
             <div class="upscale-stage-layer" id="layer-after" style="clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);">
               <canvas id="canvas-after"></canvas>
-              <span class="tag-badge tag-after">AI 4x 超清无损放大</span>
+              <span class="tag-badge tag-after" data-i18n="upscale_tag_after">AI 4x 超清无损放大</span>
             </div>
 
             <!-- 分割线拖动杆 -->
@@ -293,13 +301,13 @@
         <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 20px; justify-content: flex-end;">
           <button class="btn btn-primary" id="btn-copy" style="background: linear-gradient(135deg, #06b6d4, #3b82f6); padding: 9px 20px; font-size: 13px; font-weight: 700;">
             <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
-            <span>复制超清大图到剪贴板</span>
+            <span data-i18n="upscale_btn_copy">复制超清大图到剪贴板</span>
           </button>
           <button class="btn btn-primary" id="btn-download-png" style="background: linear-gradient(135deg, #10b981, #06b6d4); padding: 9px 20px; font-size: 13px; font-weight: 700;">
             <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
-            <span>下载超清 PNG</span>
+            <span data-i18n="upscale_btn_download">下载超清 PNG</span>
           </button>
-          <button class="btn" id="btn-reset" style="background: transparent; border: 1px solid var(--border-light); padding: 9px 16px; font-size: 13px; color: var(--text-muted);">
+          <button class="btn" id="btn-reset" style="background: transparent; border: 1px solid var(--border-light); padding: 9px 16px; font-size: 13px; color: var(--text-muted);" data-i18n="upscale_btn_reset">
             上传新图片
           </button>
         </div>
@@ -312,9 +320,9 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">speed</span>
-          <span>零等待 · 永久免费不限次</span>
+          <span data-i18n="upscale_card1_title">零等待 · 永久免费不限次</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="upscale_card1_desc">
           常规在线商业超分网站（如 Bigjpg、Topaz）通常需排队上传，且每天免费仅限 2~3 张。本站直接调用您设备本机的 GPU 显卡与 WebGL 流水线，不用排队、没有额度限制。
         </p>
       </div>
@@ -322,9 +330,9 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #a78bfa; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">brush</span>
-          <span>专为二次元动漫与线条优化</span>
+          <span data-i18n="upscale_card2_title">专为二次元动漫与线条优化</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="upscale_card2_desc">
           内置动漫模式针对二次元插画的线条轮廓进行高频感知重构，能自动消除网络压缩产生的蚊式噪点，保留色块纯净平涂，让老旧低清壁纸焕发 4K 新生。
         </p>
       </div>
@@ -332,9 +340,9 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">shield</span>
-          <span>100% 本地运算 隐私零外泄</span>
+          <span data-i18n="upscale_card3_title">100% 本地运算 隐私零外泄</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="upscale_card3_desc">
           包含个人隐私的自拍照、家人相册、设计原稿无需上传到第三方服务器。所有放大像素均在浏览器内存内就地计算，彻底告别服务器泄露隐私的后顾之忧。
         </p>
       </div>
@@ -343,7 +351,7 @@
   </main>
 
   <footer style="text-align: center; padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; color: var(--text-muted);">
-    <p>© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
+    <p data-i18n="ai_footer_note">© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
   </footer>
 
   <style>
@@ -630,5 +638,7 @@
       dropzone.style.display = 'block';
     });
   </script>
+  <script src="../js/storage.js?v=2.8.0"></script>
+  <script src="../js/i18n.js?v=2.8.0"></script>
 </body>
 </html>

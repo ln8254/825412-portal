@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 照片人脸智能打码与隐私脱敏 - 极客端侧离线 AI 工坊 | 825412.xyz</title>
+  <title data-i18n="tool_face_blur_title">AI 照片人脸自动打码工坊 - 825412.xyz</title>
   <meta name="description" content="基于轻量级端侧神经网络，100% 浏览器本地毫秒级检测所有人脸。支持像素马赛克、高斯模糊、墨镜/Emoji 贴纸遮挡与黑条脱敏，支持手动拉框打码车牌与敏感信息，零隐私数据上云。">
   <meta name="keywords" content="AI打码, 人脸打码, 智能马赛克, 照片脱敏, 车牌打码, 隐私保护, 纯前端打码, 825412.xyz">
   <link rel="canonical" href="https://825412.xyz/tools/ai-face-blur">
@@ -124,47 +124,55 @@
           <span>825412.xyz</span>
         </a>
         <span style="color: #64748b;">/</span>
-        <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 600;">极客工具箱</a>
+        <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 600;" data-i18n="nav_toolbox">极客工具箱</a>
         <span style="color: #64748b;">/</span>
-        <span style="color: #f472b6; font-size: 13px; font-weight: 700;">AI 照片人脸打码</span>
+        <span style="color: #f472b6; font-size: 13px; font-weight: 700;" data-i18n="nav_tool_face_blur">AI 照片人脸打码</span>
       </div>
 
-      <!-- 右侧：全站入口快捷导航菜单 -->
-      <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
-        <a href="/" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">dashboard</span>
-          <span>控制台</span>
-        </a>
-        <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">build</span>
-          <span>全部工具</span>
-        </a>
-        <span style="color: rgba(255,255,255,0.15);">|</span>
-        <a href="/tools/pdf-to-markdown" style="color: #38bdf8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">article</span>
-          <span>PDF转MD</span>
-        </a>
-        <a href="/tools/ai-ocr" style="color: #a78bfa; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">document_scanner</span>
-          <span>AI OCR</span>
-        </a>
-        <a href="/tools/ai-matting" style="color: #f472b6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">photo_auto_merge</span>
-          <span>AI 抠图</span>
-        </a>
-        <a href="/tools/ai-upscale" style="color: #38bdf8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">photo_size_select_large</span>
-          <span>4x超清</span>
-        </a>
-        <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">3d_rotation</span>
-          <span>3D视差</span>
-        </a>
-        <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">wifi_tethering</span>
-          <span>隔空快传</span>
-        </a>
-      </nav>
+      <!-- 右侧：全站入口快捷导航菜单与多语言切换 -->
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
+          <a href="/" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">dashboard</span>
+            <span data-i18n="nav_dashboard">控制台</span>
+          </a>
+          <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">build</span>
+            <span data-i18n="nav_all_tools">全部工具</span>
+          </a>
+          <span style="color: rgba(255,255,255,0.15);">|</span>
+          <a href="/tools/pdf-to-markdown" style="color: #38bdf8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">article</span>
+            <span data-i18n="nav_tool_pdf">PDF转MD</span>
+          </a>
+          <a href="/tools/ai-ocr" style="color: #a78bfa; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">document_scanner</span>
+            <span data-i18n="nav_tool_ocr">AI OCR</span>
+          </a>
+          <a href="/tools/ai-matting" style="color: #f472b6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">photo_auto_merge</span>
+            <span data-i18n="nav_tool_matting">AI 抠图</span>
+          </a>
+          <a href="/tools/ai-upscale" style="color: #38bdf8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">photo_size_select_large</span>
+            <span data-i18n="nav_tool_upscale">4x超清</span>
+          </a>
+          <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">3d_rotation</span>
+            <span data-i18n="nav_tool_3d">3D视差</span>
+          </a>
+          <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">wifi_tethering</span>
+            <span data-i18n="nav_airdrop">隔空快传</span>
+          </a>
+        </nav>
+        <div class="lang-toggle-wrapper">
+          <select class="lang-selector custom-select" style="padding: 4px 10px; font-size: 12px; border-radius: var(--radius-sm); background: var(--surface-high); color: var(--text-primary); border: 1px solid var(--border-light); cursor: pointer;">
+            <option value="zh-CN">🇨🇳 简体中文</option>
+            <option value="en-US">🇺🇸 English</option>
+          </select>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -175,12 +183,12 @@
     <div style="margin-bottom: 24px;">
       <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(236, 72, 153, 0.1); border: 1px solid rgba(236, 72, 153, 0.3); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #f472b6; margin-bottom: 10px; font-weight: 700;">
         <span class="material-symbols-outlined" style="font-size: 16px;">visibility_off</span>
-        <span>端侧人脸视觉隐私脱敏工坊 · 毫秒级检测 自由交互</span>
+        <span data-i18n="blur_hero_badge">端侧人脸视觉隐私脱敏工坊 · 毫秒级检测 自由交互</span>
       </div>
-      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px;">
+      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px;" data-i18n="blur_hero_title">
         AI 照片人脸智能打码与隐私脱敏
       </h1>
-      <p style="font-size: 14px; color: var(--text-secondary); margin: 0; line-height: 1.6;">
+      <p style="font-size: 14px; color: var(--text-secondary); margin: 0; line-height: 1.6;" data-i18n="blur_hero_desc">
         分享合影、街拍或生活照前一键保护隐私！端侧轻量神经模型秒级自动锁定所有人脸，支持经典马赛克、高斯模糊、趣味贴纸遮挡与机密黑条。点击人脸可单独开关，也支持直接鼠标拉框为车牌和证件打码。
       </p>
     </div>
@@ -193,14 +201,14 @@
         <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(236, 72, 153, 0.15); color: #f472b6; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
           <span class="material-symbols-outlined" style="font-size: 32px;">face</span>
         </div>
-        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
-          拖拽图片至此 / 点击选择本地图片
+        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;" data-i18n="blur_drop_title">
+          拖拽照片至此 / 点击选择本地照片
         </div>
-        <div style="font-size: 13px; color: #f472b6; font-weight: 600; margin-bottom: 6px;">
-          ⚡ 极客推荐：截屏后直接按 Ctrl+V (或 ⌘V) 即可瞬间开始智能人脸打码！
+        <div style="font-size: 13px; color: #f472b6; font-weight: 600; margin-bottom: 6px;" data-i18n="blur_drop_tip1">
+          ✨ 快捷提取：支持全屏 Ctrl+V 粘贴合照或街拍图片
         </div>
-        <div style="font-size: 12px; color: var(--text-muted);">
-          支持 PNG, JPG, WebP, BMP | 人脸特征 100% 内存本地即时推理 | 绝不上云
+        <div style="font-size: 12px; color: var(--text-muted);" data-i18n="blur_drop_tip2">
+          支持批量人脸自动检测与微调半径，100% 浏览器本地处理
         </div>
         <input type="file" id="file-input" accept="image/*" style="display: none;">
       </div>
@@ -210,39 +218,39 @@
         
         <!-- 遮罩风格 -->
         <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 13px; font-weight: 700; color: #fff;">🎭 遮罩风格:</label>
+          <label style="font-size: 13px; font-weight: 700; color: #fff;" data-i18n="blur_label_style">🎭 遮罩风格:</label>
           <div style="display: flex; gap: 6px; flex-wrap: wrap;">
             <button type="button" class="mode-tab active" data-mode="mosaic">
-              <span>🔳 像素马赛克</span>
+              <span data-i18n="blur_mode_mosaic">🔳 像素马赛克</span>
             </button>
             <button type="button" class="mode-tab" data-mode="blur">
-              <span>🌫️ 柔和模糊</span>
+              <span data-i18n="blur_mode_blur">🌫️ 柔和模糊</span>
             </button>
             <button type="button" class="mode-tab" data-mode="sticker">
-              <span>🕶️ 趣味贴纸</span>
+              <span data-i18n="blur_mode_sticker">🕶️ 趣味贴纸</span>
             </button>
             <button type="button" class="mode-tab" data-mode="blackout">
-              <span>⬛ 黑色隐匿条</span>
+              <span data-i18n="blur_mode_blackout">⬛ 黑色隐匿条</span>
             </button>
           </div>
         </div>
 
         <!-- 贴纸子选项 (仅在贴纸模式显示) -->
         <div id="sticker-selector" style="display: none; align-items: center; gap: 6px;">
-          <label style="font-size: 12px; color: var(--text-muted);">贴纸样式:</label>
+          <label style="font-size: 12px; color: var(--text-muted);" data-i18n="blur_label_sticker">贴纸样式:</label>
           <select id="sticker-type" class="custom-select" style="padding: 4px 10px; border-radius: 6px; background: var(--surface-high); border: 1px solid var(--border-light); color: #fff; font-size: 13px;">
-            <option value="sunglasses">🕶️ 酷炫墨镜</option>
-            <option value="cool">😎 墨镜笑脸</option>
-            <option value="mask">😷 防护口罩</option>
-            <option value="cat">🐱 可爱猫咪</option>
-            <option value="ghost">👻 搞怪幽灵</option>
-            <option value="heart">💖 爱心遮挡</option>
+            <option value="sunglasses" data-i18n="blur_opt_sunglasses">🕶️ 酷炫墨镜</option>
+            <option value="cool" data-i18n="blur_opt_cool">😎 墨镜笑脸</option>
+            <option value="mask" data-i18n="blur_opt_mask">😷 防护口罩</option>
+            <option value="cat" data-i18n="blur_opt_cat">🐱 可爱猫咪</option>
+            <option value="ghost" data-i18n="blur_opt_ghost">👻 搞怪幽灵</option>
+            <option value="heart" data-i18n="blur_opt_heart">💖 爱心遮挡</option>
           </select>
         </div>
 
         <!-- 模糊强度滑块 -->
         <div id="intensity-wrapper" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-          <label style="font-size: 12px; color: var(--text-muted);" id="intensity-label">马赛克粒度:</label>
+          <label style="font-size: 12px; color: var(--text-muted);" id="intensity-label" data-i18n="blur_label_intensity">马赛克粒度:</label>
           <input type="range" id="intensity-range" min="6" max="36" value="16" style="width: 90px; accent-color: #ec4899;">
           <span id="intensity-val" style="font-size: 11px; font-family: var(--font-mono); color: #f472b6;">16px</span>
         </div>
@@ -254,7 +262,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #f472b6;">
             <span class="material-symbols-outlined" style="font-size: 18px; animation: spin 1.5s linear infinite;">hourglass_top</span>
-            <span id="status-text">正在初始化端侧 TinyFace 视觉神经检测模型...</span>
+            <span id="status-text" data-i18n="blur_status_starting">正在初始化端侧 TinyFace 视觉神经检测模型...</span>
           </div>
           <span id="percent-text" style="font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: #fff;">0%</span>
         </div>
@@ -269,18 +277,18 @@
         <!-- 操作提示与人脸统计 -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span id="face-count-badge" style="font-size: 12px; font-weight: 700; background: rgba(236, 72, 153, 0.15); color: #f472b6; padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(236, 72, 153, 0.3);">
+            <span id="face-count-badge" style="font-size: 12px; font-weight: 700; background: rgba(236, 72, 153, 0.15); color: #f472b6; padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(236, 72, 153, 0.3);" data-i18n="blur_face_count_init">
               🎉 自动识别到 0 张人脸
             </span>
-            <span style="font-size: 11px; color: var(--text-muted);">
+            <span style="font-size: 11px; color: var(--text-muted);" data-i18n="blur_hint_face_ops">
               💡 提示：点击图上粉色虚线框可取消/恢复该人脸打码；鼠标直接拖拽可手动为车牌/敏感文字画框打码
             </span>
           </div>
           <div style="display: flex; gap: 8px;">
-            <button id="btn-toggle-all" class="btn" style="background: rgba(255,255,255,0.06); padding: 4px 12px; font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border-light);">
+            <button id="btn-toggle-all" class="btn" style="background: rgba(255,255,255,0.06); padding: 4px 12px; font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border-light);" data-i18n="blur_btn_toggle_all">
               全部脱敏 / 全部保留
             </button>
-            <button id="btn-clear-custom" class="btn" style="background: rgba(255,255,255,0.06); padding: 4px 12px; font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border-light);">
+            <button id="btn-clear-custom" class="btn" style="background: rgba(255,255,255,0.06); padding: 4px 12px; font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border-light);" data-i18n="blur_btn_clear_custom">
               清除手动划框
             </button>
           </div>
@@ -298,13 +306,13 @@
         <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 20px; justify-content: flex-end;">
           <button class="btn btn-primary" id="btn-copy" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); padding: 9px 20px; font-size: 13px; font-weight: 700;">
             <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
-            <span>复制脱敏图片到剪贴板</span>
+            <span data-i18n="blur_btn_copy">复制脱敏图片到剪贴板</span>
           </button>
           <button class="btn btn-primary" id="btn-download" style="background: linear-gradient(135deg, #10b981, #06b6d4); padding: 9px 20px; font-size: 13px; font-weight: 700;">
             <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
-            <span>下载脱敏后图片</span>
+            <span data-i18n="blur_btn_download">下载脱敏后图片</span>
           </button>
-          <button class="btn" id="btn-reset" style="background: transparent; border: 1px solid var(--border-light); padding: 9px 16px; font-size: 13px; color: var(--text-muted);">
+          <button class="btn" id="btn-reset" style="background: transparent; border: 1px solid var(--border-light); padding: 9px 16px; font-size: 13px; color: var(--text-muted);" data-i18n="blur_btn_reset">
             上传新图片
           </button>
         </div>
@@ -318,9 +326,9 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #f472b6; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">fingerprint</span>
-          <span>高敏感生物信息 0 泄露风险</span>
+          <span data-i18n="blur_card1_title">高敏感生物信息 0 泄露风险</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="blur_card1_desc">
           人脸属于极其关键的个人生物隐私。普通美图软件或云端打码平台会将您的原图上传到服务器进行模型识别，存在暗中留存用于训练或被拖库泄露的风险。本工具基于纯浏览器内存运算，人脸数据绝不出您的本机。
         </p>
       </div>
@@ -328,9 +336,9 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #a78bfa; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">touch_app</span>
-          <span>自由交互：想留谁就留谁</span>
+          <span data-i18n="blur_card2_title">自由交互：想留谁就留谁</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="blur_card2_desc">
           在景区自拍或聚餐合影中，常常需要保留自己或核心好友的面孔，仅对背景里的路人与陌生人进行打码。本工具支持鼠标单点切换开关，无需手动一点点涂抹。
         </p>
       </div>
@@ -338,10 +346,10 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">directions_car</span>
-          <span>车牌与敏感证件一键划框</span>
+          <span data-i18n="blur_card3_title">车牌与敏感证件一键划框</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
-          除了人脸之外，街拍中的汽车车牌号、合同里的印章签名、门牌号和二维码也是高危隐私点。本工具支持鼠标在画面上直接拖拽画框，同等享受平滑打码效果。
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="blur_card3_desc">
+          除了自动人脸识别，支持直接在照片上用鼠标拉框打码车牌号、门牌号、证件号或敏感信息，全能一站式隐私脱敏。
         </p>
       </div>
     </div>
@@ -349,7 +357,7 @@
   </main>
 
   <footer style="text-align: center; padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; color: var(--text-muted);">
-    <p>© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
+    <p data-i18n="ai_footer_note">© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
   </footer>
 
   <style>
@@ -547,7 +555,12 @@
 
     function updateStatsBadge() {
       const activeCount = detectedFaces.filter(f => f.active).length;
-      faceCountBadge.textContent = `🎉 识别到 ${detectedFaces.length} 张人脸 (${activeCount} 处打码保护中${customBoxes.length ? `，${customBoxes.length} 处自定义划框` : ''})`;
+      const isEn = (typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US');
+      if (isEn) {
+        faceCountBadge.textContent = `🎉 ${detectedFaces.length} Faces Detected (${activeCount} Masked${customBoxes.length ? `, ${customBoxes.length} Custom` : ''})`;
+      } else {
+        faceCountBadge.textContent = `🎉 识别到 ${detectedFaces.length} 张人脸 (${activeCount} 处打码保护中${customBoxes.length ? `，${customBoxes.length} 处自定义划框` : ''})`;
+      }
     }
 
     // 渲染主画布
@@ -835,5 +848,7 @@
       dropzone.style.display = 'block';
     });
   </script>
+  <script src="../js/storage.js?v=2.8.0"></script>
+  <script src="../js/i18n.js?v=2.8.0"></script>
 </body>
 </html>

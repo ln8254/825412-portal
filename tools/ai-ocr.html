@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>纯前端 AI 本地离线文字识别与 OCR 段落清洗 - 825412.xyz</title>
+  <title data-i18n="tool_ocr_title">纯前端 AI 本地离线文字识别与 OCR 段落清洗 - 825412.xyz</title>
   <meta name="description" content="基于 Tesseract.js 纯浏览器端 WebAssembly 离线识别引擎，100% 本地内存解析，0 字节上传云端。支持中英日韩多国语言、全页面 Ctrl+V 极速粘贴截图、独家学术论文/PDF“去除换行合并段落”与汉字空格清洗。">
   <meta name="keywords" content="在线OCR, 离线OCR, 纯前端文字提取, 截图转文字, 论文复制去除换行, 合同发票识别, 825412.xyz">
   <link rel="canonical" href="https://825412.xyz/tools/ai-ocr">
@@ -102,20 +102,32 @@
           <span>825412.xyz</span>
         </a>
         <span style="color: #64748b;">/</span>
-        <a href="/toolbox" style="color: #8b5cf6; font-size: 14px; font-weight: 600; text-decoration: none;">极客工具箱</a>
+        <a href="/toolbox" style="color: #8b5cf6; font-size: 14px; font-weight: 600; text-decoration: none;" data-i18n="nav_toolbox">极客工具箱</a>
+        <span style="color: #64748b;">/</span>
+        <span style="color: #c084fc; font-size: 14px; font-weight: 700;" data-i18n="nav_tool_ocr">AI OCR</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
         <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
-          <a href="/" style="color: var(--text-secondary); text-decoration: none;">控制台</a>
-          <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none;">全部工具</a>
+          <a href="/" style="color: var(--text-secondary); text-decoration: none;">
+            <span data-i18n="nav_dashboard">控制台</span>
+          </a>
+          <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none;">
+            <span data-i18n="nav_all_tools">全部工具</span>
+          </a>
           <span style="color: rgba(255,255,255,0.15);">|</span>
-          <a href="/tools/pdf-to-markdown" style="color: #38bdf8; text-decoration: none; font-weight: 600;">PDF转MD</a>
-          <a href="/tools/ai-matting" style="color: #f472b6; text-decoration: none; font-weight: 600;">AI 抠图</a>
-          <a href="/tools/ai-upscale" style="color: #38bdf8; text-decoration: none; font-weight: 600;">4x超清</a>
-          <a href="/tools/ai-face-blur" style="color: #f472b6; text-decoration: none; font-weight: 600;">人脸打码</a>
-          <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600;">3D视差</a>
-          <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none;">隔空快传</a>
+          <a href="/tools/pdf-to-markdown" style="color: #38bdf8; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_pdf">PDF转MD</a>
+          <a href="/tools/ai-matting" style="color: #f472b6; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_matting">AI 抠图</a>
+          <a href="/tools/ai-upscale" style="color: #38bdf8; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_upscale">4x超清</a>
+          <a href="/tools/ai-face-blur" style="color: #f472b6; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_face_blur">人脸打码</a>
+          <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_3d">3D视差</a>
+          <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_airdrop">隔空快传</a>
         </nav>
+        <div class="lang-toggle-wrapper">
+          <select class="lang-selector custom-select" style="padding: 4px 10px; font-size: 12px; border-radius: var(--radius-sm); background: var(--surface-high); color: var(--text-primary); border: 1px solid var(--border-light); cursor: pointer;">
+            <option value="zh-CN">🇨🇳 简体中文</option>
+            <option value="en-US">🇺🇸 English</option>
+          </select>
+        </div>
       </div>
     </div>
   </header>
@@ -125,10 +137,10 @@
     <div style="margin-bottom: 24px;">
       <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #a78bfa; margin-bottom: 10px; font-weight: 700;">
         <span class="material-symbols-outlined" style="font-size: 15px;">document_scanner</span>
-        <span>端侧 AI 引擎 · 100% 浏览器内存 OCR 识别 · 0 字节上传云端</span>
+        <span data-i18n="ocr_hero_badge">端侧 AI 引擎 · 100% 浏览器内存 OCR 识别 · 0 字节上传云端</span>
       </div>
-      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px;">AI 本地高精度文字识别与 OCR 段落清洗</h1>
-      <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;">
+      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px;" data-i18n="ocr_hero_title">AI 本地高精度文字识别与 OCR 段落清洗</h1>
+      <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;" data-i18n="ocr_hero_desc">
         集成端侧两阶段深度学习视觉引擎（PaddleOCR PP-OCRv6：DBNet 文字定位 + SVTR 文字识别），彻底摆脱传统扫描仪的背景乱码缺陷，复杂插画、动漫字幕、海报与游戏截图 100% 干净提取，0 字节上传云端。
       </p>
     </div>
@@ -141,14 +153,14 @@
         <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(139, 92, 246, 0.15); color: #a78bfa; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
           <span class="material-symbols-outlined" style="font-size: 32px;">text_fields</span>
         </div>
-        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;" data-i18n="ocr_drop_title">
           拖拽图片至此 / 点击选择本地图片
         </div>
-        <div style="font-size: 13px; color: #c084fc; font-weight: 600; margin-bottom: 6px;">
+        <div style="font-size: 13px; color: #c084fc; font-weight: 600; margin-bottom: 6px;" data-i18n="ocr_drop_tip1">
           ⚡ 极客推荐：截屏后直接按 Ctrl+V (或 ⌘V) 即可瞬间开始提取！
         </div>
-        <div style="font-size: 12px; color: var(--text-muted);">
-          支持 PNG, JPG, WebP, BMP, GIF | 纯前端本地内存运算 | 绝不向服务器传输任何像素
+        <div style="font-size: 12px; color: var(--text-muted);" data-i18n="ocr_drop_tip2">
+          100% 浏览器客户端离线计算 | 隐私数据 0 泄露 | 免费无限次识别
         </div>
         <input type="file" id="ocr-file-input" accept="image/*" style="display: none;">
       </div>
@@ -156,20 +168,20 @@
       <!-- 引擎与识别参数选择栏 -->
       <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 13px; font-weight: 700; color: #fff;">⚙️ 识别引擎:</label>
+          <label style="font-size: 13px; font-weight: 700; color: #fff;" data-i18n="ocr_label_engine">⚙️ 识别引擎:</label>
           <select class="custom-select" id="ocr-engine-select" style="padding: 6px 12px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid #8b5cf6; color: #fff; font-size: 13px; font-weight: 600;">
-            <option value="paddleocr" selected>🤖 深度学习视觉引擎 (PaddleOCR PP-OCRv6 · 自动定位无噪点 · 推荐)</option>
-            <option value="tesseract">📄 传统轻量文档引擎 (Tesseract.js · 纯白底黑字合同/论文)</option>
+            <option value="paddleocr" selected data-i18n="ocr_opt_paddle">🤖 深度学习视觉引擎 (PaddleOCR PP-OCRv6 · 自动定位无噪点 · 推荐)</option>
+            <option value="tesseract" data-i18n="ocr_opt_tesseract">📄 传统轻量文档引擎 (Tesseract.js · 纯白底黑字合同/论文)</option>
           </select>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 13px; font-weight: 700; color: #fff;">🌐 语言包:</label>
+          <label style="font-size: 13px; font-weight: 700; color: #fff;" data-i18n="ocr_label_lang">🌐 语言包:</label>
           <select class="custom-select" id="ocr-lang-select" style="padding: 6px 12px; border-radius: var(--radius-sm); background: var(--surface-high); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 13px;">
-            <option value="ch" selected>🇨🇳 中文通用 (简体中文 + 英文混合)</option>
-            <option value="en">🇬🇧 纯英文 (文献 / 编程代码)</option>
+            <option value="ch" selected data-i18n="ocr_opt_lang_zh">🇨🇳 中文通用 (简体中文 + 英文混合)</option>
+            <option value="en" data-i18n="ocr_opt_lang_en">🇬🇧 纯英文 (文献 / 编程代码)</option>
           </select>
         </div>
-        <div style="font-size: 12px; color: var(--text-muted);" id="engine-hint">
+        <div style="font-size: 12px; color: var(--text-muted);" id="engine-hint" data-i18n="ocr_engine_hint">
           💡 PaddleOCR 具备 DBNet 视觉定位，支持动漫插画/海报/实景照片，从根源上绝无背景噪点乱码。
         </div>
       </div>
@@ -179,7 +191,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #c084fc;">
             <span class="material-symbols-outlined pulse-glow" style="font-size: 18px;">hourglass_top</span>
-            <span id="ocr-status-text">正在启动 WebAssembly OCR 识别核心...</span>
+            <span id="ocr-status-text" data-i18n="ocr_status_starting">正在启动 WebAssembly OCR 识别核心...</span>
           </div>
           <span id="ocr-percent-text" style="font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: #fff;">0%</span>
         </div>
@@ -187,7 +199,7 @@
           <div id="ocr-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #8b5cf6, #06b6d4); transition: width 0.15s ease;"></div>
         </div>
         <div style="margin-top: 8px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between;">
-          <span>端侧神经网络并行推理中</span>
+          <span data-i18n="ocr_parallel_note">端侧神经网络并行推理中</span>
           <span id="ocr-timer-text" style="font-family: var(--font-mono);">0.0s</span>
         </div>
       </div>
@@ -198,15 +210,15 @@
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
             <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="font-size: 13px; font-weight: 700; color: var(--text-secondary);">🖼️ 待识别源图</span>
-              <span style="font-size: 11px; background: rgba(139, 92, 246, 0.15); color: #c084fc; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3);">
+              <span style="font-size: 13px; font-weight: 700; color: var(--text-secondary);" data-i18n="ocr_source_img">🖼️ 待识别源图</span>
+              <span style="font-size: 11px; background: rgba(139, 92, 246, 0.15); color: #c084fc; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3);" data-i18n="ocr_crop_tip_badge">
                 🖱️ 支持鼠标拖拽局部框选
               </span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <button id="btn-recognize-full" class="quick-action-pill" style="display: none; padding: 3px 8px; font-size: 11px;" title="重新扫描整张图片">
                 <span class="material-symbols-outlined" style="font-size: 14px;">fullscreen</span>
-                <span>全图扫描</span>
+                <span data-i18n="ocr_btn_full_scan">全图扫描</span>
               </button>
               <span id="ocr-img-dim" style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">0 x 0</span>
             </div>
@@ -228,30 +240,30 @@
 
             <!-- 浮动操作条 (选定后弹出) -->
             <div id="ocr-crop-bar" style="display: none; position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 30; background: rgba(15, 23, 42, 0.95); border: 1px solid #8b5cf6; box-shadow: 0 8px 30px rgba(0,0,0,0.8); border-radius: 30px; padding: 6px 14px; align-items: center; gap: 8px; backdrop-filter: blur(12px); white-space: nowrap;">
-              <span style="font-size: 12px; color: #cbd5e1; font-weight: 600;">已划定局部区域</span>
+              <span style="font-size: 12px; color: #cbd5e1; font-weight: 600;" data-i18n="ocr_crop_selected">已划定局部区域</span>
               <button id="btn-crop-recognize" class="btn btn-primary" type="button" style="padding: 5px 14px; font-size: 12px; background: linear-gradient(135deg, #8b5cf6, #06b6d4); border-radius: 20px; font-weight: 700; cursor: pointer;">
                 <span class="material-symbols-outlined" style="font-size: 15px;">crop</span>
-                <span>🎯 仅识别框选区域</span>
+                <span data-i18n="ocr_btn_crop_run">🎯 仅识别框选区域</span>
               </button>
               <button id="btn-crop-cancel" class="btn" type="button" style="padding: 5px 10px; font-size: 12px; background: rgba(255,255,255,0.1); color: #94a3b8; border-radius: 20px; cursor: pointer;">
-                <span>取消</span>
+                <span data-i18n="ocr_btn_cancel">取消</span>
               </button>
             </div>
           </div>
 
           <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-            <span>💡 提示：在图片上直接按住鼠标左键拖拽拉框，即可秒速提取字幕/对话框/局部文本</span>
-            <span id="ocr-mode-badge" style="color: #38bdf8; font-weight: 600;">当前：全图扫描模式</span>
+            <span data-i18n="ocr_mouse_tip">💡 提示：在图片上直接按住鼠标左键拖拽拉框，即可秒速提取字幕/对话框/局部文本</span>
+            <span id="ocr-mode-badge" style="color: #38bdf8; font-weight: 600;" data-i18n="ocr_mode_full">当前：全图扫描模式</span>
           </div>
         </div>
 
         <!-- 右侧：识别结果与后处理工作区 -->
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-            <span style="font-size: 13px; font-weight: 700; color: #c084fc;">📝 提取结果编辑区</span>
+            <span style="font-size: 13px; font-weight: 700; color: #c084fc;" data-i18n="ocr_result_title">📝 提取结果编辑区</span>
             <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); display: flex; gap: 10px;">
-              <span>字符数: <strong id="stat-chars" style="color: #fff;">0</strong></span>
-              <span>行数: <strong id="stat-lines" style="color: #fff;">0</strong></span>
+              <span><span data-i18n="ocr_stat_chars">字符数:</span> <strong id="stat-chars" style="color: #fff;">0</strong></span>
+              <span><span data-i18n="ocr_stat_lines">行数:</span> <strong id="stat-lines" style="color: #fff;">0</strong></span>
             </div>
           </div>
 
@@ -259,45 +271,45 @@
           <div id="ocr-noise-notice" style="display: none; margin-bottom: 8px; padding: 7px 12px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: var(--radius-sm); font-size: 12px; color: #fbbf24; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
             <div style="display: flex; align-items: center; gap: 6px;">
               <span class="material-symbols-outlined" style="font-size: 16px;">auto_fix_high</span>
-              <span id="ocr-noise-notice-text">已智能过滤背景噪点乱码（发光颗粒/树干纹理等非文字干扰）</span>
+              <span id="ocr-noise-notice-text" data-i18n="ocr_noise_filtered">已智能过滤背景噪点乱码（发光颗粒/树干纹理等非文字干扰）</span>
             </div>
-            <button id="btn-toggle-raw-noise" type="button" style="background: transparent; border: none; color: #38bdf8; cursor: pointer; text-decoration: underline; font-size: 12px; font-weight: 600; padding: 0;">
+            <button id="btn-toggle-raw-noise" type="button" style="background: transparent; border: none; color: #38bdf8; cursor: pointer; text-decoration: underline; font-size: 12px; font-weight: 600; padding: 0;" data-i18n="ocr_view_raw_chars">
               查看原始全量字符
             </button>
           </div>
 
-          <textarea class="ocr-editor-textarea" id="ocr-result-text" placeholder="识别完成后，文字将显示在此处，可直接编辑微调..."></textarea>
+          <textarea class="ocr-editor-textarea" id="ocr-result-text" placeholder="识别完成后，文字将显示在此处，可直接编辑微调..." data-i18n-ph="ocr_result_ph"></textarea>
         </div>
       </div>
 
       <!-- 杀手级后处理格式清洗工具条 (在有结果时显示) -->
       <div id="ocr-actions-toolbar" style="display: none; border-top: 1px solid var(--border-light); padding-top: 18px;">
         <div style="margin-bottom: 12px;">
-          <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-right: 8px;">⚡ 极客快捷文本清洗 (点击即生效):</span>
+          <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-right: 8px;" data-i18n="ocr_clean_title">⚡ 极客快捷文本清洗 (点击即生效):</span>
           <div style="display: inline-flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
             <button class="quick-action-pill" id="action-filter-noise" title="过滤掉低于50%置信度的背景纹理或非文字乱码">
               <span class="material-symbols-outlined" style="font-size: 15px; color: #f59e0b;">filter_alt</span>
-              <span id="label-filter-noise">过滤背景噪点乱码</span>
+              <span id="label-filter-noise" data-i18n="ocr_act_noise">过滤背景噪点乱码</span>
             </button>
             <button class="quick-action-pill" id="action-merge-lines" title="解决从 PDF 或论文复制文字时每行强制断行导致的破碎阅读体验">
               <span class="material-symbols-outlined" style="font-size: 15px; color: #10b981;">magic_button</span>
-              <span>合并断行 / 段落重构 (论文/PDF 必备)</span>
+              <span data-i18n="ocr_act_merge_lines">合并断行 / 段落重构 (论文/PDF 必备)</span>
             </button>
             <button class="quick-action-pill" id="action-clean-cjk-spaces" title="清除 OCR 引擎在汉字之间错误添加的无意义空格">
               <span class="material-symbols-outlined" style="font-size: 15px; color: #38bdf8;">content_cut</span>
-              <span>清理汉字间冗余空格</span>
+              <span data-i18n="ocr_act_cjk_spaces">清理汉字间冗余空格</span>
             </button>
             <button class="quick-action-pill" id="action-to-uppercase">
               <span class="material-symbols-outlined" style="font-size: 15px;">text_fields</span>
-              <span>全部大写</span>
+              <span data-i18n="ocr_act_upper">全部大写</span>
             </button>
             <button class="quick-action-pill" id="action-to-lowercase">
               <span class="material-symbols-outlined" style="font-size: 15px;">text_fields</span>
-              <span>全部小写</span>
+              <span data-i18n="ocr_act_lower">全部小写</span>
             </button>
             <button class="quick-action-pill" id="action-to-markdown">
               <span class="material-symbols-outlined" style="font-size: 15px; color: #f59e0b;">code</span>
-              <span>加引用块 (> Quote)</span>
+              <span data-i18n="ocr_act_quote">加引用块 (> Quote)</span>
             </button>
           </div>
         </div>
@@ -306,18 +318,18 @@
         <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px;">
           <button class="btn btn-primary" id="copy-text-btn" style="background: linear-gradient(135deg, #8b5cf6, #06b6d4); padding: 9px 18px; font-size: 13px; font-weight: 700;">
             <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
-            <span>复制全部文本</span>
+            <span data-i18n="ocr_btn_copy">复制识别文本</span>
           </button>
           <button class="btn btn-primary" id="download-txt-btn" style="background: linear-gradient(135deg, #10b981, #06b6d4); padding: 9px 18px; font-size: 13px; font-weight: 700;">
             <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
-            <span>导出为 .TXT</span>
+            <span data-i18n="ocr_btn_export_txt">导出为 .TXT</span>
           </button>
           <button class="btn" id="download-md-btn" style="background: var(--surface-high); border: 1px solid var(--border-light); padding: 9px 18px; font-size: 13px; font-weight: 600; color: #fff;">
             <span class="material-symbols-outlined" style="font-size: 16px;">description</span>
-            <span>导出为 .MD</span>
+            <span data-i18n="ocr_btn_export_md">导出 Markdown</span>
           </button>
-          <button class="btn" id="ocr-reset-btn" style="background: transparent; border: 1px solid var(--border-light); padding: 9px 16px; font-size: 13px; color: var(--text-muted);">
-            重新识别
+          <button class="btn" id="ocr-reset-btn" style="background: transparent; border: 1px solid var(--border-light); padding: 9px 16px; font-size: 13px; color: var(--text-muted);" data-i18n="ocr_btn_reset">
+            重置 / 上传新图片
           </button>
         </div>
       </div>
@@ -329,30 +341,30 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #a78bfa; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">verified_user</span>
-          <span>高敏感数据零泄露</span>
+          <span data-i18n="ocr_card1_title">100% 本地运算，商业机密 0 泄露</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
-          包含个人隐私的身份证、发票凭证、银行流水、未公开商业合同，在普通在线 OCR 网站上有极高的上云被爬取或留存训练风险。本工具基于 WebAssembly 纯客户端执行，数据绝不出您的本机。
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="ocr_card1_desc">
+          合同、财务发票、身份证件、内部会议纪要无需上传至云端 OCR API，杜绝数据在传输或服务端被留存训练的风险。断网依然能极速提取。
         </p>
       </div>
 
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">auto_fix_high</span>
-          <span>独家论文段落清洗算法</span>
+          <span data-i18n="ocr_card2_title">PaddleOCR 两阶段深度学习引擎</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
-          常规 OCR 提取双栏排版 PDF 或英文论文时，往往每行末尾都有换行符，贴入 Word 或翻译工具时排版完全错乱。我们的“合并断行”算法能智能识别句子终止符，自动重组连贯段落。
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="ocr_card2_desc">
+          基于百度开源的 PP-OCRv6 轻量架构，通过 DBNet 实现文字像素级框选，彻底解决传统 Tesseract 无法处理倾斜艺术字、动漫字幕和复杂背景海报的问题。
         </p>
       </div>
 
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">speed</span>
-          <span>Ctrl+V 肌肉记忆与毫秒级复用</span>
+          <span data-i18n="ocr_card3_title">极客格式清洗：专治破损排版</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
-          无需繁琐地“右键另存为图片 -> 上传文件 -> 点击识别 -> 下载结果”。使用微信/系统截图后，切换到本页面直接按 Ctrl+V，离线神经网络即可就地唤醒运算并输出文本。
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="ocr_card3_desc">
+          内置论文/PDF 强制断行合并算法，将原本破碎成数十截的文字重组为自然连续的段落；一键消除汉字间的无意义空格，直接喂给大模型或整理进知识库。
         </p>
       </div>
     </div>
@@ -360,7 +372,7 @@
   </main>
 
   <footer style="text-align: center; padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; color: var(--text-muted);">
-    <p>© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
+    <p data-i18n="ai_footer_note">© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
   </footer>
 
   <!-- 引入 Tesseract.js 作为备选轻量引擎 -->
@@ -1197,5 +1209,7 @@
       resultTextarea.value = '';
     });
   </script>
+  <script src="../js/storage.js?v=2.8.0"></script>
+  <script src="../js/i18n.js?v=2.8.0"></script>
 </body>
 </html>

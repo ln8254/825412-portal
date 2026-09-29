@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI PDF 智能解析与 Markdown 导出工坊 - 极客端侧离线 AI 工坊 | 825412.xyz</title>
+  <title data-i18n="tool_pdf_title">AI PDF 智能解析与 Markdown 导出工坊 - 极客端侧离线 AI 工坊 | 825412.xyz</title>
   <meta name="description" content="基于纯浏览器端侧 WebAssembly 技术（@firecrawl/pdf-inspector-wasm），100% 本地运算，0 字节数据上传云端。毫秒级快速检测 PDF 类型（原生纯文本/扫描件/混合图文），智能提取多栏排版与复杂表格并转换为干净的 Markdown，支持一键复制与 .md 文件导出。">
   <meta name="keywords" content="PDF转Markdown, PDF提取, 本地PDF解析, pdf-inspector, 端侧AI, WebAssembly, 纯前端PDF解析, 825412.xyz">
   <link rel="canonical" href="https://825412.xyz/tools/pdf-to-markdown">
@@ -22,13 +22,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
-      min-height: 520px;
       margin-bottom: 24px;
-    }
-    @media (max-width: 900px) {
-      .pdf-workbench-grid {
-        grid-template-columns: 1fr;
-      }
     }
     .panel-container {
       background: #090d16;
@@ -36,9 +30,21 @@
       border-radius: var(--radius-md);
       display: flex;
       flex-direction: column;
-      height: 68vh;
-      min-height: 480px;
+      height: 60vh;
+      min-height: 420px;
       overflow: hidden;
+    }
+    @media (max-width: 900px) {
+      .pdf-workbench-grid {
+        grid-template-columns: 1fr;
+      }
+      .panel-container {
+        height: auto;
+        min-height: 360px;
+      }
+      #source-textarea {
+        min-height: 280px !important;
+      }
     }
     .panel-header {
       padding: 10px 16px;
@@ -230,47 +236,55 @@
           <span>825412.xyz</span>
         </a>
         <span style="color: #64748b;">/</span>
-        <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 600;">极客工具箱</a>
+        <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 600;" data-i18n="nav_toolbox">极客工具箱</a>
         <span style="color: #64748b;">/</span>
-        <span style="color: #38bdf8; font-size: 13px; font-weight: 700;">AI PDF 转 Markdown</span>
+        <span style="color: #38bdf8; font-size: 13px; font-weight: 700;" data-i18n="nav_tool_pdf">AI PDF 转 Markdown</span>
       </div>
 
-      <!-- 右侧：全站入口快捷导航菜单 -->
-      <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
-        <a href="/" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">dashboard</span>
-          <span>控制台</span>
-        </a>
-        <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">build</span>
-          <span>全部工具</span>
-        </a>
-        <span style="color: rgba(255,255,255,0.15);">|</span>
-        <a href="/tools/ai-ocr" style="color: #a78bfa; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">document_scanner</span>
-          <span>AI OCR</span>
-        </a>
-        <a href="/tools/ai-matting" style="color: #f472b6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">photo_auto_merge</span>
-          <span>AI 抠图</span>
-        </a>
-        <a href="/tools/ai-upscale" style="color: #38bdf8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">photo_size_select_large</span>
-          <span>4x超清</span>
-        </a>
-        <a href="/tools/ai-face-blur" style="color: #f472b6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">visibility_off</span>
-          <span>人脸打码</span>
-        </a>
-        <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">3d_rotation</span>
-          <span>3D视差</span>
-        </a>
-        <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">wifi_tethering</span>
-          <span>隔空快传</span>
-        </a>
-      </nav>
+      <!-- 右侧：全站入口快捷导航菜单与多语言切换 -->
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <nav style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px;">
+          <a href="/" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">dashboard</span>
+            <span data-i18n="nav_dashboard">控制台</span>
+          </a>
+          <a href="/toolbox" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">build</span>
+            <span data-i18n="nav_all_tools">全部工具</span>
+          </a>
+          <span style="color: rgba(255,255,255,0.15);">|</span>
+          <a href="/tools/ai-ocr" style="color: #a78bfa; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">document_scanner</span>
+            <span data-i18n="nav_tool_ocr">AI OCR</span>
+          </a>
+          <a href="/tools/ai-matting" style="color: #f472b6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">photo_auto_merge</span>
+            <span data-i18n="nav_tool_matting">AI 抠图</span>
+          </a>
+          <a href="/tools/ai-upscale" style="color: #38bdf8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">photo_size_select_large</span>
+            <span data-i18n="nav_tool_upscale">4x超清</span>
+          </a>
+          <a href="/tools/ai-face-blur" style="color: #f472b6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">visibility_off</span>
+            <span data-i18n="nav_tool_face_blur">人脸打码</span>
+          </a>
+          <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">3d_rotation</span>
+            <span data-i18n="nav_tool_3d">3D视差</span>
+          </a>
+          <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">wifi_tethering</span>
+            <span data-i18n="nav_airdrop">隔空快传</span>
+          </a>
+        </nav>
+        <div class="lang-toggle-wrapper">
+          <select class="lang-selector custom-select" style="padding: 4px 10px; font-size: 12px; border-radius: var(--radius-sm); background: var(--surface-high); color: var(--text-primary); border: 1px solid var(--border-light); cursor: pointer;">
+            <option value="zh-CN">🇨🇳 简体中文</option>
+            <option value="en-US">🇺🇸 English</option>
+          </select>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -281,12 +295,12 @@
     <div style="margin-bottom: 24px;">
       <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #c084fc; margin-bottom: 10px; font-weight: 700;">
         <span class="material-symbols-outlined" style="font-size: 16px;">document_scanner</span>
-        <span>端侧离线 AI 工坊 · Firecrawl pdf-inspector-wasm 原生驱动</span>
+        <span data-i18n="pdf_hero_badge">端侧离线 AI 工坊 · Firecrawl pdf-inspector-wasm 原生驱动</span>
       </div>
-      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px;">
+      <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px;" data-i18n="pdf_hero_title">
         AI PDF 智能解析与 Markdown 导出工坊
       </h1>
-      <p style="font-size: 14px; color: var(--text-secondary); margin: 0; line-height: 1.6;">
+      <p style="font-size: 14px; color: var(--text-secondary); margin: 0; line-height: 1.6;" data-i18n="pdf_hero_desc">
         专为大模型（LLM）RAG 知识库、学术论文、财务报表与商业合同设计！基于纯浏览器 WebAssembly 引擎在本地毫秒级提取 PDF 原生结构，自动还原复杂表格、双栏阅读流与层级标题。100% 内存本地运行，0 字节上云，商业机密绝不外泄。
       </p>
     </div>
@@ -299,13 +313,13 @@
         <div style="width: 58px; height: 58px; border-radius: 50%; background: rgba(168, 85, 247, 0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #c084fc;">
           <span class="material-symbols-outlined" style="font-size: 32px;">upload_file</span>
         </div>
-        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;" data-i18n="pdf_drop_title">
           拖拽 PDF 文件至此 / 点击选择本地文档
         </div>
-        <div style="font-size: 13px; color: #c084fc; font-weight: 600; margin-bottom: 6px;">
+        <div style="font-size: 13px; color: #c084fc; font-weight: 600; margin-bottom: 6px;" data-i18n="pdf_drop_tip1">
           ⚡ 毫秒级提取：支持各类商业财报、合同公文、学术论文、技术白皮书
         </div>
-        <div style="font-size: 12px; color: var(--text-muted);">
+        <div style="font-size: 12px; color: var(--text-muted);" data-i18n="pdf_drop_tip2">
           100% 浏览器客户端 WebAssembly 本地解析 | 绝对离线 零泄露风险 | 免费无限制
         </div>
         <input type="file" id="file-input" accept=".pdf,application/pdf" style="display: none;">
@@ -316,7 +330,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #c084fc;">
             <span class="material-symbols-outlined" style="font-size: 18px; animation: spin 1.5s linear infinite;">hourglass_top</span>
-            <span id="status-text">正在启动 WebAssembly 解析引擎...</span>
+            <span id="status-text" data-i18n="pdf_status_starting">正在启动 WebAssembly 解析引擎...</span>
           </div>
           <span id="percent-text" style="font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: #fff;">0%</span>
         </div>
@@ -333,30 +347,30 @@
           <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
             <span id="diag-type-badge" class="diag-badge diag-badge-text">
               <span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span>
-              <span id="diag-type-text">TextBased 原生文本</span>
+              <span id="diag-type-text" data-i18n="pdf_diag_type_text">TextBased 原生文本</span>
             </span>
             <span style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
               <span class="material-symbols-outlined" style="font-size: 16px; color: #38bdf8;">pages</span>
-              <span id="diag-pages">12 页</span>
+              <span id="diag-pages">12 Pages</span>
             </span>
             <span style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
               <span class="material-symbols-outlined" style="font-size: 16px; color: #34d399;">speed</span>
               <span id="diag-time">45 ms</span>
             </span>
-            <span id="diag-table-tag" style="display: none; font-size: 12px; color: #c084fc; background: rgba(168, 85, 247, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(168, 85, 247, 0.3);">
+            <span id="diag-table-tag" style="display: none; font-size: 12px; color: #c084fc; background: rgba(168, 85, 247, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(168, 85, 247, 0.3);" data-i18n="pdf_diag_tag_table">
               📊 包含结构化表格
             </span>
-            <span id="diag-column-tag" style="display: none; font-size: 12px; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.3);">
+            <span id="diag-column-tag" style="display: none; font-size: 12px; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.3);" data-i18n="pdf_diag_tag_column">
               📰 多栏排版顺序还原
             </span>
           </div>
 
           <!-- 排版模式切换 -->
           <div style="display: flex; gap: 8px; align-items: center;">
-            <label style="font-size: 12px; color: var(--text-muted);">排版模式:</label>
+            <label style="font-size: 12px; color: var(--text-muted);" data-i18n="pdf_diag_mode">排版模式:</label>
             <select id="profile-select" style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-light); color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 6px; outline: none; cursor: pointer;">
-              <option value="fidelity" selected>源版面高保真 (Fidelity)</option>
-              <option value="compact">精简 Token 模式 (大模型友好)</option>
+              <option value="fidelity" selected data-i18n="pdf_opt_fidelity">源版面高保真 (Fidelity)</option>
+              <option value="compact" data-i18n="pdf_opt_compact">精简 Token 模式 (大模型友好)</option>
             </select>
           </div>
         </div>
@@ -366,10 +380,10 @@
           <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #fbbf24;">
               <span class="material-symbols-outlined" style="font-size: 18px;">warning</span>
-              <span id="ocr-alert-text">检测到部分页面属于扫描图片，建议联动端侧 OCR 识别！</span>
+              <span id="ocr-alert-text" data-i18n="pdf_ocr_notice">检测到部分页面属于扫描图片，建议联动端侧 OCR 识别！</span>
             </div>
             <a href="/tools/ai-ocr" target="_blank" class="btn" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 12px; padding: 4px 12px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font-weight: 700;">
-              <span>前往 AI 离线 OCR 工坊</span>
+              <span data-i18n="pdf_btn_goto_ocr">前往 AI 离线 OCR 工坊</span>
               <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span>
             </a>
           </div>
@@ -380,28 +394,28 @@
           <div style="display: flex; gap: 6px;">
             <button type="button" class="view-pill active" data-view="split">
               <span class="material-symbols-outlined" style="font-size: 15px;">vertical_split</span>
-              <span>双栏并排 (Split)</span>
+              <span data-i18n="pdf_view_split">双栏并排 (Split)</span>
             </button>
             <button type="button" class="view-pill" data-view="source">
               <span class="material-symbols-outlined" style="font-size: 15px;">code</span>
-              <span>Markdown 源码</span>
+              <span data-i18n="pdf_view_source">Markdown 源码</span>
             </button>
             <button type="button" class="view-pill" data-view="preview">
               <span class="material-symbols-outlined" style="font-size: 15px;">visibility</span>
-              <span>富文本排版预览</span>
+              <span data-i18n="pdf_view_preview">富文本排版预览</span>
             </button>
           </div>
 
           <div style="display: flex; gap: 10px; align-items: center;">
             <button class="btn btn-primary" id="btn-copy-md" style="background: linear-gradient(135deg, #a855f7, #3b82f6); padding: 7px 18px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
               <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
-              <span id="copy-btn-text">复制 Markdown</span>
+              <span id="copy-btn-text" data-i18n="pdf_btn_copy">复制 Markdown</span>
             </button>
             <button class="btn btn-primary" id="btn-download-md" style="background: linear-gradient(135deg, #3b82f6, #06b6d4); padding: 7px 18px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
               <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
-              <span>下载 .md 文件</span>
+              <span data-i18n="pdf_btn_download">下载 .md 文件</span>
             </button>
-            <button class="btn" id="btn-reset" style="background: transparent; border: 1px solid var(--border-light); padding: 7px 14px; font-size: 12px; color: var(--text-muted);">
+            <button class="btn" id="btn-reset" style="background: transparent; border: 1px solid var(--border-light); padding: 7px 14px; font-size: 12px; color: var(--text-muted);" data-i18n="pdf_btn_reset">
               重置
             </button>
           </div>
@@ -415,14 +429,14 @@
             <div class="panel-header">
               <span style="color: #c084fc; display: flex; align-items: center; gap: 6px;">
                 <span class="material-symbols-outlined" style="font-size: 16px;">terminal</span>
-                <span>Markdown 源码</span>
+                <span data-i18n="pdf_panel_source_title">Markdown 源码</span>
               </span>
               <span id="source-stats" style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">
                 0 字 | 0 字符
               </span>
             </div>
             <div class="panel-body">
-              <textarea id="source-textarea" spellcheck="false" placeholder="解析结果将呈现在此..."></textarea>
+              <textarea id="source-textarea" spellcheck="false" data-i18n-ph="pdf_textarea_ph" placeholder="解析结果将呈现在此..."></textarea>
             </div>
           </div>
 
@@ -431,9 +445,9 @@
             <div class="panel-header">
               <span style="color: #38bdf8; display: flex; align-items: center; gap: 6px;">
                 <span class="material-symbols-outlined" style="font-size: 16px;">auto_stories</span>
-                <span>所见即所得富文本渲染</span>
+                <span data-i18n="pdf_panel_preview_title">所见即所得富文本渲染</span>
               </span>
-              <span style="font-size: 11px; color: var(--text-muted);">
+              <span style="font-size: 11px; color: var(--text-muted);" data-i18n="pdf_panel_preview_sub">
                 支持 GFM 表格与排版
               </span>
             </div>
@@ -453,9 +467,9 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #c084fc; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">verified_user</span>
-          <span>100% 内存运行，商业机密 0 泄露</span>
+          <span data-i18n="pdf_card1_title">100% 内存运行，商业机密 0 泄露</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="pdf_card1_desc">
           市面上的在线 PDF 转换网站通常要求将文件完整上传至其远端服务器，企业财报、涉密合同、个人简历面临巨大的泄密风险。本工具基于 WebAssembly 完全在您浏览器内存中解析，断网可用，绝不上传任何字节。
         </p>
       </div>
@@ -463,9 +477,9 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">bolt</span>
-          <span>50 ~ 200ms 毫秒级极速处理</span>
+          <span data-i18n="pdf_card2_title">50 ~ 200ms 毫秒级极速处理</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="pdf_card2_desc">
           告别云端排队等待！由 Firecrawl 团队优化的 Rust 原生引擎将数十页复杂的原生 PDF 文档在几十毫秒内秒级解析完成，比传统 Python 方案（如 PyMuPDF4LLM、MarkItDown）快 30 倍以上。
         </p>
       </div>
@@ -473,9 +487,9 @@
       <div class="glass-card">
         <h3 style="font-size: 16px; font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
           <span class="material-symbols-outlined">table_chart</span>
-          <span>复杂财务表格与双栏排版还原</span>
+          <span data-i18n="pdf_card3_title">复杂财务表格与双栏排版还原</span>
         </h3>
-        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;" data-i18n="pdf_card3_desc">
           针对学术论文与报纸的双栏排版自动计算视觉阅读顺序；结合矢量线框与文本对齐算法精准还原表格为标准 GFM Markdown 表格，是喂入大语言模型（LLM）进行 RAG 检索的利器。
         </p>
       </div>
@@ -484,12 +498,15 @@
   </main>
 
   <footer style="text-align: center; padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; color: var(--text-muted);">
-    <p>© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
+    <p data-i18n="pdf_footer_note">© 2026 825412.xyz · 极客端侧离线 AI 工坊 · 100% 本地计算 零数据上传</p>
   </footer>
 
   <style>
     @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
+
+  <script src="../js/storage.js?v=2.8.0"></script>
+  <script src="../js/i18n.js?v=2.8.0"></script>
 
   <!-- 业务逻辑脚本 -->
   <script type="module">
@@ -628,8 +645,9 @@
 
         setTimeout(() => {
           progressPanel.style.display = 'none';
+          dropzone.style.display = 'none';
           workbench.style.display = 'block';
-          workbench.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 160);
 
       } catch (err) {
@@ -775,16 +793,16 @@
 
       try {
         await navigator.clipboard.writeText(text);
-        copyBtnText.textContent = '已复制！';
+        copyBtnText.textContent = (window.I18nController && I18nController.t('pdf_btn_copied')) || '已复制！';
         btnCopyMd.style.background = '#10b981';
         setTimeout(() => {
-          copyBtnText.textContent = '复制 Markdown';
+          copyBtnText.textContent = (window.I18nController && I18nController.t('pdf_btn_copy')) || '复制 Markdown';
           btnCopyMd.style.background = 'linear-gradient(135deg, #a855f7, #3b82f6)';
         }, 1800);
       } catch (err) {
         sourceTextarea.select();
         document.execCommand('copy');
-        alert('已复制到剪贴板！');
+        alert((window.I18nController && I18nController.t('pdf_btn_copied')) || '已复制到剪贴板！');
       }
     });
 

@@ -149,16 +149,17 @@
           <a href="/" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_dashboard">控制台</a>
           <a href="/toolbox" style="color: var(--color-primary); font-weight: 700; text-decoration: none;" data-i18n="nav_toolbox">极客工具箱</a>
           <span style="color: rgba(255,255,255,0.15);">|</span>
-          <a href="/tools/pdf-to-markdown" style="color: #38bdf8; text-decoration: none; font-weight: 600;">PDF转MD</a>
-          <a href="/tools/ai-ocr" style="color: #a78bfa; text-decoration: none; font-weight: 600;">AI OCR</a>
-          <a href="/tools/ai-matting" style="color: #f472b6; text-decoration: none; font-weight: 600;">AI 抠图</a>
-          <a href="/tools/ai-upscale" style="color: #38bdf8; text-decoration: none; font-weight: 600;">4x超清</a>
-          <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600;">3D视差</a>
+          <a href="/tools/pdf-to-markdown" style="color: #38bdf8; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_pdf">PDF转MD</a>
+          <a href="/tools/ai-ocr" style="color: #a78bfa; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_ocr">AI OCR</a>
+          <a href="/tools/ai-matting" style="color: #f472b6; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_matting">AI 抠图</a>
+          <a href="/tools/ai-upscale" style="color: #38bdf8; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_upscale">4x超清</a>
+          <a href="/tools/ai-face-blur" style="color: #f472b6; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_face_blur">人脸打码</a>
+          <a href="/tools/ai-3d-photo" style="color: #c084fc; text-decoration: none; font-weight: 600;" data-i18n="nav_tool_3d">3D视差</a>
           <a href="/airdrop" style="color: var(--text-secondary); text-decoration: none;" data-i18n="nav_airdrop">隔空快传</a>
         </nav>
         <div class="lang-toggle-wrapper">
-          <select id="lang-select-header" class="custom-select" style="padding: 4px 10px; font-size: 12px; border-radius: var(--radius-sm); background: var(--surface-high); color: var(--text-primary); border: 1px solid var(--border-light); cursor: pointer;">
-            <option value="zh-CN">🇨🇳 中文</option>
+          <select id="lang-select-header" class="lang-selector custom-select" style="padding: 4px 10px; font-size: 12px; border-radius: var(--radius-sm); background: var(--surface-high); color: var(--text-primary); border: 1px solid var(--border-light); cursor: pointer;">
+            <option value="zh-CN">🇨🇳 简体中文</option>
             <option value="en-US">🇺🇸 English</option>
           </select>
         </div>
@@ -172,7 +173,7 @@
     <!-- 标题与架构介绍 -->
     <div style="margin-bottom: 24px;">
       <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #a78bfa; margin-bottom: 10px; font-weight: 700;">
-        <span>🧰 统一工具聚合中心 · 100% 纯前端零上传</span>
+        <span data-i18n="toolbox_hub_badge">🧰 统一工具聚合中心 · 100% 纯前端零上传</span>
       </div>
       <h1 style="font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px;" data-i18n="toolbox_hub_title">极客工具箱聚合大厅 (Geek Toolbox Hub)</h1>
       <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;" data-i18n="toolbox_hub_desc">免安装、零依赖、纯浏览器本地内存运算的开发者瑞士军刀。每个工具均配备独立沉浸式工作台，彻底告别堆叠与割裂。</p>
@@ -180,12 +181,12 @@
 
     <!-- 分类筛选导航条 -->
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;">
-      <button class="filter-btn active" data-filter="all">🌟 全部工具 (<span id="count-all">16</span>)</button>
-      <button class="filter-btn" data-filter="ai" style="border-color: rgba(236, 72, 153, 0.5); color: #f472b6;">🤖 端侧离线 AI (6)</button>
-      <button class="filter-btn" data-filter="security">🔐 安全与密码 (3)</button>
-      <button class="filter-btn" data-filter="dev">🔤 格式与开发 (3)</button>
-      <button class="filter-btn" data-filter="media">🖼️ 多媒体图像 (2)</button>
-      <button class="filter-btn" data-filter="hardware">🖥️ 硬件与外设 (2)</button>
+      <button class="filter-btn active" data-filter="all" data-i18n="filter_all">🌟 全部工具 (16)</button>
+      <button class="filter-btn" data-filter="ai" style="border-color: rgba(236, 72, 153, 0.5); color: #f472b6;" data-i18n="filter_ai">🤖 端侧离线 AI (6)</button>
+      <button class="filter-btn" data-filter="security" data-i18n="filter_security">🔐 安全与密码 (3)</button>
+      <button class="filter-btn" data-filter="dev" data-i18n="filter_dev">🔤 格式与开发 (3)</button>
+      <button class="filter-btn" data-filter="media" data-i18n="filter_media">🖼️ 多媒体图像 (2)</button>
+      <button class="filter-btn" data-filter="hardware" data-i18n="filter_hardware">🖥️ 硬件与外设 (2)</button>
     </div>
 
     <!-- 15 大独立工具网格矩阵 -->
@@ -200,18 +201,18 @@
             </div>
             <div>
               <div style="display: flex; gap: 6px; margin-bottom: 4px;">
-                <span class="hub-tag" style="color: #f472b6; background: rgba(236, 72, 153, 0.15); font-weight: 800;">⚡ 端侧 AI</span>
-                <span class="hub-tag">ONNX / WASM</span>
+                <span class="hub-tag" style="color: #f472b6; background: rgba(236, 72, 153, 0.15); font-weight: 800;" data-i18n="tag_edge_ai">⚡ 端侧 AI</span>
+                <span class="hub-tag" data-i18n="tag_onnx_wasm">ONNX / WASM</span>
               </div>
-              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">AI 智能离线抠图与换底</h2>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;" data-i18n="tool_matting_hub_title">AI 智能离线抠图与换底</h2>
             </div>
           </div>
-          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
-            基于本地神经网络模型进行发丝级人像与商品边缘分离。支持 Squoosh 级左右无级划线比对、一键换证件蓝/红/白底，支持直接复制透明 PNG。
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;" data-i18n="tool_matting_hub_desc">
+            基于本地神经网络模型进行发丝级人像与商品边缘分离。支持全图所见即所得、左右划线比对、一键换证件蓝/红/白底，支持直接复制透明 PNG。
           </p>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #f472b6;">
-          <span>进入 AI 独立工作台</span>
+          <span data-i18n="hub_btn_enter_ai">进入 AI 独立工作台</span>
           <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>
       </a>
@@ -225,18 +226,18 @@
             </div>
             <div>
               <div style="display: flex; gap: 6px; margin-bottom: 4px;">
-                <span class="hub-tag" style="color: #a78bfa; background: rgba(139, 92, 246, 0.15); font-weight: 800;">⚡ 端侧 AI</span>
-                <span class="hub-tag">Tesseract.js</span>
+                <span class="hub-tag" style="color: #a78bfa; background: rgba(139, 92, 246, 0.15); font-weight: 800;" data-i18n="tag_edge_ai">⚡ 端侧 AI</span>
+                <span class="hub-tag" data-i18n="tag_tesseract">Tesseract.js</span>
               </div>
-              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">AI 本地离线 OCR 与清洗</h2>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;" data-i18n="tool_ocr_hub_title">AI 本地离线 OCR 与清洗</h2>
             </div>
           </div>
-          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;" data-i18n="tool_ocr_hub_desc">
             支持全页面 Ctrl+V 极速粘贴截图识字，多核并行计算。内嵌学术论文/PDF“去除换行合并段落”与汉字空格清理算法，合同发票 0 泄露。
           </p>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #a78bfa;">
-          <span>进入 AI 独立工作台</span>
+          <span data-i18n="hub_btn_enter_ai">进入 AI 独立工作台</span>
           <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>
       </a>
@@ -250,18 +251,18 @@
             </div>
             <div>
               <div style="display: flex; gap: 6px; margin-bottom: 4px;">
-                <span class="hub-tag" style="color: #38bdf8; background: rgba(6, 182, 212, 0.15); font-weight: 800;">⚡ 端侧 AI</span>
-                <span class="hub-tag">WebGL / 超分辨率</span>
+                <span class="hub-tag" style="color: #38bdf8; background: rgba(6, 182, 212, 0.15); font-weight: 800;" data-i18n="tag_edge_ai">⚡ 端侧 AI</span>
+                <span class="hub-tag" data-i18n="tag_webgl_sr">WebGL / 超分辨率</span>
               </div>
-              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">AI 动漫与照片 4x 超清放大</h2>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;" data-i18n="tool_upscale_hub_title">AI 动漫与照片 4x 超清放大</h2>
             </div>
           </div>
-          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;" data-i18n="tool_upscale_hub_desc">
             基于端侧 GPU 卷积着色器，智能重构二次元动漫插画线条与抗锯齿，无损放大 2x/4x，消除噪点并支持 Squoosh 级左右比对。
           </p>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #38bdf8;">
-          <span>进入 AI 独立工作台</span>
+          <span data-i18n="hub_btn_enter_ai">进入 AI 独立工作台</span>
           <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>
       </a>
@@ -275,18 +276,18 @@
             </div>
             <div>
               <div style="display: flex; gap: 6px; margin-bottom: 4px;">
-                <span class="hub-tag" style="color: #f472b6; background: rgba(236, 72, 153, 0.15); font-weight: 800;">⚡ 端侧 AI</span>
-                <span class="hub-tag">TinyFace / 隐私脱敏</span>
+                <span class="hub-tag" style="color: #f472b6; background: rgba(236, 72, 153, 0.15); font-weight: 800;" data-i18n="tag_edge_ai">⚡ 端侧 AI</span>
+                <span class="hub-tag" data-i18n="tag_tinyface">TinyFace / 隐私脱敏</span>
               </div>
-              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">AI 照片人脸打码与隐私脱敏</h2>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;" data-i18n="tool_face_blur_hub_title">AI 照片人脸打码与隐私脱敏</h2>
             </div>
           </div>
-          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;" data-i18n="tool_face_blur_hub_desc">
             毫秒级端侧视觉检测所有人脸，支持马赛克、高斯模糊、墨镜/Emoji 遮挡与黑条脱敏。支持单人脸启闭与手动画框打码车牌。
           </p>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #f472b6;">
-          <span>进入 AI 独立工作台</span>
+          <span data-i18n="hub_btn_enter_ai">进入 AI 独立工作台</span>
           <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>
       </a>
@@ -300,18 +301,18 @@
             </div>
             <div>
               <div style="display: flex; gap: 6px; margin-bottom: 4px;">
-                <span class="hub-tag" style="color: #c084fc; background: rgba(139, 92, 246, 0.15); font-weight: 800;">⚡ 端侧 AI</span>
-                <span class="hub-tag">单目深度 / WebGL 3D</span>
+                <span class="hub-tag" style="color: #c084fc; background: rgba(139, 92, 246, 0.15); font-weight: 800;" data-i18n="tag_edge_ai">⚡ 端侧 AI</span>
+                <span class="hub-tag" data-i18n="tag_depth_webgl">单目深度 / WebGL 3D</span>
               </div>
-              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">AI 2D 照片转 3D 视差壁纸</h2>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;" data-i18n="tool_3d_hub_title">AI 2D 照片转 3D 视差壁纸</h2>
             </div>
           </div>
-          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;" data-i18n="tool_3d_hub_desc">
             端侧预测每颗像素的 Z 轴三维景深，通过 WebGL 空间着色器实现跟随鼠标与手机陀螺仪晃动的裸眼 3D 视差，支持导出 Depth Map。
           </p>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #a78bfa;">
-          <span>进入 AI 独立工作台</span>
+          <span data-i18n="hub_btn_enter_ai">进入 AI 独立工作台</span>
           <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>
       </a>
@@ -325,18 +326,18 @@
             </div>
             <div>
               <div style="display: flex; gap: 6px; margin-bottom: 4px;">
-                <span class="hub-tag" style="color: #38bdf8; background: rgba(56, 189, 248, 0.15); font-weight: 800;">⚡ 端侧 AI</span>
-                <span class="hub-tag">Rust / WASM</span>
+                <span class="hub-tag" style="color: #38bdf8; background: rgba(56, 189, 248, 0.15); font-weight: 800;" data-i18n="tag_edge_ai">⚡ 端侧 AI</span>
+                <span class="hub-tag" data-i18n="tag_rust_wasm">Rust / WASM</span>
               </div>
-              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">AI PDF 智能解析与 Markdown 导出</h2>
+              <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;" data-i18n="tool_pdf_hub_title">AI PDF 智能解析与 Markdown 导出</h2>
             </div>
           </div>
-          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;" data-i18n="tool_pdf_hub_desc">
             基于 Firecrawl pdf-inspector-wasm 纯浏览器端解析，智能还原表格排版与多栏阅读顺序。秒级检测文档类型，支持实时富文本预览与一键导出 .md。
           </p>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; font-size: 12px; font-weight: 600; color: #38bdf8;">
-          <span>进入 AI 独立工作台</span>
+          <span data-i18n="hub_btn_enter_ai">进入 AI 独立工作台</span>
           <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
         </div>
       </a>
@@ -597,9 +598,9 @@
     <div style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
       <div style="font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
         <span class="material-symbols-outlined" style="font-size: 18px; color: #10b981;">verified_user</span>
-        <span>纯前端零上传安全承诺 (Zero-Knowledge Client Architecture)</span>
+        <span data-i18n="zero_knowledge_title">纯前端零上传安全承诺 (Zero-Knowledge Client Architecture)</span>
       </div>
-      <div>
+      <div data-i18n="zero_knowledge_desc">
         以上所有工具完全基于浏览器 JavaScript、HTML5 Canvas 与 Web Cryptography API 构建，所有计算过程在您本机的内存与 CPU/GPU 线程中秒级完成，不会向任何服务器上传您的任何图片、明文密码、JWT Token 或私密文本。
       </div>
     </div>
