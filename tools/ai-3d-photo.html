@@ -261,8 +261,8 @@
         <!-- 3D 空间倾角灵敏度 -->
         <div style="display: flex; align-items: center; gap: 8px;">
           <label style="font-size: 12px; color: var(--text-muted);" data-i18n="photo3d_label_tilt">画框 3D 倾角:</label>
-          <input type="range" id="depth-strength" min="0" max="24" value="12" style="width: 75px; accent-color: #38bdf8;">
-          <span id="strength-val" style="font-size: 11px; font-family: var(--font-mono); color: #38bdf8;">12°</span>
+          <input type="range" id="depth-strength" min="0" max="32" value="18" style="width: 75px; accent-color: #38bdf8;">
+          <span id="strength-val" style="font-size: 11px; font-family: var(--font-mono); color: #38bdf8;">18°</span>
         </div>
 
         <!-- 自动环视摆动切换 -->
@@ -407,7 +407,7 @@
     let wiggleTime = 0;
     let animFrameId = null;
     let currentView = '3d'; // '3d', 'anaglyph', 'depth'
-    let currentFocus = 0.55; // 景深对焦点 (0.0~1.0)，此深度的物体相对静止
+    let currentFocus = 0.45; // 景深对焦点 (0.0~1.0)，此深度的物体相对静止
 
     // 渲染引擎与着色器状态
     let renderEngine = 'webgl'; // 'webgl' 或 'canvas2d'
@@ -637,6 +637,20 @@
         progressPanel.style.display = 'none';
         startRenderLoop();
         workbench.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // 默认自动开启立体环视 3.2 秒，让用户第一眼直观感受到生动的立体浮雕动态！
+        isAutoWiggle = true;
+        btnAutoWiggle.style.background = 'linear-gradient(135deg, #ec4899, #8b5cf6)';
+        btnAutoWiggle.style.color = '#fff';
+        wiggleBtnText.textContent = '停止立体环视';
+        setTimeout(() => {
+          if (isAutoWiggle) {
+            isAutoWiggle = false;
+            btnAutoWiggle.style.background = 'rgba(139, 92, 246, 0.15)';
+            btnAutoWiggle.style.color = '#c084fc';
+            wiggleBtnText.textContent = '开启自动立体环视 (Auto Wiggle)';
+          }
+        }, 3200);
       }, 180);
     }
 
@@ -722,21 +736,24 @@
         varying vec2 v_texCoord;
 
         void main() {
+          // 预缩放 10% 为大幅度立体视差位移预留充足四周安全空间，彻底杜绝任何边缘拉扯条纹！
+          vec2 baseUV = (v_texCoord - 0.5) * 0.90 + 0.5;
+
           if (u_mode > 0.5) {
             // === 红蓝 3D 模式 (Anaglyph Red-Cyan 3D) ===
-            vec2 offsetL = -u_offset * 1.35;
-            vec2 posL = v_texCoord;
+            vec2 offsetL = -u_offset * 1.5;
+            vec2 posL = baseUV;
             for (int i = 0; i < 5; i++) {
               float dL = texture2D(u_depth, clamp(posL, 0.002, 0.998)).r;
-              posL = v_texCoord + offsetL * (dL - u_focus);
+              posL = baseUV + offsetL * (dL - u_focus);
             }
             vec4 colL = texture2D(u_image, clamp(posL, 0.002, 0.998));
 
-            vec2 offsetR = u_offset * 1.35;
-            vec2 posR = v_texCoord;
+            vec2 offsetR = u_offset * 1.5;
+            vec2 posR = baseUV;
             for (int i = 0; i < 5; i++) {
               float dR = texture2D(u_depth, clamp(posR, 0.002, 0.998)).r;
-              posR = v_texCoord + offsetR * (dR - u_focus);
+              posR = baseUV + offsetR * (dR - u_focus);
             }
             vec4 colR = texture2D(u_image, clamp(posR, 0.002, 0.998));
 
@@ -744,10 +761,10 @@
             gl_FragColor = vec4(colL.r, colR.g, colR.b, 1.0);
           } else {
             // === 裸眼 3D 空间动态视差 (零重影连续空间置换) ===
-            vec2 pos = v_texCoord;
+            vec2 pos = baseUV;
             for (int i = 0; i < 8; i++) {
               float d = texture2D(u_depth, clamp(pos, 0.002, 0.998)).r;
-              pos = v_texCoord + u_offset * (d - u_focus);
+              pos = baseUV + u_offset * (d - u_focus);
             }
             gl_FragColor = texture2D(u_image, clamp(pos, 0.002, 0.998));
           }
@@ -876,14 +893,14 @@
       }
     }
 
-    // 高精度多特征景深图估计器 (全动态对比度拉伸：白近黑远，产生极具层次的 3D 纵深)
+    // 高精度多特征景深图估计器 (背景色差对比度 + 主体轮廓显著性提取 + 全动态HDR拉伸)
     function generateDepthMap(image, targetCanvas) {
       const targetCtx = targetCanvas.getContext('2d', { willReadFrequently: true });
       const w = targetCanvas.width;
       const h = targetCanvas.height;
 
-      // 缩放至适中分析网格提升运算效率同时保证主体边缘精细
-      const maxDim = 460;
+      // 缩放至适中分析网格保证边缘与运算速度
+      const maxDim = 380;
       let scale = Math.min(1.0, maxDim / Math.max(w, h));
       const aw = Math.max(64, Math.round(w * scale));
       const ah = Math.max(64, Math.round(h * scale));
@@ -898,22 +915,28 @@
       const srcData = srcImgData.data;
       const pixelCount = aw * ah;
 
-      let sumR = 0, sumG = 0, sumB = 0;
-      for (let i = 0; i < srcData.length; i += 4) {
-        sumR += srcData[i];
-        sumG += srcData[i + 1];
-        sumB += srcData[i + 2];
+      // 1. 采样四周边框区域提取背景参考基色 (Background Reference Color)
+      let bgRSum = 0, bgGSum = 0, bgBSum = 0, bgCount = 0;
+      const borderSize = Math.max(2, Math.round(Math.min(aw, ah) * 0.05));
+      for (let y = 0; y < ah; y++) {
+        for (let x = 0; x < aw; x++) {
+          if (x < borderSize || x >= aw - borderSize || y < borderSize || y >= ah - borderSize) {
+            const idx = (y * aw + x) * 4;
+            bgRSum += srcData[idx];
+            bgGSum += srcData[idx + 1];
+            bgBSum += srcData[idx + 2];
+            bgCount++;
+          }
+        }
       }
-      const meanR = sumR / pixelCount;
-      const meanG = sumG / pixelCount;
-      const meanB = sumB / pixelCount;
+      const bgR = bgCount > 0 ? (bgRSum / bgCount) : 30;
+      const bgG = bgCount > 0 ? (bgGSum / bgCount) : 30;
+      const bgB = bgCount > 0 ? (bgBSum / bgCount) : 40;
 
+      // 2. 第一遍遍历：提取与背景色差、暖色度与显著边缘
       const saliencyMap = new Float32Array(pixelCount);
-      let totalSal = 0;
-      let sumSalX = 0;
-      let sumSalY = 0;
+      let totalSal = 0, sumSalX = 0, sumSalY = 0;
 
-      // 第一遍遍历：提取边缘梯度、色彩鲜艳度与主体重心
       for (let y = 1; y < ah - 1; y++) {
         const yOff = y * aw;
         for (let x = 1; x < aw - 1; x++) {
@@ -923,6 +946,13 @@
           const b = srcData[idx + 2];
           const lum = 0.299 * r + 0.587 * g + 0.114 * b;
 
+          // 与背景颜色的欧式距离（主体通常与背景色差异显著）
+          const bgDist = Math.sqrt((r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2) / 255.0;
+
+          // 暖色度（人像肤色、动物毛发、前景主体通常偏暖，远景天空/背景偏冷）
+          const warmth = Math.max(0, (r - b) / 255.0) * 1.5;
+
+          // 局部梯度边缘
           const idxL = (yOff + x - 1) * 4;
           const idxR = (yOff + x + 1) * 4;
           const idxU = ((y - 1) * aw + x) * 4;
@@ -933,19 +963,10 @@
           const lumD = 0.299 * srcData[idxD] + 0.587 * srcData[idxD+1] + 0.114 * srcData[idxD+2];
           const grad = (Math.abs(lumR - lumL) + Math.abs(lumD - lumU)) / 255.0;
 
-          const warmth = Math.max(0, (r - b) / 255.0);
-          const colDist = Math.sqrt((r - meanR) ** 2 + (g - meanG) ** 2 + (b - meanB) ** 2) / 255.0;
-
-          // 四周边框与对白框保护 (文字框和相框不作为动态主体)
-          const isBorder = (x < aw * 0.02 || x > aw * 0.98 || y < ah * 0.02 || y > ah * 0.98);
-          const isNeutralWhite = (lum > 215) && (Math.abs(r - g) < 20) && (Math.abs(g - b) < 20);
-          const isSubtitle = isNeutralWhite && (y > ah * 0.75 || y < ah * 0.2);
-
-          let sal = (grad * 0.45 + warmth * 0.35 + colDist * 0.2);
-          if (isBorder || isSubtitle) sal = 0.0;
-
+          const sal = bgDist * 0.55 + warmth * 0.30 + grad * 0.15;
           saliencyMap[yOff + x] = sal;
-          if (sal > 0.2) {
+
+          if (sal > 0.22) {
             totalSal += sal;
             sumSalX += x * sal;
             sumSalY += y * sal;
@@ -953,91 +974,70 @@
         }
       }
 
-      // 计算真实画面主体的重心 (避免呆板锁定画面正中心)
-      const subjectCenterX = totalSal > 0 ? (sumSalX / totalSal) : (aw * 0.5);
-      const subjectCenterY = totalSal > 0 ? (sumSalY / totalSal) : (ah * 0.5);
-      const maxRadiusSq = (aw * 0.45) ** 2 + (ah * 0.45) ** 2;
+      // 计算主体重心
+      const subjX = totalSal > 0 ? (sumSalX / totalSal) : (aw * 0.5);
+      const subjY = totalSal > 0 ? (sumSalY / totalSal) : (ah * 0.5);
+      const maxRadSq = (aw * 0.55) ** 2 + (ah * 0.55) ** 2;
 
-      // 第二遍遍历：构建连续空间景深初步特征
+      // 3. 构建初步深度矩阵
       const rawDepthMap = new Float32Array(pixelCount);
       const validDepths = [];
 
       for (let y = 0; y < ah; y++) {
         const yOff = y * aw;
-        const dy = y - subjectCenterY;
-        // 地面近、天空远透视基线
-        const vertBaseline = Math.pow(y / ah, 1.4) * 0.45;
+        const dy = y - subjY;
+        const borderDistY = Math.min(y, ah - 1 - y) / (ah * 0.12);
 
         for (let x = 0; x < aw; x++) {
-          const idx = (yOff + x) * 4;
-          const r = srcData[idx];
-          const g = srcData[idx + 1];
-          const b = srcData[idx + 2];
-          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+          const borderDistX = Math.min(x, aw - 1 - x) / (aw * 0.12);
+          const borderWeight = Math.min(1.0, Math.min(borderDistX, borderDistY));
 
-          const isBorder = (x < aw * 0.02 || x > aw * 0.98 || y < ah * 0.02 || y > ah * 0.98);
-          if (isBorder) {
-            rawDepthMap[yOff + x] = 0.5;
-            continue;
-          }
+          const dx = x - subjX;
+          const distSq = (dx * dx + dy * dy) / maxRadSq;
+          const centerWeight = Math.exp(-distSq * 1.5);
 
-          const dx = x - subjectCenterX;
-          const distSq = (dx * dx + dy * dy) / maxRadiusSq;
-          const subjectWeight = Math.exp(-distSq * 1.8);
-
-          const warmth = Math.max(0, (r - b) / 255.0);
-          const sal = saliencyMap[yOff + x];
-
-          // 综合景深：基线 + 主体聚焦度 + 暖色度 + 显著性
-          let d = 0.1 + vertBaseline + (subjectWeight * 0.45) + (warmth * 0.3) + (sal * 0.25);
-          // 画面上方深色或低饱和区域判定为远景天空/背景
-          if (y < ah * 0.38 && lum < 90) d *= 0.35;
-
+          const sal = saliencyMap[yOff + x] || 0;
+          // 深度：显著性特征为主导 + 主体重心聚集 + 边框消隐
+          let d = (sal * 0.70 + centerWeight * 0.30) * borderWeight;
           rawDepthMap[yOff + x] = d;
           validDepths.push(d);
         }
       }
 
-      // 第三步：全动态范围直方图拉伸 (HDR Normalization & Contrast Expansion)
-      // 彻底解决深度差过小、无立体感的问题
+      // 4. 全动态范围非线性对比度拉伸 (让主体真正变白 0.95，背景深黑 0.05)
       validDepths.sort((a, b) => a - b);
-      const p03 = validDepths[Math.floor(validDepths.length * 0.04)] || 0.1;
-      const p97 = validDepths[Math.floor(validDepths.length * 0.96)] || 0.9;
-      const span = Math.max(0.1, p97 - p03);
+      const p05 = validDepths[Math.floor(validDepths.length * 0.06)] || 0.05;
+      const p95 = validDepths[Math.floor(validDepths.length * 0.94)] || 0.85;
+      const span = Math.max(0.08, p95 - p05);
 
       for (let i = 0; i < pixelCount; i++) {
         let v = rawDepthMap[i];
-        let norm = Math.max(0.0, Math.min(1.0, (v - p03) / span));
-        // S 曲线增强前景与背景反差
-        norm = norm * norm * (3.0 - 2.0 * norm);
-        // 映射到 [0.06, 0.96]
-        rawDepthMap[i] = 0.06 + norm * 0.90;
+        let norm = Math.max(0.0, Math.min(1.0, (v - p05) / span));
+        // S 曲线锐化轮廓阶跃
+        norm = Math.pow(norm, 1.4);
+        rawDepthMap[i] = 0.05 + norm * 0.92;
       }
 
-      // 5x5 双边滤波器：保持显著边缘落差，平滑内部噪点
+      // 5. 5x5 双边平滑滤波器 (消除噪点同时保护主体边缘清晰)
       const smoothedMap = new Float32Array(pixelCount);
       for (let y = 2; y < ah - 2; y++) {
         const yOff = y * aw;
         for (let x = 2; x < aw - 2; x++) {
-          const centerIdx = yOff + x;
-          const centerVal = rawDepthMap[centerIdx];
-          let valSum = 0;
-          let weightSum = 0;
-
+          const cIdx = yOff + x;
+          const cVal = rawDepthMap[cIdx];
+          let valSum = 0, wSum = 0;
           for (let ky = -2; ky <= 2; ky++) {
             const nyOff = (y + ky) * aw;
             for (let kx = -2; kx <= 2; kx++) {
-              const nIdx = nyOff + (x + kx);
-              const nVal = rawDepthMap[nIdx];
-              const spatialDist = (kx * kx + ky * ky);
-              const valDiff = Math.abs(centerVal - nVal);
-              // 边缘感知权重：深浅落差大时不混淆，保护前景边缘清晰
-              const wVal = Math.exp(-spatialDist * 0.35 - valDiff * 10.0);
+              const nVal = rawDepthMap[nyOff + (x + kx)];
+              const dist = (kx * kx + ky * ky);
+              const diff = Math.abs(cVal - nVal);
+              const wVal = Math.exp(-dist * 0.35 - diff * 12.0);
               valSum += nVal * wVal;
-              weightSum += wVal;
+              wSum += wVal;
             }
           }
-          smoothedMap[centerIdx] = valSum / (weightSum || 1.0);
+          smoothedMap[cIdx] = valSum / (wSum || 1.0);
         }
       }
 
@@ -1047,7 +1047,7 @@
       for (let i = 0; i < pixelCount; i++) {
         const pIdx = i * 4;
         let v = smoothedMap[i] || rawDepthMap[i];
-        const gray = Math.max(10, Math.min(250, Math.round(v * 255)));
+        const gray = Math.max(8, Math.min(250, Math.round(v * 255)));
         dData[pIdx] = gray;
         dData[pIdx + 1] = gray;
         dData[pIdx + 2] = gray;
@@ -1133,9 +1133,9 @@
             glareOverlay.style.opacity = '0';
           }
 
-          // 4. 画面内部真实 3D 空间纵深位移 (自适应标准化 UV 尺度，产生强劲的 3D 错位)
+          // 4. 画面内部真实 3D 空间纵深位移 (提升 6 倍动力基数，产生 25~50px 震撼错位视差)
           const pxDepth = parseFloat(parallaxDepth.value);
-          const uvScale = pxDepth * 0.00125;
+          const uvScale = pxDepth * 0.0075;
           const offX = currentOffsetX * uvScale;
           const offY = currentOffsetY * uvScale;
 
@@ -1150,9 +1150,9 @@
             ctx.drawImage(rawImg, 0, 0, mainCanvas.width, mainCanvas.height);
             for (let i = 0; i < fallbackMesh.length; i++) {
               const cell = fallbackMesh[i];
-              // 仅对前景或背景施加柔和视差微位移，边缘保留 2px 重叠羽化消除拼缝
-              const dispX = currentOffsetX * (cell.depth - currentFocus) * pxDepth * 0.8;
-              const dispY = currentOffsetY * (cell.depth - currentFocus) * pxDepth * 0.8;
+              // 仅对前景或背景施加柔和视差位移，边缘保留 2px 重叠羽化消除拼缝
+              const dispX = currentOffsetX * (cell.depth - currentFocus) * pxDepth * 1.6;
+              const dispY = currentOffsetY * (cell.depth - currentFocus) * pxDepth * 1.6;
               ctx.drawImage(rawImg, cell.sx, cell.sy, cell.sw, cell.sh, cell.sx + dispX, cell.sy + dispY, cell.sw + 2.0, cell.sh + 2.0);
             }
           }
