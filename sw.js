@@ -1,4 +1,4 @@
-const CACHE_NAME = 'geek-portal-v2.7.0';
+const CACHE_NAME = 'geek-portal-v2.8.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -27,7 +27,7 @@ const STATIC_ASSETS = [
   '/privacy.html',
   '/terms.html',
   '/contact.html',
-  '/style.css?v=2.7.0',
+  '/style.css?v=2.8.0',
   '/js/storage.js?v=2.7.0',
   '/js/i18n.js?v=2.7.0',
   '/js/toolbox.js?v=2.7.0',
