@@ -390,7 +390,7 @@
     const workbench = document.getElementById('workbench');
     const viewport = document.getElementById('viewport');
     const stageWrapper = document.getElementById('stage-wrapper');
-    const mainCanvas = document.getElementById('main-canvas');
+    let mainCanvas = document.getElementById('main-canvas');
     const depthCanvas = document.getElementById('depth-canvas');
     const glareOverlay = document.getElementById('glare-overlay');
     const btnExportDepth = document.getElementById('btn-export-depth');
@@ -640,7 +640,7 @@
       }, 180);
     }
 
-    // 初始化渲染管线 (WebGL 优先，失败自动无缝降级 Canvas 2D，绝不弹窗报错)
+    // 初始化渲染管线 (WebGL 硬件加速优先，失败自动平滑兜底)
     function initRenderPipeline(w, h) {
       // 限制纹理尺寸至安全上限，保证千元机与老旧设备 GPU 满帧
       const maxDim = 2048;
@@ -652,15 +652,24 @@
         targetH = Math.round(h * s);
       }
 
-      mainCanvas.width = targetW;
-      mainCanvas.height = targetH;
+      // 关键防坑：若旧 canvas 已被绑定到 2D 上下文，同一 canvas 无法再获取 WebGL！
+      // 重新生成一个纯净的新 canvas 元素替换它，确保 100% 能够拿到 WebGL 上下文
+      const oldCanvas = document.getElementById('main-canvas');
+      const newCanvas = document.createElement('canvas');
+      newCanvas.id = 'main-canvas';
+      newCanvas.width = targetW;
+      newCanvas.height = targetH;
+      if (oldCanvas && oldCanvas.parentNode) {
+        oldCanvas.parentNode.replaceChild(newCanvas, oldCanvas);
+      }
+      mainCanvas = newCanvas;
 
       gl = null;
       try {
         const opts = { preserveDrawingBuffer: true, alpha: true, antialias: true, premultipliedAlpha: false };
         gl = mainCanvas.getContext('webgl', opts) || mainCanvas.getContext('experimental-webgl', opts);
       } catch (err) {
-        console.warn('WebGL initialization failed, falling back to Canvas 2D:', err);
+        console.warn('WebGL context request failed:', err);
         gl = null;
       }
 
@@ -678,7 +687,7 @@
         }
       }
 
-      // 优雅降级：若 WebGL 不可用，无缝进入 Canvas 2D 智能网格视差引擎
+      // 优雅降级：若 WebGL 不可用，进入无缝无黑边 Canvas 2D 智能视差引擎
       initCanvas2DFallback(w, h);
     }
 
@@ -695,20 +704,26 @@
       `;
 
       // 8步迭代视差遮挡光线步进 (Parallax Occlusion Raymarching)
-      // 零重影！支持自由对焦点 (u_focus) 与红蓝双目 3D 立体模式 (Anaglyph 3D)
+      // 兼容所有 WebGL 1.0/2.0 设备：同时声明 float 与 int 精度，避免驱动丢失默认 int 精度导致编译失败
       const fsSource = `
+        #ifdef GL_FRAGMENT_PRECISION_HIGH
+        precision highp float;
+        precision highp int;
+        #else
         precision mediump float;
+        precision mediump int;
+        #endif
+
         uniform sampler2D u_image;
         uniform sampler2D u_depth;
         uniform vec2 u_offset;
         uniform float u_focus;
-        uniform int u_mode; // 0: 裸眼3D动态视差, 1: 红蓝3D立体模式
+        uniform float u_mode; // 0.0: 裸眼3D动态视差, 1.0: 红蓝3D立体模式
         varying vec2 v_texCoord;
 
         void main() {
-          if (u_mode == 1) {
+          if (u_mode > 0.5) {
             // === 红蓝 3D 模式 (Anaglyph Red-Cyan 3D) ===
-            // 视差偏移：左眼向负偏移，右眼向正偏移
             vec2 offsetL = -u_offset * 1.35;
             vec2 posL = v_texCoord;
             for (int i = 0; i < 5; i++) {
@@ -732,7 +747,6 @@
             vec2 pos = v_texCoord;
             for (int i = 0; i < 8; i++) {
               float d = texture2D(u_depth, clamp(pos, 0.002, 0.998)).r;
-              // 以 u_focus 为不动物体平面，d > u_focus 为前景顺向偏移，d < u_focus 为背景反向深度位移
               pos = v_texCoord + u_offset * (d - u_focus);
             }
             gl_FragColor = texture2D(u_image, clamp(pos, 0.002, 0.998));
@@ -745,7 +759,7 @@
         gl.shaderSource(s, src);
         gl.compileShader(s);
         if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-          console.warn(gl.getShaderInfoLog(s));
+          console.error('WebGL Shader compile error:', gl.getShaderInfoLog(s));
           gl.deleteShader(s);
           return null;
         }
@@ -1128,16 +1142,18 @@
           if (renderEngine === 'webgl' && gl && shaderProgram && uOffsetLoc) {
             gl.uniform2f(uOffsetLoc, offX, -offY); // WebGL Y 轴向上，符号反转
             if (uFocusLoc) gl.uniform1f(uFocusLoc, currentFocus);
-            if (uModeLoc) gl.uniform1i(uModeLoc, (currentView === 'anaglyph') ? 1 : 0);
+            if (uModeLoc) gl.uniform1f(uModeLoc, (currentView === 'anaglyph') ? 1.0 : 0.0);
             gl.drawArrays(gl.TRIANGLES, 0, 6);
           } else if (renderEngine === 'canvas2d' && fallbackMesh) {
             const ctx = mainCanvas.getContext('2d');
-            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            // 关键：底层先铺满原始高清原画，彻底杜绝任何黑色断层或裂缝镂空！
+            ctx.drawImage(rawImg, 0, 0, mainCanvas.width, mainCanvas.height);
             for (let i = 0; i < fallbackMesh.length; i++) {
               const cell = fallbackMesh[i];
-              const dispX = currentOffsetX * (cell.depth - currentFocus) * pxDepth * 2.2;
-              const dispY = currentOffsetY * (cell.depth - currentFocus) * pxDepth * 2.2;
-              ctx.drawImage(rawImg, cell.sx, cell.sy, cell.sw, cell.sh, cell.sx + dispX, cell.sy + dispY, cell.sw + 0.5, cell.sh + 0.5);
+              // 仅对前景或背景施加柔和视差微位移，边缘保留 2px 重叠羽化消除拼缝
+              const dispX = currentOffsetX * (cell.depth - currentFocus) * pxDepth * 0.8;
+              const dispY = currentOffsetY * (cell.depth - currentFocus) * pxDepth * 0.8;
+              ctx.drawImage(rawImg, cell.sx, cell.sy, cell.sw, cell.sh, cell.sx + dispX, cell.sy + dispY, cell.sw + 2.0, cell.sh + 2.0);
             }
           }
         } else {
