@@ -10,52 +10,52 @@ const I18nController = {
     {
         "code": "zh-CN",
         "name": "简体中文",
-        "flag": "🇨🇳"
+        "flag": ""
     },
     {
         "code": "en-US",
         "name": "English",
-        "flag": "🇺🇸"
+        "flag": ""
     },
     {
         "code": "zh-TW",
         "name": "繁體中文",
-        "flag": "🇹🇼"
+        "flag": ""
     },
     {
         "code": "ja-JP",
         "name": "日本語",
-        "flag": "🇯🇵"
+        "flag": ""
     },
     {
         "code": "ko-KR",
         "name": "한국어",
-        "flag": "🇰🇷"
+        "flag": ""
     },
     {
         "code": "es-ES",
         "name": "Español",
-        "flag": "🇪🇸"
+        "flag": ""
     },
     {
         "code": "fr-FR",
         "name": "Français",
-        "flag": "🇫🇷"
+        "flag": ""
     },
     {
         "code": "de-DE",
         "name": "Deutsch",
-        "flag": "🇩🇪"
+        "flag": ""
     },
     {
         "code": "ru-RU",
         "name": "Русский",
-        "flag": "🇷🇺"
+        "flag": ""
     },
     {
         "code": "pt-BR",
         "name": "Português",
-        "flag": "🇧🇷"
+        "flag": ""
     }
 ],
 
@@ -154,7 +154,7 @@ const I18nController = {
     "ocr_opt_paddle": "🤖 深度学习视觉引擎 (PaddleOCR PP-OCRv6 · 自动定位无噪点 · 推荐)",
     "ocr_opt_tesseract": "📄 传统轻量文档引擎 (Tesseract.js · 纯白底黑字合同/论文)",
     "ocr_label_lang": "🌐 语言包:",
-    "ocr_opt_lang_zh": "🇨🇳 中文通用 (简体中文 + 英文混合)",
+    "ocr_opt_lang_zh": "中文通用 (简体中文 + 英文混合)",
     "ocr_opt_lang_en": "🇬🇧 纯英文 (文献 / 编程代码)",
     "ocr_engine_hint": "💡 PaddleOCR 具备 DBNet 视觉定位，支持动漫插画/海报/实景照片，从根源上绝无背景噪点乱码。",
     "ocr_status_starting": "正在启动 WebAssembly OCR 识别核心...",
@@ -826,7 +826,7 @@ const I18nController = {
     "ocr_opt_paddle": "🤖 Deep Learning Vision (PaddleOCR PP-OCRv6 · Auto-detect Noise-Free · Recommended)",
     "ocr_opt_tesseract": "📄 Legacy Document Engine (Tesseract.js · Black & White Papers)",
     "ocr_label_lang": "🌐 Language:",
-    "ocr_opt_lang_zh": "🇨🇳 Chinese & English (Bilingual)",
+    "ocr_opt_lang_zh": "Chinese & English (Bilingual)",
     "ocr_opt_lang_en": "🇬🇧 English Only (Code / Papers)",
     "ocr_engine_hint": "💡 PaddleOCR DBNet localizes text boxes accurately, eliminating background noise in photos, posters, and illustrations.",
     "ocr_status_starting": "Initializing WebAssembly OCR Core...",
@@ -1517,7 +1517,7 @@ const I18nController = {
     "ocr_opt_paddle": "🤖 深度學習視覺引擎 (PaddleOCR PP-OCRv6 · 自動定位無噪點 · 推薦)",
     "ocr_opt_tesseract": "📄 傳統輕量文檔引擎 (Tesseract.js · 純白底黑字合同/論文)",
     "ocr_label_lang": "🌐 語言包:",
-    "ocr_opt_lang_zh": "🇨🇳 中文通用 (簡體中文 + 英文混合)",
+    "ocr_opt_lang_zh": "中文通用 (簡體中文 + 英文混合)",
     "ocr_opt_lang_en": "🇬🇧 純英文 (文獻 / 編程代碼)",
     "ocr_engine_hint": "💡 PaddleOCR 具備 DBNet 視覺定位，支持動漫插畫/海報/實景照片，從根源上絕無背景噪點亂碼。",
     "ocr_status_starting": "正在啟動 WebAssembly OCR 識別核心...",
@@ -1945,7 +1945,7 @@ const I18nController = {
     "ocr_opt_paddle": "🤖 深層学習ビジョン (PaddleOCR PP-OCRv6 · ノイズ皆無・推奨)",
     "ocr_opt_tesseract": "📄 軽量ドキュメントエンジン (Tesseract.js · 白黒の文書・論文向け)",
     "ocr_label_lang": "🌐 言語パック:",
-    "ocr_opt_lang_zh": "🇨🇳 中国語・英語 (バイリンガル)",
+    "ocr_opt_lang_zh": "中国語・英語 (バイリンガル)",
     "ocr_opt_lang_en": "🇬🇧 英語のみ (論文・プログラムコード)",
     "ocr_engine_hint": "💡 PaddleOCR は DBNet 視覚認識を備えており、イラスト、ポスター、風景写真からノイズなく文字のみを検出します。",
     "ocr_status_starting": "WebAssembly OCR 認識コアを起動中...",
@@ -2373,7 +2373,7 @@ const I18nController = {
     "ocr_opt_paddle": "🤖 딥러닝 비전 엔진 (PaddleOCR PP-OCRv6 · 노이즈 없는 자동 검출 · 추천)",
     "ocr_opt_tesseract": "📄 전통 문서 엔진 (Tesseract.js · 흑백 문서/논문 전용)",
     "ocr_label_lang": "🌐 언어 팩:",
-    "ocr_opt_lang_zh": "🇨🇳 중국어 일반 (중문 + 영문 혼합)",
+    "ocr_opt_lang_zh": "중국어 일반 (중문 + 영문 혼합)",
     "ocr_opt_lang_en": "🇬🇧 영어 전용 (논문 / 프로그래밍 코드)",
     "ocr_engine_hint": "💡 PaddleOCR의 DBNet은 텍스트 영역을 정밀 감지하여 일러스트/포스터/사진 배경 노이즈를 근본적으로 차단합니다.",
     "ocr_status_starting": "WebAssembly OCR 인식 코어 초기화 중...",
@@ -2801,7 +2801,7 @@ const I18nController = {
     "ocr_opt_paddle": "🤖 Visión por Aprendizaje Profundo (PaddleOCR PP-OCRv6 · Sin ruido · Recomendado)",
     "ocr_opt_tesseract": "📄 Motor de documentos clásico (Tesseract.js · Papel blanco y texto negro)",
     "ocr_label_lang": "🌐 Paquete de idioma:",
-    "ocr_opt_lang_zh": "🇨🇳 Chino e Inglés (Bilingüe)",
+    "ocr_opt_lang_zh": "Chino e Inglés (Bilingüe)",
     "ocr_opt_lang_en": "🇬🇧 Solo Inglés (Artículos / Código)",
     "ocr_engine_hint": "💡 PaddleOCR DBNet localiza cuadros de texto con precisión, eliminando el ruido de fondo en fotos e ilustraciones.",
     "ocr_status_starting": "Inicializando núcleo OCR WebAssembly...",
@@ -3229,7 +3229,7 @@ const I18nController = {
     "ocr_opt_paddle": "🤖 Vision Deep Learning (PaddleOCR PP-OCRv6 · Détection sans bruit · Recommandé)",
     "ocr_opt_tesseract": "📄 Moteur documentaire classique (Tesseract.js · Documents noir & blanc)",
     "ocr_label_lang": "🌐 Pack de langue :",
-    "ocr_opt_lang_zh": "🇨🇳 Chinois et Anglais (Bilingue)",
+    "ocr_opt_lang_zh": "Chinois et Anglais (Bilingue)",
     "ocr_opt_lang_en": "🇬🇧 Anglais uniquement (Articles / Code)",
     "ocr_engine_hint": "💡 PaddleOCR DBNet localise précisément les zones de texte, éliminant tout artefact d'arrière-plan.",
     "ocr_status_starting": "Initialisation du cœur OCR WebAssembly...",
@@ -3657,7 +3657,7 @@ const I18nController = {
     "ocr_opt_paddle": "🤖 Deep-Learning-Vision (PaddleOCR PP-OCRv6 · Rauschfrei · Empfohlen)",
     "ocr_opt_tesseract": "📄 Klassische Dokument-Engine (Tesseract.js · Nur Schwarz/Weiß-Dokumente)",
     "ocr_label_lang": "🌐 Sprachpaket:",
-    "ocr_opt_lang_zh": "🇨🇳 Chinesisch & Englisch (Bilingual)",
+    "ocr_opt_lang_zh": "Chinesisch & Englisch (Bilingual)",
     "ocr_opt_lang_en": "🇬🇧 Nur Englisch (Fachliteratur / Code)",
     "ocr_engine_hint": "💡 PaddleOCR DBNet lokalisiert Textbereiche exakt und verhindert so fehlerhafte Hintergrundartefakte in Fotos.",
     "ocr_status_starting": "WebAssembly-OCR-Kern wird initialisiert...",
@@ -4085,7 +4085,7 @@ const I18nController = {
     "ocr_opt_paddle": "🤖 Глубокое Обучение (PaddleOCR PP-OCRv6 · Без шумов · Рекомендуется)",
     "ocr_opt_tesseract": "📄 Классический движок документов (Tesseract.js · Для ч/б сканов и статей)",
     "ocr_label_lang": "🌐 Языковой пакет:",
-    "ocr_opt_lang_zh": "🇨🇳 Китайский и Английский (Двуязычный)",
+    "ocr_opt_lang_zh": "Китайский и Английский (Двуязычный)",
     "ocr_opt_lang_en": "🇬🇧 Только Английский (Статьи / Код)",
     "ocr_engine_hint": "💡 PaddleOCR DBNet точно определяет текстовые блоки, исключая фоновый шум на фото и артах.",
     "ocr_status_starting": "Инициализация ядра WebAssembly OCR...",
@@ -4513,7 +4513,7 @@ const I18nController = {
     "ocr_opt_paddle": "🤖 Visão por Aprendizado Profundo (PaddleOCR PP-OCRv6 · Sem ruídos · Recomendado)",
     "ocr_opt_tesseract": "📄 Motor clássico de documentos (Tesseract.js · Papel branco e texto preto)",
     "ocr_label_lang": "🌐 Pacote de idiomas:",
-    "ocr_opt_lang_zh": "🇨🇳 Chinês e Inglês (Bilíngue)",
+    "ocr_opt_lang_zh": "Chinês e Inglês (Bilíngue)",
     "ocr_opt_lang_en": "🇬🇧 Apenas Inglês (Artigos / Código)",
     "ocr_engine_hint": "💡 PaddleOCR DBNet localiza blocos de texto com precisão, eliminando ruídos em fotos e ilustrações.",
     "ocr_status_starting": "Inicializando núcleo OCR WebAssembly...",
