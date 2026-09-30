@@ -228,12 +228,16 @@
       <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
         
         <!-- 视图模式 -->
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
           <label style="font-size: 13px; font-weight: 700; color: #fff;" data-i18n="photo3d_label_view">👁️ 视图呈现:</label>
-          <div style="display: flex; gap: 6px;">
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
             <button type="button" class="view-mode-pill active" data-view="3d">
               <span class="material-symbols-outlined" style="font-size: 15px;">view_in_ar</span>
               <span data-i18n="photo3d_view_3d">3D 裸眼视差动态视图</span>
+            </button>
+            <button type="button" class="view-mode-pill" data-view="anaglyph">
+              <span class="material-symbols-outlined" style="font-size: 15px;">vrpano</span>
+              <span data-i18n="photo3d_view_anaglyph">红蓝 3D 立体模式</span>
             </button>
             <button type="button" class="view-mode-pill" data-view="depth">
               <span class="material-symbols-outlined" style="font-size: 15px;">blur_linear</span>
@@ -243,17 +247,22 @@
         </div>
 
         <!-- 主体与背景视差深度 -->
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
           <label style="font-size: 12px; color: var(--text-muted);" data-i18n="photo3d_label_parallax">主体 3D 纵深位移:</label>
-          <input type="range" id="parallax-depth" min="5" max="40" value="22" style="width: 85px; accent-color: #8b5cf6;">
-          <span id="parallax-val" style="font-size: 11px; font-family: var(--font-mono); color: #c084fc;">22px</span>
+          <input type="range" id="parallax-depth" min="10" max="80" value="36" style="width: 85px; accent-color: #8b5cf6;">
+          <span id="parallax-val" style="font-size: 11px; font-family: var(--font-mono); color: #c084fc;">36px</span>
+          <div style="display: inline-flex; gap: 4px; margin-left: 4px;">
+            <button type="button" class="depth-preset-btn" data-val="18" data-i18n="photo3d_preset_mild" style="padding: 2px 8px; font-size: 11px; border-radius: 12px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.05); color: var(--text-secondary); cursor: pointer;">轻微自然</button>
+            <button type="button" class="depth-preset-btn active" data-val="36" data-i18n="photo3d_preset_strong" style="padding: 2px 8px; font-size: 11px; border-radius: 12px; border: 1px solid #8b5cf6; background: rgba(139, 92, 246, 0.25); color: #fff; cursor: pointer;">强烈立体</button>
+            <button type="button" class="depth-preset-btn" data-val="60" data-i18n="photo3d_preset_extreme" style="padding: 2px 8px; font-size: 11px; border-radius: 12px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.05); color: var(--text-secondary); cursor: pointer;">极致纵深</button>
+          </div>
         </div>
 
         <!-- 3D 空间倾角灵敏度 -->
         <div style="display: flex; align-items: center; gap: 8px;">
           <label style="font-size: 12px; color: var(--text-muted);" data-i18n="photo3d_label_tilt">画框 3D 倾角:</label>
-          <input type="range" id="depth-strength" min="0" max="18" value="8" style="width: 75px; accent-color: #38bdf8;">
-          <span id="strength-val" style="font-size: 11px; font-family: var(--font-mono); color: #38bdf8;">8°</span>
+          <input type="range" id="depth-strength" min="0" max="24" value="12" style="width: 75px; accent-color: #38bdf8;">
+          <span id="strength-val" style="font-size: 11px; font-family: var(--font-mono); color: #38bdf8;">12°</span>
         </div>
 
         <!-- 自动环视摆动切换 -->
@@ -284,9 +293,9 @@
       <div id="workbench" style="display: none;">
         
         <div class="parallax-viewport" id="viewport">
-          <div class="hint-3d-tag">
-            <span class="material-symbols-outlined" style="font-size: 14px;">mouse</span>
-            <span data-i18n="photo3d_hint_mouse">在画面上轻晃鼠标或触控拖拽，感受 3D 纵深！</span>
+          <div class="hint-3d-tag" id="hint-3d-tag">
+            <span class="material-symbols-outlined" style="font-size: 14px;">center_focus_strong</span>
+            <span id="hint-tag-text" data-i18n="photo3d_focus_tip">💡 提示：在画面上晃动鼠标感受 3D 纵深；点击任意物体即可定焦！</span>
           </div>
 
           <div class="parallax-stage-wrapper" id="stage-wrapper">
@@ -296,6 +305,8 @@
             <canvas id="depth-canvas" style="display: none;"></canvas>
             <!-- 动态全息流光与表面法线反光层 -->
             <div id="glare-overlay" class="glare-effect"></div>
+            <!-- 点击对焦波纹圈 -->
+            <div id="focus-ring" style="position: absolute; width: 36px; height: 36px; border: 2px solid #38bdf8; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%) scale(0); opacity: 0; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease; z-index: 20; box-shadow: 0 0 14px #38bdf8;"></div>
           </div>
         </div>
 
@@ -395,19 +406,57 @@
     let isAutoWiggle = false;
     let wiggleTime = 0;
     let animFrameId = null;
-    let currentView = '3d';
+    let currentView = '3d'; // '3d', 'anaglyph', 'depth'
+    let currentFocus = 0.55; // 景深对焦点 (0.0~1.0)，此深度的物体相对静止
 
     // 渲染引擎与着色器状态
     let renderEngine = 'webgl'; // 'webgl' 或 'canvas2d'
     let gl = null;
     let shaderProgram = null;
     let uOffsetLoc = null;
+    let uFocusLoc = null;
+    let uModeLoc = null;
     let imageTexture = null;
     let depthTexture = null;
     let fallbackMesh = null;
 
+    const depthPresetBtns = document.querySelectorAll('.depth-preset-btn');
+    const focusRing = document.getElementById('focus-ring');
+    const hintTagText = document.getElementById('hint-tag-text');
+
     parallaxDepth.addEventListener('input', (e) => {
-      parallaxVal.textContent = e.target.value + 'px';
+      const val = e.target.value;
+      parallaxVal.textContent = val + 'px';
+      depthPresetBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-val') === val);
+        if (btn.getAttribute('data-val') === val) {
+          btn.style.background = 'rgba(139, 92, 246, 0.25)';
+          btn.style.borderColor = '#8b5cf6';
+          btn.style.color = '#fff';
+        } else {
+          btn.style.background = 'rgba(255,255,255,0.05)';
+          btn.style.borderColor = 'var(--border-light)';
+          btn.style.color = 'var(--text-secondary)';
+        }
+      });
+    });
+
+    depthPresetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.getAttribute('data-val');
+        parallaxDepth.value = val;
+        parallaxVal.textContent = val + 'px';
+        depthPresetBtns.forEach(b => {
+          b.classList.remove('active');
+          b.style.background = 'rgba(255,255,255,0.05)';
+          b.style.borderColor = 'var(--border-light)';
+          b.style.color = 'var(--text-secondary)';
+        });
+        btn.classList.add('active');
+        btn.style.background = 'rgba(139, 92, 246, 0.25)';
+        btn.style.borderColor = '#8b5cf6';
+        btn.style.color = '#fff';
+      });
     });
 
     depthStrength.addEventListener('input', (e) => {
@@ -415,10 +464,10 @@
     });
 
     function updateViewDisplay() {
-      if (currentView === '3d') {
+      if (currentView === '3d' || currentView === 'anaglyph') {
         mainCanvas.style.display = 'block';
         depthCanvas.style.display = 'none';
-        glareOverlay.style.display = 'block';
+        glareOverlay.style.display = (currentView === '3d') ? 'block' : 'none';
       } else {
         mainCanvas.style.display = 'none';
         depthCanvas.style.display = 'block';
@@ -433,6 +482,49 @@
         currentView = pill.getAttribute('data-view');
         updateViewDisplay();
       });
+    });
+
+    // 点击画面任意位置实现“交互式定焦”
+    stageWrapper.addEventListener('click', (e) => {
+      if (!rawImg || currentView === 'depth') return;
+      const rect = mainCanvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+      if (clickX < 0 || clickX > rect.width || clickY < 0 || clickY > rect.height) return;
+
+      const normX = Math.max(0, Math.min(1, clickX / rect.width));
+      const normY = Math.max(0, Math.min(1, clickY / rect.height));
+
+      // 从 depthCanvas 采样点击位置的深度值
+      const dCtx = depthCanvas.getContext('2d', { willReadFrequently: true });
+      const pixelX = Math.floor(normX * depthCanvas.width);
+      const pixelY = Math.floor(normY * depthCanvas.height);
+      const pixel = dCtx.getImageData(pixelX, pixelY, 1, 1).data;
+      const sampledDepth = pixel[0] / 255.0;
+
+      currentFocus = sampledDepth;
+
+      // 触发定焦波纹光圈动画
+      if (focusRing) {
+        focusRing.style.left = clickX + 'px';
+        focusRing.style.top = clickY + 'px';
+        focusRing.style.transform = 'translate(-50%, -50%) scale(1.3)';
+        focusRing.style.opacity = '1';
+        setTimeout(() => {
+          focusRing.style.transform = 'translate(-50%, -50%) scale(0.8)';
+          focusRing.style.opacity = '0';
+        }, 400);
+      }
+
+      if (hintTagText) {
+        const pct = Math.round(sampledDepth * 100);
+        hintTagText.textContent = `🎯 已定焦至所选区域 (景深深度: ${pct}%)`;
+        setTimeout(() => {
+          if (hintTagText) {
+            hintTagText.textContent = '💡 提示：在画面上晃动鼠标感受 3D 纵深；点击任意物体即可定焦！';
+          }
+        }, 2600);
+      }
     });
 
     btnAutoWiggle.addEventListener('click', () => {
@@ -602,22 +694,49 @@
         }
       `;
 
-      // 6步迭代视差遮挡行进 (Parallax Occlusion Raymarching)
-      // 零重影！单次采样连续空间位移映射，主体与背景产生真实深度分离
+      // 8步迭代视差遮挡光线步进 (Parallax Occlusion Raymarching)
+      // 零重影！支持自由对焦点 (u_focus) 与红蓝双目 3D 立体模式 (Anaglyph 3D)
       const fsSource = `
         precision mediump float;
         uniform sampler2D u_image;
         uniform sampler2D u_depth;
         uniform vec2 u_offset;
+        uniform float u_focus;
+        uniform int u_mode; // 0: 裸眼3D动态视差, 1: 红蓝3D立体模式
         varying vec2 v_texCoord;
 
         void main() {
-          vec2 pos = v_texCoord;
-          for (int i = 0; i < 6; i++) {
-            float d = texture2D(u_depth, clamp(pos, 0.002, 0.998)).r;
-            pos = v_texCoord + u_offset * (d - 0.5);
+          if (u_mode == 1) {
+            // === 红蓝 3D 模式 (Anaglyph Red-Cyan 3D) ===
+            // 视差偏移：左眼向负偏移，右眼向正偏移
+            vec2 offsetL = -u_offset * 1.35;
+            vec2 posL = v_texCoord;
+            for (int i = 0; i < 5; i++) {
+              float dL = texture2D(u_depth, clamp(posL, 0.002, 0.998)).r;
+              posL = v_texCoord + offsetL * (dL - u_focus);
+            }
+            vec4 colL = texture2D(u_image, clamp(posL, 0.002, 0.998));
+
+            vec2 offsetR = u_offset * 1.35;
+            vec2 posR = v_texCoord;
+            for (int i = 0; i < 5; i++) {
+              float dR = texture2D(u_depth, clamp(posR, 0.002, 0.998)).r;
+              posR = v_texCoord + offsetR * (dR - u_focus);
+            }
+            vec4 colR = texture2D(u_image, clamp(posR, 0.002, 0.998));
+
+            // 合成红蓝眼镜立体：左眼取红通道，右眼取绿蓝通道
+            gl_FragColor = vec4(colL.r, colR.g, colR.b, 1.0);
+          } else {
+            // === 裸眼 3D 空间动态视差 (零重影连续空间置换) ===
+            vec2 pos = v_texCoord;
+            for (int i = 0; i < 8; i++) {
+              float d = texture2D(u_depth, clamp(pos, 0.002, 0.998)).r;
+              // 以 u_focus 为不动物体平面，d > u_focus 为前景顺向偏移，d < u_focus 为背景反向深度位移
+              pos = v_texCoord + u_offset * (d - u_focus);
+            }
+            gl_FragColor = texture2D(u_image, clamp(pos, 0.002, 0.998));
           }
-          gl_FragColor = texture2D(u_image, clamp(pos, 0.002, 0.998));
         }
       `;
 
@@ -701,6 +820,8 @@
       gl.uniform1i(gl.getUniformLocation(shaderProgram, "u_depth"), 1);
 
       uOffsetLoc = gl.getUniformLocation(shaderProgram, "u_offset");
+      uFocusLoc = gl.getUniformLocation(shaderProgram, "u_focus");
+      uModeLoc = gl.getUniformLocation(shaderProgram, "u_mode");
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
       return true;
@@ -741,14 +862,14 @@
       }
     }
 
-    // 高精度多特征景深图估计器 (白近黑远，用于专业 Depth Map PNG 导出与 3D 空间置换)
+    // 高精度多特征景深图估计器 (全动态对比度拉伸：白近黑远，产生极具层次的 3D 纵深)
     function generateDepthMap(image, targetCanvas) {
       const targetCtx = targetCanvas.getContext('2d', { willReadFrequently: true });
       const w = targetCanvas.width;
       const h = targetCanvas.height;
 
-      // 缩放至分析网格提升运算效率与消除噪点
-      const maxDim = 380;
+      // 缩放至适中分析网格提升运算效率同时保证主体边缘精细
+      const maxDim = 460;
       let scale = Math.min(1.0, maxDim / Math.max(w, h));
       const aw = Math.max(64, Math.round(w * scale));
       const ah = Math.max(64, Math.round(h * scale));
@@ -778,7 +899,7 @@
       let sumSalX = 0;
       let sumSalY = 0;
 
-      // 第一遍遍历：提取梯度、暖色度与显著性重心 (Dynamic Subject Centroid)
+      // 第一遍遍历：提取边缘梯度、色彩鲜艳度与主体重心
       for (let y = 1; y < ah - 1; y++) {
         const yOff = y * aw;
         for (let x = 1; x < aw - 1; x++) {
@@ -802,15 +923,15 @@
           const colDist = Math.sqrt((r - meanR) ** 2 + (g - meanG) ** 2 + (b - meanB) ** 2) / 255.0;
 
           // 四周边框与对白框保护 (文字框和相框不作为动态主体)
-          const isBorder = (x < aw * 0.025 || x > aw * 0.975 || y < ah * 0.025 || y > ah * 0.975);
-          const isNeutralWhite = (lum > 200) && (Math.abs(r - g) < 25) && (Math.abs(g - b) < 25);
-          const isSubtitle = isNeutralWhite && (y > ah * 0.65 || y < ah * 0.25 || x < aw * 0.45);
+          const isBorder = (x < aw * 0.02 || x > aw * 0.98 || y < ah * 0.02 || y > ah * 0.98);
+          const isNeutralWhite = (lum > 215) && (Math.abs(r - g) < 20) && (Math.abs(g - b) < 20);
+          const isSubtitle = isNeutralWhite && (y > ah * 0.75 || y < ah * 0.2);
 
-          let sal = (grad * 0.4 + warmth * 0.4 + colDist * 0.2);
+          let sal = (grad * 0.45 + warmth * 0.35 + colDist * 0.2);
           if (isBorder || isSubtitle) sal = 0.0;
 
           saliencyMap[yOff + x] = sal;
-          if (sal > 0.25) {
+          if (sal > 0.2) {
             totalSal += sal;
             sumSalX += x * sal;
             sumSalY += y * sal;
@@ -818,17 +939,20 @@
         }
       }
 
-      // 计算真实画面主体的重心 (避免机械默认画面中心，支持三分法则构图)
+      // 计算真实画面主体的重心 (避免呆板锁定画面正中心)
       const subjectCenterX = totalSal > 0 ? (sumSalX / totalSal) : (aw * 0.5);
       const subjectCenterY = totalSal > 0 ? (sumSalY / totalSal) : (ah * 0.5);
       const maxRadiusSq = (aw * 0.45) ** 2 + (ah * 0.45) ** 2;
 
-      // 第二遍遍历：构建连续平滑空间深度矩阵
+      // 第二遍遍历：构建连续空间景深初步特征
       const rawDepthMap = new Float32Array(pixelCount);
+      const validDepths = [];
+
       for (let y = 0; y < ah; y++) {
         const yOff = y * aw;
         const dy = y - subjectCenterY;
-        const vertBaseline = Math.pow(y / ah, 1.2) * 0.35; // 地面近、天空远纵深基线
+        // 地面近、天空远透视基线
+        const vertBaseline = Math.pow(y / ah, 1.4) * 0.45;
 
         for (let x = 0; x < aw; x++) {
           const idx = (yOff + x) * 4;
@@ -837,33 +961,46 @@
           const b = srcData[idx + 2];
           const lum = 0.299 * r + 0.587 * g + 0.114 * b;
 
-          const isBorder = (x < aw * 0.025 || x > aw * 0.975 || y < ah * 0.025 || y > ah * 0.975);
-          const isNeutralWhite = (lum > 200) && (Math.abs(r - g) < 25) && (Math.abs(g - b) < 25);
-          const isSubtitle = isNeutralWhite && (y > ah * 0.65 || y < ah * 0.25 || x < aw * 0.45);
-
-          if (isBorder || isSubtitle) {
-            // 文字框与画框固定在对焦点 (0.5)，绝对零位移、零形变、零重影
+          const isBorder = (x < aw * 0.02 || x > aw * 0.98 || y < ah * 0.02 || y > ah * 0.98);
+          if (isBorder) {
             rawDepthMap[yOff + x] = 0.5;
             continue;
           }
 
           const dx = x - subjectCenterX;
           const distSq = (dx * dx + dy * dy) / maxRadiusSq;
-          const subjectWeight = Math.exp(-distSq * 2.0);
+          const subjectWeight = Math.exp(-distSq * 1.8);
 
           const warmth = Math.max(0, (r - b) / 255.0);
           const sal = saliencyMap[yOff + x];
 
           // 综合景深：基线 + 主体聚焦度 + 暖色度 + 显著性
-          let d = 0.18 + vertBaseline + (subjectWeight * 0.35) + (warmth * 0.25) + (sal * 0.15);
-          // 远方深色森林压暗
-          if (y < ah * 0.4 && lum < 80) d *= 0.4;
+          let d = 0.1 + vertBaseline + (subjectWeight * 0.45) + (warmth * 0.3) + (sal * 0.25);
+          // 画面上方深色或低饱和区域判定为远景天空/背景
+          if (y < ah * 0.38 && lum < 90) d *= 0.35;
 
-          rawDepthMap[yOff + x] = Math.max(0.08, Math.min(0.95, d));
+          rawDepthMap[yOff + x] = d;
+          validDepths.push(d);
         }
       }
 
-      // 5x5 双边平滑滤波器 (消除噪点与锐利断层，保证 3D 浮雕平滑过渡)
+      // 第三步：全动态范围直方图拉伸 (HDR Normalization & Contrast Expansion)
+      // 彻底解决深度差过小、无立体感的问题
+      validDepths.sort((a, b) => a - b);
+      const p03 = validDepths[Math.floor(validDepths.length * 0.04)] || 0.1;
+      const p97 = validDepths[Math.floor(validDepths.length * 0.96)] || 0.9;
+      const span = Math.max(0.1, p97 - p03);
+
+      for (let i = 0; i < pixelCount; i++) {
+        let v = rawDepthMap[i];
+        let norm = Math.max(0.0, Math.min(1.0, (v - p03) / span));
+        // S 曲线增强前景与背景反差
+        norm = norm * norm * (3.0 - 2.0 * norm);
+        // 映射到 [0.06, 0.96]
+        rawDepthMap[i] = 0.06 + norm * 0.90;
+      }
+
+      // 5x5 双边滤波器：保持显著边缘落差，平滑内部噪点
       const smoothedMap = new Float32Array(pixelCount);
       for (let y = 2; y < ah - 2; y++) {
         const yOff = y * aw;
@@ -880,7 +1017,8 @@
               const nVal = rawDepthMap[nIdx];
               const spatialDist = (kx * kx + ky * ky);
               const valDiff = Math.abs(centerVal - nVal);
-              const wVal = Math.exp(-spatialDist * 0.3 - valDiff * 8.0);
+              // 边缘感知权重：深浅落差大时不混淆，保护前景边缘清晰
+              const wVal = Math.exp(-spatialDist * 0.35 - valDiff * 10.0);
               valSum += nVal * wVal;
               weightSum += wVal;
             }
@@ -929,8 +1067,8 @@
     if (window.DeviceOrientationEvent) {
       window.addEventListener('deviceorientation', (e) => {
         if (isAutoWiggle || !e.gamma || !e.beta) return;
-        targetOffsetX = Math.max(-0.5, Math.min(0.5, e.gamma / 40));
-        targetOffsetY = Math.max(-0.5, Math.min(0.5, (e.beta - 45) / 40));
+        targetOffsetX = Math.max(-0.6, Math.min(0.6, e.gamma / 28));
+        targetOffsetY = Math.max(-0.6, Math.min(0.6, (e.beta - 45) / 28));
       });
     }
 
@@ -950,16 +1088,16 @@
 
       function render() {
         if (isAutoWiggle) {
-          wiggleTime += 0.035;
-          targetOffsetX = Math.sin(wiggleTime) * 0.42;
-          targetOffsetY = Math.cos(wiggleTime * 0.8) * 0.22;
+          wiggleTime += 0.038;
+          targetOffsetX = Math.sin(wiggleTime) * 0.55;
+          targetOffsetY = Math.cos(wiggleTime * 0.75) * 0.28;
         }
 
         // 弹性平滑逼近
         currentOffsetX += (targetOffsetX - currentOffsetX) * 0.12;
         currentOffsetY += (targetOffsetY - currentOffsetY) * 0.12;
 
-        if (currentView === '3d') {
+        if (currentView === '3d' || currentView === 'anaglyph') {
           // 1. 物理画框 3D 空间倾角 (微幅倾斜增强空间感)
           const maxTilt = parseFloat(depthStrength.value);
           const rotX = -currentOffsetY * maxTilt;
@@ -967,29 +1105,38 @@
           stageWrapper.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.025, 1.025, 1.025)`;
 
           // 2. 真实物理反向深邃空间阴影 (产生浮出画框的立体纵深)
-          const shadowX = -currentOffsetX * 35;
-          const shadowY = -currentOffsetY * 35 + 18;
-          stageWrapper.style.boxShadow = `${shadowX.toFixed(1)}px ${shadowY.toFixed(1)}px 45px rgba(0, 0, 0, 0.8), 0 12px 35px rgba(139, 92, 246, 0.22)`;
+          const shadowX = -currentOffsetX * 40;
+          const shadowY = -currentOffsetY * 40 + 20;
+          stageWrapper.style.boxShadow = `${shadowX.toFixed(1)}px ${shadowY.toFixed(1)}px 50px rgba(0, 0, 0, 0.85), 0 14px 40px rgba(139, 92, 246, 0.25)`;
 
-          // 3. 全息曲面光斑流光 (随视角在主体表面流动)
-          const gx = (currentOffsetX + 0.5) * 100;
-          const gy = (currentOffsetY + 0.5) * 100;
-          glareOverlay.style.background = `radial-gradient(circle at ${gx.toFixed(1)}% ${gy.toFixed(1)}%, rgba(255,255,255,0.48) 0%, rgba(192, 132, 252, 0.18) 32%, transparent 68%)`;
+          // 3. 全息曲面光斑流光 (裸眼 3D 模式开启，红蓝模式关闭避免混色)
+          if (currentView === '3d') {
+            glareOverlay.style.opacity = '0.7';
+            const gx = (currentOffsetX + 0.5) * 100;
+            const gy = (currentOffsetY + 0.5) * 100;
+            glareOverlay.style.background = `radial-gradient(circle at ${gx.toFixed(1)}% ${gy.toFixed(1)}%, rgba(255,255,255,0.48) 0%, rgba(192, 132, 252, 0.18) 32%, transparent 68%)`;
+          } else {
+            glareOverlay.style.opacity = '0';
+          }
 
-          // 4. 画面内部真实 3D 空间纵深位移 (零重影！主体与背景产生相对走位)
+          // 4. 画面内部真实 3D 空间纵深位移 (自适应标准化 UV 尺度，产生强劲的 3D 错位)
           const pxDepth = parseFloat(parallaxDepth.value);
+          const uvScale = pxDepth * 0.00125;
+          const offX = currentOffsetX * uvScale;
+          const offY = currentOffsetY * uvScale;
+
           if (renderEngine === 'webgl' && gl && shaderProgram && uOffsetLoc) {
-            const offX = (currentOffsetX * pxDepth) / mainCanvas.width;
-            const offY = (currentOffsetY * pxDepth) / mainCanvas.height;
             gl.uniform2f(uOffsetLoc, offX, -offY); // WebGL Y 轴向上，符号反转
+            if (uFocusLoc) gl.uniform1f(uFocusLoc, currentFocus);
+            if (uModeLoc) gl.uniform1i(uModeLoc, (currentView === 'anaglyph') ? 1 : 0);
             gl.drawArrays(gl.TRIANGLES, 0, 6);
           } else if (renderEngine === 'canvas2d' && fallbackMesh) {
             const ctx = mainCanvas.getContext('2d');
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
             for (let i = 0; i < fallbackMesh.length; i++) {
               const cell = fallbackMesh[i];
-              const dispX = currentOffsetX * (cell.depth - 0.5) * pxDepth;
-              const dispY = currentOffsetY * (cell.depth - 0.5) * pxDepth;
+              const dispX = currentOffsetX * (cell.depth - currentFocus) * pxDepth * 2.2;
+              const dispY = currentOffsetY * (cell.depth - currentFocus) * pxDepth * 2.2;
               ctx.drawImage(rawImg, cell.sx, cell.sy, cell.sw, cell.sh, cell.sx + dispX, cell.sy + dispY, cell.sw + 0.5, cell.sh + 0.5);
             }
           }
@@ -1034,6 +1181,15 @@
     btnReset.addEventListener('click', () => {
       fileInput.value = '';
       rawImg = null;
+      currentFocus = 0.55;
+      targetOffsetX = 0;
+      targetOffsetY = 0;
+      currentOffsetX = 0;
+      currentOffsetY = 0;
+      isAutoWiggle = false;
+      btnAutoWiggle.style.background = 'rgba(139, 92, 246, 0.15)';
+      btnAutoWiggle.style.color = '#c084fc';
+      wiggleBtnText.textContent = '开启自动立体环视 (Auto Wiggle)';
       if (animFrameId) cancelAnimationFrame(animFrameId);
       stageWrapper.style.transform = 'none';
       stageWrapper.style.boxShadow = '0 16px 40px rgba(0, 0, 0, 0.8)';
