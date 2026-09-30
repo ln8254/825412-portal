@@ -58,7 +58,7 @@ const WebhookController = {
     }
     this.hookId = savedHook;
 
-    const urlDisplay = document.getElementById('webhook-url-display');
+    const urlDisplay = document.getElementById('webhook-endpoint-url') || document.getElementById('webhook-url-display');
     const endpointUrl = `https://echo.free.beeceptor.com/webhook/825412_${this.hookId}`;
     if (urlDisplay) urlDisplay.textContent = endpointUrl;
 
@@ -141,7 +141,21 @@ const WebhookController = {
       const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
       sendBtn.innerHTML = `<span class="material-symbols-outlined">sync</span> ${isEn ? "Simulating trigger..." : "正在模拟触发..."}`;
 
-      // 1. 构造捕获报文
+      // 1. 发送真实网络请求至测试端点
+      const endpointUrl = `https://echo.free.beeceptor.com/webhook/825412_${this.hookId}`;
+      try {
+        fetch(endpointUrl, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Webhook-Source': '825412-Portal-Mock'
+          },
+          body: JSON.stringify(payloadData),
+          mode: 'no-cors'
+        }).catch(() => {});
+      } catch (e) {}
+
+      // 2. 构造本地捕获报文
       const newRequest = {
         id: 'req_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6),
         method: method,
@@ -159,7 +173,7 @@ const WebhookController = {
         timestamp: Date.now()
       };
 
-      // 2. 模拟网络往返延迟 (200ms)
+      // 3. 模拟网络往返延迟 (200ms)
       await new Promise(r => setTimeout(r, 200));
 
       this.capturedRequests.unshift(newRequest);

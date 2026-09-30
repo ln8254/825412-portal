@@ -56,10 +56,11 @@
         <label class="form-label" data-i18n="tool_jwt_input_label">编码后的 JWT 令牌 (Encoded Token):</label>
         <textarea class="custom-textarea" id="jwt-input" data-i18n-ph="tool_jwt_ph" placeholder="在此粘贴 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." style="font-family: var(--font-mono); font-size: 13px; height: 110px;"></textarea>
       </div>
-      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+      <div style="display: flex; gap: 10px; margin-bottom: 14px;">
         <button class="btn btn-primary" id="jwt-decode-btn" data-i18n="tool_jwt_btn_decode">⚡ 立即解码</button>
         <button class="btn" id="jwt-sample-btn" style="background: var(--surface-high);">加载测试示例</button>
       </div>
+      <div id="jwt-validity-text" style="font-size: 13px; font-family: var(--font-mono); margin-bottom: 16px; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); background: rgba(0,0,0,0.2); color: var(--text-muted);">等待输入 JWT 令牌...</div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
         <div>
           <label class="form-label" style="color: #ef4444;" data-i18n="tool_jwt_header_label">HEADER (算法与令牌类型):</label>

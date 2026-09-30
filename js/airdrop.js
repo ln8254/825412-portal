@@ -109,8 +109,8 @@ const AirDropController = {
             <span class="material-symbols-outlined modal-close" id="close-qr-modal">close</span>
           </div>
           <div class="qr-modal-body">
-            <div class="qr-canvas-container">
-              <img id="airdrop-qr-img" src="" alt="AirDrop Room QR Code" style="width: 180px; height: 180px; display: block;" />
+            <div class="qr-canvas-container" style="display: flex; justify-content: center; align-items: center; min-height: 180px;">
+              <div id="airdrop-qr-box" style="background: white; padding: 10px; border-radius: 6px;"></div>
             </div>
             <div style="font-weight: 700; font-size: 16px; color: #fff; margin-bottom: 4px;">
               <span data-i18n="airdrop_qr_room_label">房间号:</span>
@@ -135,10 +135,22 @@ const AirDropController = {
     const targetPath = isStandaloneAirdrop ? 'airdrop.html' : '';
     const shareUrl = `${window.location.origin}/${targetPath}?view=airdrop&room=${this.roomId}`;
     
-    const qrImg = modal.querySelector('#airdrop-qr-img');
+    const qrBox = modal.querySelector('#airdrop-qr-box');
     const badge = modal.querySelector('#qr-room-badge');
     if (badge) badge.textContent = `#${this.roomId}`;
-    if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`;
+    if (qrBox) {
+      qrBox.innerHTML = '';
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(qrBox, {
+          text: shareUrl,
+          width: 180,
+          height: 180,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+    }
 
     // 动态应用当前语言包
     if (typeof I18nController !== 'undefined') {
@@ -450,9 +462,9 @@ const AirDropController = {
 
     const peerKeys = Object.keys(this.peersInfo);
     const totalCount = peerKeys.length + 1;
+    const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
 
     if (countBadge) {
-      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
       countBadge.textContent = isEn ? `${totalCount} Device(s) Online` : `${totalCount} 台设备在线`;
     }
 
@@ -615,6 +627,7 @@ const AirDropController = {
     const list = document.getElementById('airdrop-messages-list');
     if (!list) return;
 
+    const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
     const isFile = payload.type === 'file';
     const isImage = isFile && payload.fileType && payload.fileType.startsWith('image/');
 
@@ -662,6 +675,7 @@ const AirDropController = {
     const list = document.getElementById('airdrop-messages-list');
     if (!list) return;
 
+    const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
     const item = document.createElement('div');
     item.className = 'history-item';
     item.style.marginBottom = '12px';

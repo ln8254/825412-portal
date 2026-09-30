@@ -4852,7 +4852,7 @@ const I18nController = {
   },
 
   renderLangSelectors() {
-    const selectors = document.querySelectorAll('.lang-selector');
+    const selectors = document.querySelectorAll('.lang-selector, #lang-select-header, #lang-select, select[id*="lang"]');
     selectors.forEach(select => {
       select.innerHTML = this.supportedLanguages.map(lang => {
         const selected = lang.code === this.currentLang ? 'selected' : '';
@@ -4865,6 +4865,10 @@ const I18nController = {
         this.setLanguage(e.target.value);
       };
     });
+  },
+
+  switchLang(lang) {
+    this.setLanguage(lang);
   },
 
   toggleLanguage() {

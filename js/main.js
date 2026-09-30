@@ -615,8 +615,19 @@ function initDashboardNetworkCenter() {
     currentWifiString = `WIFI:T:${enc};S:${escapeWifi(ssid)};${pwdStr}${hiddenStr};`;
 
     if (wifiQrContainer) {
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentWifiString)}`;
-      wifiQrContainer.innerHTML = `<img id="wifi-qr-img" src="${qrUrl}" alt="WiFi QR Code" style="width: 150px; height: 150px; display: block;" />`;
+      wifiQrContainer.innerHTML = '';
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(wifiQrContainer, {
+          text: currentWifiString,
+          width: 150,
+          height: 150,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } else {
+        wifiQrContainer.innerHTML = `<div style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #ef4444; text-align: center; padding: 10px;">本地二维码引擎未就绪</div>`;
+      }
     }
 
     if (wifiCardInfo) {
@@ -645,17 +656,25 @@ function initDashboardNetworkCenter() {
 
   if (wifiDlBtn) {
     wifiDlBtn.addEventListener('click', () => {
-      const qrImg = document.getElementById('wifi-qr-img');
-      if (!qrImg || !qrImg.src) {
+      if (!currentWifiString) {
         generateWifiQr();
       }
-      const img = document.getElementById('wifi-qr-img');
-      if (img && img.src) {
-        const a = document.createElement('a');
-        a.href = img.src;
-        a.download = `WiFi_${(wifiSsid ? wifiSsid.value : 'QR') || 'Connect'}.png`;
-        a.target = '_blank';
-        a.click();
+      if (wifiQrContainer) {
+        const canvas = wifiQrContainer.querySelector('canvas');
+        const img = wifiQrContainer.querySelector('img');
+        const dataUrl = canvas ? canvas.toDataURL('image/png') : (img && img.src ? img.src : null);
+        if (dataUrl) {
+          const a = document.createElement('a');
+          a.href = dataUrl;
+          a.download = `WiFi_${(wifiSsid ? wifiSsid.value : 'QR') || 'Connect'}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          if (typeof Toast !== 'undefined') {
+            const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+            Toast.success(isEn ? 'WiFi QR Code PNG downloaded!' : 'WiFi 直连二维码已保存为本地 PNG！');
+          }
+        }
       }
     });
   }

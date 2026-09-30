@@ -479,9 +479,40 @@
     // 初始化模型
     async function ensureModelLoaded() {
       if (isModelLoaded) return;
+      statusText.textContent = '正在初始化端侧计算引擎与模型...';
+      progressBar.style.width = '20%';
+      percentText.textContent = '20%';
+
+      try {
+        if (typeof faceapi !== 'undefined' && faceapi.tf) {
+          const hasWebGL = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+            } catch (e) {
+              return false;
+            }
+          };
+
+          if (!hasWebGL()) {
+            console.warn('WebGL 不可用，自动切换至 CPU 计算后端...');
+            await faceapi.tf.setBackend('cpu');
+          }
+          await faceapi.tf.ready();
+        }
+      } catch (tfErr) {
+        console.warn('TensorFlow backend init fallback:', tfErr);
+        try {
+          if (typeof faceapi !== 'undefined' && faceapi.tf) {
+            await faceapi.tf.setBackend('cpu');
+            await faceapi.tf.ready();
+          }
+        } catch (e) {}
+      }
+
+      progressBar.style.width = '40%';
+      percentText.textContent = '40%';
       statusText.textContent = '正在下载并预热端侧轻量 TinyFace 人脸模型 (约 190KB)...';
-      progressBar.style.width = '30%';
-      percentText.textContent = '30%';
 
       const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
       await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);

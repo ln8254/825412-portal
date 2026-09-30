@@ -148,8 +148,10 @@ const ClipboardController = {
       const text = contentArea.value;
       if (text && !text.startsWith('正在') && !text.startsWith('该剪贴板')) {
         navigator.clipboard.writeText(text).then(() => {
-          if (typeof Toast !== 'undefined') const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
-          Toast.success(isEn ? "Content copied to clipboard!" : "文本内容已成功复制！");
+          const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+          if (typeof Toast !== 'undefined') {
+            Toast.success(isEn ? "Content copied to clipboard!" : "文本内容已成功复制！");
+          }
         });
       }
     });
@@ -170,8 +172,10 @@ const ClipboardController = {
     saveBtn.addEventListener('click', async () => {
       const text = contentText.value.trim();
       if (!text) {
-        if (typeof Toast !== 'undefined') const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
-        Toast.warning(isEn ? "Please enter content to share!" : "请输入需要分享的内容！");
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        if (typeof Toast !== 'undefined') {
+          Toast.warning(isEn ? "Please enter content to share!" : "请输入需要分享的内容！");
+        }
         return;
       }
 
@@ -229,8 +233,10 @@ const ClipboardController = {
 
       } catch (err) {
         console.error(err);
-        if (typeof Toast !== 'undefined') const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
-        Toast.error(isEn ? "Failed to create share. Check network and try again." : "创建匿名分享失败，请检查网络连接或稍后再试。");
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        if (typeof Toast !== 'undefined') {
+          Toast.error(isEn ? "Failed to create share. Check network and try again." : "创建匿名分享失败，请检查网络连接或稍后再试。");
+        }
       } finally {
         saveBtn.disabled = false;
         const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
@@ -243,8 +249,10 @@ const ClipboardController = {
       const url = shareUrlDiv.textContent;
       if (url) {
         navigator.clipboard.writeText(url).then(() => {
-          if (typeof Toast !== 'undefined') const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
-          Toast.success(isEn ? "Share link copied to clipboard!" : "站内分享链接已复制到剪贴板！");
+          const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+          if (typeof Toast !== 'undefined') {
+            Toast.success(isEn ? "Share link copied to clipboard!" : "站内分享链接已复制到剪贴板！");
+          }
         });
       }
     });

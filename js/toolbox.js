@@ -60,49 +60,64 @@ const ToolboxController = {
   // 1. 密码生成器与信息熵（Entropy）评估引擎
   // ==========================================
   initPasswordGenerator() {
-    const generateBtn = document.getElementById('generate-password-btn');
-    const copyBtn = document.getElementById('copy-password-btn');
-    const lengthInput = document.getElementById('password-length');
-    const lengthVal = document.getElementById('length-val');
+    const generateBtn = document.getElementById('pwd-gen-btn') || document.getElementById('generate-password-btn');
+    const copyBtn = document.getElementById('pwd-copy-btn') || document.getElementById('copy-password-btn');
+    const lengthInput = document.getElementById('pwd-len') || document.getElementById('password-length');
+    const lengthVal = document.getElementById('pwd-len-val') || document.getElementById('length-val');
+    const display = document.getElementById('pwd-result') || document.getElementById('generated-password');
     
-    if (!generateBtn) return;
+    if (!generateBtn && !display) return;
+
+    const getCheckbox = (id1, id2) => {
+      const el = document.getElementById(id1) || document.getElementById(id2);
+      return el ? el.checked : false;
+    };
 
     const runGen = () => {
-      const length = parseInt(lengthInput.value);
-      const uppercase = document.getElementById('include-uppercase').checked;
-      const lowercase = document.getElementById('include-lowercase').checked;
-      const numbers = document.getElementById('include-numbers').checked;
-      const symbols = document.getElementById('include-symbols').checked;
+      const length = lengthInput ? parseInt(lengthInput.value, 10) : 16;
+      const uppercase = getCheckbox('pwd-upper', 'include-uppercase');
+      const lowercase = getCheckbox('pwd-lower', 'include-lowercase');
+      const numbers = getCheckbox('pwd-num', 'include-numbers');
+      const symbols = getCheckbox('pwd-sym', 'include-symbols');
 
       const result = this.generatePassword(length, uppercase, lowercase, numbers, symbols);
-      const display = document.getElementById('generated-password');
-      display.textContent = result.password;
+      if (display) {
+        if ('value' in display) {
+          display.value = result.password;
+        } else {
+          display.textContent = result.password;
+        }
+      }
 
       this.updateEntropyDisplay(result.entropy, length, result.charsetSize);
     };
 
-    lengthInput.addEventListener('input', (e) => {
-      lengthVal.textContent = e.target.value;
-      runGen();
-    });
+    if (lengthInput) {
+      lengthInput.addEventListener('input', (e) => {
+        if (lengthVal) lengthVal.textContent = e.target.value;
+        runGen();
+      });
+    }
 
-    ['include-uppercase', 'include-lowercase', 'include-numbers', 'include-symbols'].forEach(id => {
+    ['pwd-upper', 'include-uppercase', 'pwd-lower', 'include-lowercase', 'pwd-num', 'include-numbers', 'pwd-sym', 'include-symbols'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('change', runGen);
     });
 
-    generateBtn.addEventListener('click', runGen);
+    if (generateBtn) generateBtn.addEventListener('click', runGen);
 
-    copyBtn.addEventListener('click', () => {
-      const pwd = document.getElementById('generated-password').textContent;
-      if (pwd && !pwd.startsWith('点击') && !pwd.startsWith('Click')) {
-        navigator.clipboard.writeText(pwd).then(() => {
-          if (typeof Toast !== 'undefined') {
-            Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Password copied to clipboard!' : '密码已成功复制到剪贴板！');
-          }
-        });
-      }
-    });
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const pwd = display ? ('value' in display ? display.value : display.textContent) : '';
+        if (pwd && !pwd.startsWith('点击') && !pwd.startsWith('Click')) {
+          navigator.clipboard.writeText(pwd).then(() => {
+            if (typeof Toast !== 'undefined') {
+              Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Password copied to clipboard!' : '密码已成功复制到剪贴板！');
+            }
+          });
+        }
+      });
+    }
 
     // 默认执行一次生成
     runGen();
@@ -273,42 +288,97 @@ const ToolboxController = {
   // ==========================================
   initJsonFormatter() {
     const input = document.getElementById('json-input');
-    const format2Btn = document.getElementById('json-format-2-btn');
-    const format4Btn = document.getElementById('json-format-4-btn');
+    const format2Btn = document.getElementById('json-format-btn') || document.getElementById('json-format-2-btn');
+    const format4Btn = document.getElementById('json-format4-btn') || document.getElementById('json-format-4-btn');
     const minifyBtn = document.getElementById('json-minify-btn');
+    const escapeBtn = document.getElementById('json-escape-btn');
     const copyBtn = document.getElementById('json-copy-btn');
     const clearBtn = document.getElementById('json-clear-btn');
     const statusBox = document.getElementById('json-status-box');
 
     if (!input) return;
 
-    const setStatus = (isValid, msg) => {
-      if (!statusBox) return;
-      if (isValid) {
-        statusBox.innerHTML = `<span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px; color: #10b981;">check_circle</span> <span style="color: #10b981;">${msg}</span>`;
-      } else {
-        statusBox.innerHTML = `<span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px; color: #ef4444;">error</span> <span style="color: #ef4444;">${msg}</span>`;
+    const setStatus = (isValid, msg, hasBigInt = false) => {
+      const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+      if (statusBox) {
+        if (isValid) {
+          const bigIntBadge = hasBigInt 
+            ? `<span style="margin-left: 8px; font-size: 11px; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.4);">${isEn ? '🛡️ BigInt Lossless Protected' : '🛡️ 64位大整数无损保护'}</span>` 
+            : '';
+          statusBox.innerHTML = `<span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px; color: #10b981;">check_circle</span> <span style="color: #10b981;">${msg}</span>${bigIntBadge}`;
+        } else {
+          statusBox.innerHTML = `<span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px; color: #ef4444;">error</span> <span style="color: #ef4444;">${msg}</span>`;
+        }
+      }
+      if (!isValid && typeof Toast !== 'undefined') {
+        Toast.error(msg);
       }
     };
 
+    // 无损大整数 (Lossless 64-bit Integer / Snowflake ID) 保护
+    const formatSafeJson = (raw, spaces) => {
+      let hasBigInt = false;
+      const bigIntMap = [];
+      const protectedRaw = raw.replace(/("(?:\\.|[^"\\])*")|(?<=:\s*|\[\s*|,\s*)(-?\d{16,})(?=\s*[,}\]])/g, (match, strToken, numToken) => {
+        if (strToken) return strToken;
+        if (numToken) {
+          hasBigInt = true;
+          const idx = bigIntMap.length;
+          bigIntMap.push(numToken);
+          return match.replace(numToken, `"__BIGINT_PLACEHOLDER_${idx}__"`);
+        }
+        return match;
+      });
+
+      const parsed = JSON.parse(protectedRaw);
+      let formatted = JSON.stringify(parsed, null, spaces);
+      
+      bigIntMap.forEach((origNum, idx) => {
+        formatted = formatted.replace(new RegExp(`"__BIGINT_PLACEHOLDER_${idx}__"`, 'g'), origNum);
+      });
+
+      return { formatted, hasBigInt };
+    };
+
     const processJson = (spaces) => {
+      const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
       const raw = input.value.trim();
       if (!raw) {
-        setStatus(true, typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Ready for input.' : '等待输入待解析的 JSON 字符串。');
+        setStatus(true, isEn ? 'Ready for input.' : '等待输入待解析的 JSON 字符串。');
         return;
       }
       try {
-        const parsed = JSON.parse(raw);
-        input.value = JSON.stringify(parsed, null, spaces);
-        setStatus(true, typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Valid JSON. Syntax structure verified successfully.' : '有效的 JSON 数据，语法校验通过！');
+        const { formatted, hasBigInt } = formatSafeJson(raw, spaces);
+        input.value = formatted;
+        const msg = isEn ? 'Valid JSON. Syntax structure verified successfully.' : '有效的 JSON 数据，语法校验通过！';
+        setStatus(true, msg, hasBigInt);
+        if (typeof Toast !== 'undefined') {
+          Toast.success(hasBigInt ? (isEn ? 'Formatted with BigInt protection!' : '格式化完成，已启用 64 位大整数无损保护！') : (isEn ? 'JSON formatted successfully!' : 'JSON 格式化成功！'));
+        }
       } catch (err) {
-        setStatus(false, `${typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'JSON Syntax Error: ' : 'JSON 语法错误：'}${err.message}`);
+        setStatus(false, `${isEn ? 'JSON Syntax Error: ' : 'JSON 语法错误：'}${err.message}`);
       }
     };
 
     if (format2Btn) format2Btn.addEventListener('click', () => processJson(2));
     if (format4Btn) format4Btn.addEventListener('click', () => processJson(4));
     if (minifyBtn) minifyBtn.addEventListener('click', () => processJson(0));
+
+    if (escapeBtn) {
+      escapeBtn.addEventListener('click', () => {
+        let text = input.value.trim();
+        if (!text) return;
+        if ((text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))) {
+          try {
+            const unquoted = JSON.parse(text);
+            if (typeof unquoted === 'string') text = unquoted;
+          } catch (e) {}
+        }
+        text = text.replace(/\\"/g, '"').replace(/\\\\/g, '\\').replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t');
+        input.value = text;
+        processJson(2);
+      });
+    }
 
     if (copyBtn) {
       copyBtn.addEventListener('click', () => {
@@ -337,7 +407,7 @@ const ToolboxController = {
         return;
       }
       try {
-        JSON.parse(raw);
+        formatSafeJson(raw, 0);
         setStatus(true, typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Valid JSON syntax.' : 'JSON 语法合法通过。');
       } catch (err) {
         setStatus(false, err.message);
@@ -350,10 +420,11 @@ const ToolboxController = {
   // ==========================================
   initJwtDebugger() {
     const input = document.getElementById('jwt-input');
-    const headerOut = document.getElementById('jwt-header-output');
-    const payloadOut = document.getElementById('jwt-payload-output');
+    const headerOut = document.getElementById('jwt-header-out') || document.getElementById('jwt-header-output');
+    const payloadOut = document.getElementById('jwt-payload-out') || document.getElementById('jwt-payload-output');
     const validText = document.getElementById('jwt-validity-text');
-    const sampleBtn = document.getElementById('jwt-load-sample');
+    const sampleBtn = document.getElementById('jwt-sample-btn') || document.getElementById('jwt-load-sample');
+    const decodeBtn = document.getElementById('jwt-decode-btn');
 
     if (!input) return;
 
@@ -365,19 +436,36 @@ const ToolboxController = {
       return decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
     };
 
+    const setOutput = (el, text) => {
+      if (!el) return;
+      if (el.tagName && (el.tagName.toLowerCase() === 'textarea' || el.tagName.toLowerCase() === 'input')) {
+        el.value = text;
+      } else {
+        el.textContent = text;
+      }
+    };
+
     const parseJwt = () => {
+      const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
       const token = input.value.trim();
       if (!token) {
-        headerOut.value = '';
-        payloadOut.value = '';
+        setOutput(headerOut, '');
+        setOutput(payloadOut, '');
+        if (validText) {
+          validText.textContent = isEn ? 'Waiting for JWT token...' : '等待输入 JWT 令牌...';
+          validText.style.color = 'var(--text-muted)';
+          if (validText.parentElement) validText.parentElement.style.borderColor = 'var(--border-light)';
+        }
         return;
       }
 
       const parts = token.split('.');
       if (parts.length !== 3) {
-        validText.textContent = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Invalid JWT: Token must consist of 3 dot-separated parts.' : '无效的 JWT：格式必须包含由小数点分隔的 Header.Payload.Signature 三段结构。';
-        validText.parentElement.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-        validText.style.color = '#ef4444';
+        if (validText) {
+          validText.textContent = isEn ? 'Invalid JWT: Token must consist of 3 dot-separated parts.' : '无效的 JWT：格式必须包含由小数点分隔的 Header.Payload.Signature 三段结构。';
+          if (validText.parentElement) validText.parentElement.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+          validText.style.color = '#ef4444';
+        }
         return;
       }
 
@@ -385,8 +473,8 @@ const ToolboxController = {
         const headerJson = JSON.parse(base64UrlDecode(parts[0]));
         const payloadJson = JSON.parse(base64UrlDecode(parts[1]));
 
-        headerOut.value = JSON.stringify(headerJson, null, 2);
-        payloadOut.value = JSON.stringify(payloadJson, null, 2);
+        setOutput(headerOut, JSON.stringify(headerJson, null, 2));
+        setOutput(payloadOut, JSON.stringify(payloadJson, null, 2));
 
         // 检查过期时间 exp
         let expInfo = '';
@@ -398,17 +486,22 @@ const ToolboxController = {
             : ` [有效至 / Valid until: ${new Date(expTime).toLocaleString()}]`;
         }
 
-        validText.textContent = `解析成功！算法: ${headerJson.alg || '未知'} | 签发者: ${payloadJson.iss || 'N/A'}${expInfo}`;
-        validText.parentElement.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-        validText.style.color = '#10b981';
+        if (validText) {
+          validText.textContent = `解析成功！算法: ${headerJson.alg || '未知'} | 签发者: ${payloadJson.iss || 'N/A'}${expInfo}`;
+          if (validText.parentElement) validText.parentElement.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+          validText.style.color = '#10b981';
+        }
       } catch (err) {
-        validText.textContent = `Base64URL 解码异常: ${err.message}`;
-        validText.parentElement.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-        validText.style.color = '#ef4444';
+        if (validText) {
+          validText.textContent = `Base64URL 解码异常: ${err.message}`;
+          if (validText.parentElement) validText.parentElement.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+          validText.style.color = '#ef4444';
+        }
       }
     };
 
     input.addEventListener('input', parseJwt);
+    if (decodeBtn) decodeBtn.addEventListener('click', parseJwt);
 
     if (sampleBtn) {
       sampleBtn.addEventListener('click', () => {
@@ -427,7 +520,10 @@ const ToolboxController = {
     const textContainer = document.getElementById('hash-text-container');
     const fileContainer = document.getElementById('hash-file-container');
     
-    const textInput = document.getElementById('hash-input');
+    const textInput = document.getElementById('hash-text-input') || document.getElementById('hash-input');
+    const calcBtn = document.getElementById('hash-calc-btn');
+    const clearBtn = document.getElementById('hash-clear-btn');
+
     const fileDropzone = document.getElementById('hash-file-dropzone');
     const fileInput = document.getElementById('hash-file-input');
     const fileInfoBox = document.getElementById('hash-file-info');
@@ -438,15 +534,15 @@ const ToolboxController = {
     const verifyInput = document.getElementById('hash-verify-input');
     const verifyResult = document.getElementById('hash-verify-result');
 
-    const md5El = document.getElementById('hash-md5');
-    const sha1El = document.getElementById('hash-sha1');
-    const sha256El = document.getElementById('hash-sha256');
-    const sha512El = document.getElementById('hash-sha512');
+    const md5El = document.getElementById('hash-md5-out') || document.getElementById('hash-md5');
+    const sha1El = document.getElementById('hash-sha1-out') || document.getElementById('hash-sha1');
+    const sha256El = document.getElementById('hash-sha256-out') || document.getElementById('hash-sha256');
+    const sha512El = document.getElementById('hash-sha512-out') || document.getElementById('hash-sha512');
 
     let currentHashes = { md5: '', sha1: '', sha256: '', sha512: '' };
     let currentMode = 'text';
 
-    if (!md5El) return;
+    if (!md5El && !textInput) return;
 
     // 1. 模式切换
     if (textModeBtn && fileModeBtn) {
@@ -456,8 +552,8 @@ const ToolboxController = {
         textModeBtn.style.background = '';
         fileModeBtn.classList.remove('btn-primary');
         fileModeBtn.style.background = 'var(--surface-high)';
-        textContainer.style.display = 'block';
-        fileContainer.style.display = 'none';
+        if (textContainer) textContainer.style.display = 'block';
+        if (fileContainer) fileContainer.style.display = 'none';
         updateTextHashes();
       });
 
@@ -467,9 +563,9 @@ const ToolboxController = {
         fileModeBtn.style.background = '';
         textModeBtn.classList.remove('btn-primary');
         textModeBtn.style.background = 'var(--surface-high)';
-        textContainer.style.display = 'none';
-        fileContainer.style.display = 'block';
-        if (!fileInput.files || fileInput.files.length === 0) {
+        if (textContainer) textContainer.style.display = 'none';
+        if (fileContainer) fileContainer.style.display = 'block';
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
           clearOutputs();
         }
       });
@@ -477,10 +573,10 @@ const ToolboxController = {
 
     const clearOutputs = () => {
       currentHashes = { md5: '', sha1: '', sha256: '', sha512: '' };
-      md5El.textContent = '-';
-      sha1El.textContent = '-';
-      sha256El.textContent = '-';
-      sha512El.textContent = '-';
+      if (md5El) md5El.textContent = '-';
+      if (sha1El) sha1El.textContent = '-';
+      if (sha256El) sha256El.textContent = '-';
+      if (sha512El) sha512El.textContent = '-';
       runVerification();
     };
 
@@ -491,10 +587,10 @@ const ToolboxController = {
         return isUpper ? val.toUpperCase() : val.toLowerCase();
       };
 
-      md5El.textContent = fmt(currentHashes.md5);
-      sha1El.textContent = fmt(currentHashes.sha1);
-      sha256El.textContent = fmt(currentHashes.sha256);
-      sha512El.textContent = fmt(currentHashes.sha512);
+      if (md5El) md5El.textContent = fmt(currentHashes.md5);
+      if (sha1El) sha1El.textContent = fmt(currentHashes.sha1);
+      if (sha256El) sha256El.textContent = fmt(currentHashes.sha256);
+      if (sha512El) sha512El.textContent = fmt(currentHashes.sha512);
 
       runVerification();
     };
@@ -534,7 +630,39 @@ const ToolboxController = {
 
     if (textInput) {
       textInput.addEventListener('input', updateTextHashes);
+      if (textInput.value) {
+        updateTextHashes();
+      }
     }
+
+    if (calcBtn) {
+      calcBtn.addEventListener('click', updateTextHashes);
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        if (textInput) textInput.value = '';
+        clearOutputs();
+      });
+    }
+
+    // 复制按钮监听 (支持 .copy-trigger)
+    document.querySelectorAll('.copy-trigger').forEach(trigger => {
+      trigger.addEventListener('click', () => {
+        const targetId = trigger.getAttribute('data-target');
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          const val = 'value' in targetEl ? targetEl.value : targetEl.textContent;
+          if (val && val !== '-') {
+            navigator.clipboard.writeText(val).then(() => {
+              if (typeof Toast !== 'undefined') {
+                Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Hash copied to clipboard!' : '哈希值已复制到剪贴板！');
+              }
+            });
+          }
+        }
+      });
+    });
 
     // 3. 文件附件哈希计算引擎
     const processFileHash = async (file) => {
@@ -796,72 +924,123 @@ const ToolboxController = {
   initTimeConverter() {
     const localTimeInput = document.getElementById('current-local-time');
     const currentTsInput = document.getElementById('current-timestamp');
+    const currentTsSpan = document.getElementById('current-ts');
     const copyCurrentTs = document.getElementById('copy-current-ts');
     
     const inputTs = document.getElementById('input-timestamp');
-    const convertBtn = document.getElementById('convert-ts-btn');
+    const convertBtn = document.getElementById('ts-to-date-btn') || document.getElementById('convert-ts-btn');
     const outputDatetime = document.getElementById('output-datetime');
 
-    if (!localTimeInput) return;
+    const inputDatetime = document.getElementById('input-datetime');
+    const dateToTsBtn = document.getElementById('date-to-ts-btn');
+    const outputTs = document.getElementById('output-timestamp');
 
-    setInterval(() => {
+    if (!localTimeInput && !currentTsInput && !currentTsSpan && !inputTs) return;
+
+    const updateTimer = () => {
       const now = new Date();
-      localTimeInput.value = `${now.toLocaleString()} (UTC ${now.toISOString().replace('T', ' ').substring(0, 19)})`;
-      currentTsInput.value = Math.floor(now.getTime() / 1000).toString();
-    }, 1000);
+      const sec = Math.floor(now.getTime() / 1000).toString();
+      if (localTimeInput) {
+        localTimeInput.value = `${now.toLocaleString()} (UTC ${now.toISOString().replace('T', ' ').substring(0, 19)})`;
+      }
+      if (currentTsInput) {
+        currentTsInput.value = sec;
+      }
+      if (currentTsSpan) {
+        currentTsSpan.textContent = sec;
+      }
+    };
+    updateTimer();
+    setInterval(updateTimer, 1000);
 
-    copyCurrentTs.addEventListener('click', () => {
-      navigator.clipboard.writeText(currentTsInput.value).then(() => {
-        if (typeof Toast !== 'undefined') {
-          Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Timestamp copied!' : '当前时间戳已复制！');
+    if (copyCurrentTs) {
+      copyCurrentTs.addEventListener('click', () => {
+        const val = currentTsInput ? currentTsInput.value : (currentTsSpan ? currentTsSpan.textContent : '');
+        if (val) {
+          navigator.clipboard.writeText(val).then(() => {
+            if (typeof Toast !== 'undefined') {
+              Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Timestamp copied!' : '当前时间戳已复制！');
+            }
+          });
         }
       });
-    });
+    }
 
-    inputTs.value = Math.floor(Date.now() / 1000).toString();
+    if (inputTs && !inputTs.value) {
+      inputTs.value = Math.floor(Date.now() / 1000).toString();
+    }
 
-    convertBtn.addEventListener('click', () => {
-      const ts = parseInt(inputTs.value.trim());
-      if (isNaN(ts)) {
-        if (typeof Toast !== 'undefined') {
-          Toast.warning(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Please enter a valid numeric timestamp!' : '请输入有效的时间戳数值！');
+    if (convertBtn && inputTs && outputDatetime) {
+      convertBtn.addEventListener('click', () => {
+        const raw = inputTs.value.trim();
+        if (!raw) return;
+        const ts = parseInt(raw, 10);
+        if (isNaN(ts)) {
+          if (typeof Toast !== 'undefined') {
+            Toast.warning(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Please enter a valid numeric timestamp!' : '请输入有效的时间戳数值！');
+          }
+          return;
         }
-        return;
-      }
-      const isMs = ts.toString().length > 10;
-      const date = new Date(isMs ? ts : ts * 1000);
-      outputDatetime.value = `${date.toLocaleString()} | ISO: ${date.toISOString()}`;
-      if (typeof Toast !== 'undefined') Toast.success('转换成功！');
-    });
+        const isMs = raw.length > 10;
+        const date = new Date(isMs ? ts : ts * 1000);
+        outputDatetime.value = `${date.toLocaleString()} | ISO: ${date.toISOString()}`;
+        if (typeof Toast !== 'undefined') Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Converted!' : '转换成功！');
+      });
+    }
+
+    if (dateToTsBtn && inputDatetime && outputTs) {
+      dateToTsBtn.addEventListener('click', () => {
+        const val = inputDatetime.value.trim();
+        if (!val) return;
+        const date = new Date(val);
+        if (isNaN(date.getTime())) {
+          if (typeof Toast !== 'undefined') {
+            Toast.error(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Invalid date format!' : '日期时间格式无效！');
+          }
+          return;
+        }
+        outputTs.value = Math.floor(date.getTime() / 1000).toString();
+        if (typeof Toast !== 'undefined') Toast.success(typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US' ? 'Converted!' : '转换成功！');
+      });
+    }
   },
 
   // ==========================================
   // 6. 文本处理与多维数据统计工具
   // ==========================================
   initTextProcessor() {
-    const input = document.getElementById('toolbox-text-input');
+    const input = document.getElementById('toolbox-text-input') || document.getElementById('text-input');
     const output = document.getElementById('toolbox-text-output');
     const resultBox = document.getElementById('text-result-box');
 
+    if (!input) return;
+
     const showResult = (val) => {
-      output.value = val;
-      resultBox.style.display = 'block';
+      if (output) {
+        output.value = val;
+        if (resultBox) resultBox.style.display = 'block';
+      } else {
+        input.value = val;
+      }
     };
 
-    const bindClick = (id, fn) => {
-      const btn = document.getElementById(id);
-      if (btn) btn.addEventListener('click', fn);
+    const bindClick = (ids, fn) => {
+      const idList = Array.isArray(ids) ? ids : [ids];
+      idList.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.addEventListener('click', fn);
+      });
     };
 
-    bindClick('text-upper-btn', () => {
+    bindClick(['text-upper-btn'], () => {
       showResult(input.value.toUpperCase());
     });
 
-    bindClick('text-lower-btn', () => {
+    bindClick(['text-lower-btn'], () => {
       showResult(input.value.toLowerCase());
     });
 
-    bindClick('text-count-btn', () => {
+    bindClick(['text-count-btn'], () => {
       const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
       const text = input.value;
       const chars = text.length;
@@ -878,7 +1057,7 @@ const ToolboxController = {
       }
     });
 
-    bindClick('text-b64-enc-btn', () => {
+    bindClick(['text-base64-encode-btn', 'text-b64-enc-btn'], () => {
       try {
         const encoded = btoa(encodeURIComponent(input.value).replace(/%([0-9A-F]{2})/g, (match, p1) => {
           return String.fromCharCode(parseInt(p1, 16));
@@ -889,7 +1068,7 @@ const ToolboxController = {
       }
     });
 
-    bindClick('text-b64-dec-btn', () => {
+    bindClick(['text-base64-decode-btn', 'text-b64-dec-btn'], () => {
       try {
         const decoded = decodeURIComponent(atob(input.value).split('').map((c) => {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
@@ -900,11 +1079,11 @@ const ToolboxController = {
       }
     });
 
-    bindClick('text-url-enc-btn', () => {
+    bindClick(['text-url-encode-btn', 'text-url-enc-btn'], () => {
       showResult(encodeURIComponent(input.value));
     });
 
-    bindClick('text-url-dec-btn', () => {
+    bindClick(['text-url-decode-btn', 'text-url-dec-btn'], () => {
       try {
         showResult(decodeURIComponent(input.value));
       } catch (err) {
@@ -912,10 +1091,10 @@ const ToolboxController = {
       }
     });
 
-    bindClick('text-clear-btn', () => {
+    bindClick(['text-clear-btn'], () => {
       input.value = '';
-      output.value = '';
-      resultBox.style.display = 'none';
+      if (output) output.value = '';
+      if (resultBox) resultBox.style.display = 'none';
     });
   },
 
