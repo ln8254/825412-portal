@@ -75,6 +75,11 @@ function initRouting() {
       const targetPanel = document.getElementById(targetViewId);
       if (targetPanel) targetPanel.classList.add('active');
 
+      // 如果切到隔空快传，按需动态加载 WebRTC 引擎与二维码库 (免除首页首屏 143KB 脚本负担)
+      if (targetViewId === 'airdrop-view') {
+        loadAirdropScripts();
+      }
+
       // 移动端点击导航项后自动关闭抽屉
       closeMobileSidebar();
     });
@@ -179,6 +184,45 @@ function triggerTabSwitch(viewId) {
 }
 
 /**
+ * 隔空快传引擎按需动态懒加载 (免首屏 143KB 巨型脚本阻塞，点击 Tab 时秒级按需拉取)
+ */
+function loadAirdropScripts() {
+  if (window._airdropLoadingPromise) return window._airdropLoadingPromise;
+  window._airdropLoadingPromise = new Promise((resolve, reject) => {
+    if (typeof AirDropController !== 'undefined') {
+      if (AirDropController.init && !AirDropController.peer) {
+        AirDropController.init();
+      }
+      return resolve();
+    }
+    const loadScript = (src) => {
+      return new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = res;
+        s.onerror = rej;
+        document.body.appendChild(s);
+      });
+    };
+
+    loadScript('js/peerjs.min.js')
+      .then(() => loadScript('js/qrcode.min.js'))
+      .then(() => loadScript('js/airdrop.js?v=2.5.1'))
+      .then(() => {
+        if (typeof AirDropController !== 'undefined' && !AirDropController.peer) {
+          AirDropController.init();
+        }
+        resolve();
+      })
+      .catch((err) => {
+        console.error('Failed to lazy-load AirDrop scripts:', err);
+        reject(err);
+      });
+  });
+  return window._airdropLoadingPromise;
+}
+
+/**
  * 自动检查并解析 URL 参数 (?view=, ?room=, ?paste=) 与 URL Hash (#drop=, #paste=, #webhook) 深度直达路由
  */
 function handleUrlRoutingAndDeepLinks() {
@@ -188,13 +232,15 @@ function handleUrlRoutingAndDeepLinks() {
   // 1. 极客隔空快传 (?view=airdrop, ?room=ABCDE, #drop=ABCDE)
   const roomParam = params.get('room');
   if (params.get('view') === 'airdrop' || roomParam || hash.startsWith('#drop=')) {
-    triggerTabSwitch('airdrop-view');
-    const roomId = roomParam || (hash.startsWith('#drop=') ? hash.replace('#drop=', '').trim() : '');
-    if (roomId && typeof AirDropController !== 'undefined') {
-      setTimeout(() => {
-        AirDropController.joinRoom(roomId);
-      }, 100);
-    }
+    loadAirdropScripts().then(() => {
+      triggerTabSwitch('airdrop-view');
+      const roomId = roomParam || (hash.startsWith('#drop=') ? hash.replace('#drop=', '').trim() : '');
+      if (roomId && typeof AirDropController !== 'undefined') {
+        setTimeout(() => {
+          AirDropController.joinRoom(roomId);
+        }, 100);
+      }
+    });
     return;
   }
 

@@ -2260,21 +2260,14 @@ function verifyWebhook(rawPayload, signatureHeader, secret) {
     </div>
   </div>
 
-  <!-- 引入 WebRTC P2P 直连库 (PeerJS，本地极速加载) -->
-  <script src="js/peerjs.min.js"></script>
-
-  <!-- 引入本地二维码渲染库 (本地极速加载，免网络外发) -->
-  <script src="js/qrcode.min.js"></script>
-
-  <!-- JavaScript 核心逻辑 (添加版本号强刷浏览器缓存) -->
-  <script src="js/storage.js?v=2.5.1"></script>
-  <script src="js/i18n.js?v=2.5.1"></script>
-  <script src="js/toolbox.js?v=2.5.1"></script>
-  <script src="js/clipboard.js?v=2.5.1"></script>
-  <script src="js/ai-chat.js?v=2.5.1"></script>
-  <script src="js/airdrop.js?v=2.5.1"></script>
-  <script src="js/webhook.js?v=2.5.1"></script>
-  <script src="js/main.js?v=2.5.1"></script>
+  <!-- JavaScript 核心逻辑 (启用 defer 异步非阻塞并行拉取，首屏 0ms 瞬间渲染；隔空快传 PeerJS 库已改为点击时秒级按需懒加载) -->
+  <script defer src="js/storage.js?v=2.5.1"></script>
+  <script defer src="js/i18n.js?v=2.5.1"></script>
+  <script defer src="js/toolbox.js?v=2.5.1"></script>
+  <script defer src="js/clipboard.js?v=2.5.1"></script>
+  <script defer src="js/ai-chat.js?v=2.5.1"></script>
+  <script defer src="js/webhook.js?v=2.5.1"></script>
+  <script defer src="js/main.js?v=2.5.1"></script>
 
 </body>
 </html>

@@ -179,12 +179,12 @@
     </footer>
   </main>
 
-  <!-- 脚本引入 (本地极速加载，免外部 CDN 延迟) -->
-  <script src="js/peerjs.min.js"></script>
-  <script src="js/qrcode.min.js"></script>
-  <script src="js/storage.js?v=2.5.0"></script>
-  <script src="js/i18n.js?v=2.5.0"></script>
-  <script src="js/airdrop.js?v=2.5.0"></script>
+  <!-- 脚本引入 (本地极速加载，启用 defer 非阻塞并行下载) -->
+  <script defer src="js/peerjs.min.js"></script>
+  <script defer src="js/qrcode.min.js"></script>
+  <script defer src="js/storage.js?v=2.5.0"></script>
+  <script defer src="js/i18n.js?v=2.5.0"></script>
+  <script defer src="js/airdrop.js?v=2.5.0"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof AirDropController !== 'undefined') {

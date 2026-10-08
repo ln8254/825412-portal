@@ -1,48 +1,14 @@
-const CACHE_NAME = 'geek-portal-v2.8.0';
-const STATIC_ASSETS = [
+const CACHE_NAME = 'geek-portal-v2.9.0';
+const CORE_SHELL = [
   '/',
-  '/index.html',
-  '/sitemap.html',
-  '/airdrop.html',
-  '/webhook.html',
-  '/toolbox.html',
-  '/clipboard.html',
-  '/tools/screen-test.html',
-  '/tools/mouse-test.html',
-  '/tools/password-generator.html',
-  '/tools/json-formatter.html',
-  '/tools/jwt-debugger.html',
-  '/tools/hash-calculator.html',
-  '/tools/timestamp-converter.html',
-  '/tools/text-tools.html',
-  '/tools/media-compress.html',
-  '/tools/wifi-qr.html',
-  '/articles/webrtc-p2p-architecture-guide.html',
-  '/articles/webhook-security-and-idempotency.html',
-  '/articles/modern-password-entropy-and-nist-standard.html',
-  '/articles/why-you-should-stop-storing-jwt-in-localstorage.html',
-  '/articles/cryptographic-hash-functions-and-slow-hashing.html',
-  '/articles/pure-frontend-image-processing-and-exif-privacy.html',
-  '/about.html',
-  '/privacy.html',
-  '/terms.html',
-  '/contact.html',
   '/style.css?v=2.8.0',
-  '/js/storage.js?v=2.7.0',
-  '/js/i18n.js?v=2.7.0',
-  '/js/toolbox.js?v=2.7.0',
-  '/js/clipboard.js?v=2.7.0',
-  '/js/ai-chat.js?v=2.7.0',
-  '/js/airdrop.js?v=2.7.0',
-  '/js/webhook.js?v=2.7.0',
-  '/js/main.js?v=2.7.0',
   '/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch((err) => {
+      return cache.addAll(CORE_SHELL).catch((err) => {
         console.warn('SW: pre-caching partial failure', err);
       });
     })
@@ -69,32 +35,37 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
 
-  // Skip Google Analytics, AdSense and PeerJS signal requests from service worker cache
+  // 1. 跳过外部统计、广告、WebRTC信令、Cloudflare指标与动态API请求
   if (
     url.hostname.includes('google') ||
     url.hostname.includes('googlesyndication') ||
+    url.hostname.includes('doubleclick') ||
     url.hostname.includes('peerjs') ||
-    url.pathname.startsWith('/api/')
+    url.hostname.includes('cloudflareinsights') ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/cdn-cgi/')
   ) {
     return;
   }
 
+  // 2. 静态资源与页面采用 Stale-While-Revalidate（缓存优先秒开 + 后台异步刷新缓存）
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Fetch fresh copy in background to update cache
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
-          }
-        }).catch(() => {});
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return networkResponse;
+      }).catch(() => {
         if (event.request.headers.get('accept')?.includes('text/html')) {
           return caches.match('/');
         }
       });
+
+      // 如果本地缓存命中，瞬间返回（0ms秒开），同时后台异步更新
+      // 如果未命中，等待网络请求并自动写入缓存供下次秒开
+      return cachedResponse || fetchPromise;
     })
   );
 });
