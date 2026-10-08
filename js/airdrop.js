@@ -14,6 +14,7 @@ const AirDropController = {
   peersInfo: {},        // { [peerId]: { name, platform, lastSeen, deviceId } }
   broadcastChan: null,
   heartbeatTimer: null,
+  wakeLock: null,
 
   init() {
     this.initDeviceIdentity();
@@ -22,6 +23,8 @@ const AirDropController = {
     this.initFileDrop();
     this.initRescanAction();
     this.initExitListeners();
+    this.initVisibilityListener();
+    this.requestWakeLock();
     this.renderPeersList();
   },
 
@@ -274,30 +277,56 @@ const AirDropController = {
       this.handleIncomingPayload(data, conn);
     });
 
-    const handlePeerDisconnect = () => {
-      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
-      const peerName = this.peersInfo[conn.peer] ? this.peersInfo[conn.peer].name : (isEn ? "Remote Peer" : "对端设备");
-      delete this.activeConnections[conn.peer];
-      delete this.peersInfo[conn.peer];
-      this.renderPeersList();
-      this.appendSystemNotice(isEn ? `🔌 Device [${peerName}] disconnected.` : `🔌 设备 [${peerName}] 连接已断开。`);
+    let disconnectTimer = null;
+    const handlePeerDisconnect = (immediate = false) => {
+      const doCleanup = () => {
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        const peerName = this.peersInfo[conn.peer] ? this.peersInfo[conn.peer].name : (isEn ? "Remote Peer" : "对端设备");
+        delete this.activeConnections[conn.peer];
+        delete this.peersInfo[conn.peer];
+        this.renderPeersList();
+        this.appendSystemNotice(isEn ? `🔌 Device [${peerName}] disconnected.` : `🔌 设备 [${peerName}] 连接已断开。`);
+      };
+
+      if (immediate) {
+        if (disconnectTimer) {
+          clearTimeout(disconnectTimer);
+          disconnectTimer = null;
+        }
+        doCleanup();
+      } else {
+        if (!disconnectTimer) {
+          // 给予 8 秒静默恢复缓冲，防止手机切应用瞬间被误杀
+          disconnectTimer = setTimeout(() => {
+            disconnectTimer = null;
+            doCleanup();
+          }, 8000);
+        }
+      }
     };
 
-    conn.on('close', handlePeerDisconnect);
-    conn.on('error', handlePeerDisconnect);
+    conn.on('close', () => handlePeerDisconnect(true));
+    conn.on('error', () => handlePeerDisconnect(false));
 
-    // 监听 WebRTC 底层 ICE 状态，快速捕获网络断开与页面关闭
+    // 监听 WebRTC 底层 ICE 状态，支持切后台平滑恢复
     if (conn.peerConnection) {
       conn.peerConnection.addEventListener('iceconnectionstatechange', () => {
         const state = conn.peerConnection.iceConnectionState;
-        if (state === 'disconnected' || state === 'failed' || state === 'closed') {
-          handlePeerDisconnect();
+        if (state === 'connected' || state === 'completed') {
+          if (disconnectTimer) {
+            clearTimeout(disconnectTimer);
+            disconnectTimer = null;
+          }
+        } else if (state === 'failed' || state === 'closed') {
+          handlePeerDisconnect(true);
+        } else if (state === 'disconnected') {
+          handlePeerDisconnect(false); // 给予缓冲恢复时间
         }
       });
     }
   },
 
-  // 3. 高频心跳循环与超时自动清理 (每 1.5 秒心跳，3.5 秒无响应即判定下线)
+  // 3. 稳健心跳循环 (每 2.5 秒心跳，放宽至 18 秒无响应才剔除，保护移动端切后台存活)
   startHeartbeatLoop() {
     if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
     this.heartbeatTimer = setInterval(() => {
@@ -316,10 +345,10 @@ const AirDropController = {
         }
       });
 
-      // 检查对端活跃时间，超时立即剔除
+      // 检查对端活跃时间，放宽至 18 秒防止切应用被秒踢
       let changed = false;
       Object.keys(this.peersInfo).forEach(peerId => {
-        if (now - this.peersInfo[peerId].lastSeen > 3500) {
+        if (now - this.peersInfo[peerId].lastSeen > 18000) {
           const peerName = this.peersInfo[peerId].name;
           delete this.activeConnections[peerId];
           delete this.peersInfo[peerId];
@@ -332,7 +361,7 @@ const AirDropController = {
       if (changed) {
         this.renderPeersList();
       }
-    }, 1500);
+    }, 2500);
   },
 
   handleIncomingPayload(payload, conn) {
@@ -394,9 +423,10 @@ const AirDropController = {
     this.receivePayload(payload);
   },
 
-  // 4. 页面关闭/刷新监听：主动广播离开通知
+  // 4. 页面真正关闭时：主动广播离开通知 (注意：严禁监听 pagehide，避免手机切应用被误杀)
   initExitListeners() {
     const notifyExit = () => {
+      this.releaseWakeLock();
       const byePayload = { type: 'bye', sender: this.deviceId };
       Object.values(this.activeConnections).forEach(conn => {
         if (conn && conn.open) {
@@ -409,7 +439,51 @@ const AirDropController = {
     };
 
     window.addEventListener('beforeunload', notifyExit);
-    window.addEventListener('pagehide', notifyExit);
+  },
+
+  // 4.1 页面前后台可见性感知与切回前台自动重连保活
+  initVisibilityListener() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        // 用户从其他应用（如微信、图库、短信）切回当前浏览器页面
+        this.requestWakeLock();
+
+        // 1. 若信令服务器连接断开，立即尝试重新连接
+        if (this.peer && this.peer.disconnected && !this.peer.destroyed) {
+          try { this.peer.reconnect(); } catch (e) {}
+        }
+
+        // 2. 自动重整 P2P 连接拓扑并向对端主动发送 ping
+        this.reconnectMesh();
+        Object.keys(this.activeConnections).forEach(peerId => {
+          const conn = this.activeConnections[peerId];
+          if (conn && conn.open) {
+            try { conn.send({ type: 'ping', sender: this.deviceId }); } catch (e) {}
+          }
+        });
+      }
+    });
+  },
+
+  // 4.2 屏幕常亮保活 (Screen Wake Lock API)，防止文件投送时手机息屏休眠断网
+  async requestWakeLock() {
+    if ('wakeLock' in navigator && !this.wakeLock) {
+      try {
+        this.wakeLock = await navigator.wakeLock.request('screen');
+        this.wakeLock.addEventListener('release', () => {
+          this.wakeLock = null;
+        });
+      } catch (e) {
+        // 静默捕获策略限制
+      }
+    }
+  },
+
+  releaseWakeLock() {
+    if (this.wakeLock) {
+      try { this.wakeLock.release(); } catch (e) {}
+      this.wakeLock = null;
+    }
   },
 
   // 5. 手动主动刷新/重扫按钮
@@ -434,17 +508,17 @@ const AirDropController = {
   },
 
   reconnectMesh() {
-    // 剔除超时连接
+    // 剔除超时连接（放宽至 18 秒，防止后台切换误判）
     const now = Date.now();
     Object.keys(this.peersInfo).forEach(k => {
-      if (now - this.peersInfo[k].lastSeen > 3000) {
+      if (now - this.peersInfo[k].lastSeen > 18000) {
         delete this.activeConnections[k];
         delete this.peersInfo[k];
       }
     });
 
     // 重新连接 Host
-    if (!this.isHost && this.peer && this.peer.open) {
+    if (!this.isHost && this.peer && !this.peer.destroyed) {
       const hostPeerId = `a825412_host_${this.roomId.toLowerCase()}`;
       if (!this.activeConnections[hostPeerId] || !this.activeConnections[hostPeerId].open) {
         const conn = this.peer.connect(hostPeerId, { reliable: true });
@@ -599,6 +673,7 @@ const AirDropController = {
   },
 
   processFileSend(file) {
+    this.requestWakeLock();
     if (file.size > 50 * 1024 * 1024) {
       const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
       if (typeof Toast !== "undefined") Toast.warning(isEn ? "Please keep individual file transfers under 50MB." : "P2P 直传单次文件请限制在 50MB 以内。");
@@ -624,6 +699,7 @@ const AirDropController = {
   },
 
   receivePayload(payload) {
+    this.requestWakeLock();
     const list = document.getElementById('airdrop-messages-list');
     if (!list) return;
 
