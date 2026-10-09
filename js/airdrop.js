@@ -15,6 +15,11 @@ const AirDropController = {
   broadcastChan: null,
   heartbeatTimer: null,
   wakeLock: null,
+  scanStream: null,
+  scanAnimId: null,
+  scanFacingMode: 'environment',
+  barcodeDetector: null,
+  scanDetected: false,
 
   init() {
     this.initDeviceIdentity();
@@ -94,6 +99,11 @@ const AirDropController = {
     if (qrBtn) {
       qrBtn.addEventListener('click', () => this.openQrModal());
     }
+
+    const scanQrBtn = document.getElementById('airdrop-scan-qr-btn');
+    if (scanQrBtn) {
+      scanQrBtn.addEventListener('click', () => this.openScanModal());
+    }
   },
 
   openQrModal() {
@@ -161,6 +171,297 @@ const AirDropController = {
     }
 
     modal.classList.add('active');
+  },
+
+  // 扫码加入房间功能
+  openScanModal() {
+    let modal = document.getElementById('airdrop-scan-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'airdrop-scan-modal';
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-content glass-panel" style="max-width: 440px; text-align: center; position: relative;">
+          <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h2 class="modal-title" style="display: flex; align-items: center; gap: 8px; font-size: 17px; margin: 0;">
+              <span class="material-symbols-outlined" style="color: var(--color-primary);">qr_code_scanner</span>
+              <span data-i18n="airdrop_scan_modal_title">扫描隔空快传二维码</span>
+            </h2>
+            <span class="material-symbols-outlined modal-close" id="close-scan-modal" style="cursor: pointer;">close</span>
+          </div>
+
+          <div class="scan-viewfinder-box">
+            <video id="airdrop-scan-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+            <canvas id="airdrop-scan-canvas" style="display: none;"></canvas>
+            
+            <div style="position: absolute; inset: 16px; border: 2px solid rgba(56, 189, 248, 0.4); border-radius: 12px; pointer-events: none; box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.45);">
+              <div class="scan-corner-tl"></div>
+              <div class="scan-corner-tr"></div>
+              <div class="scan-corner-bl"></div>
+              <div class="scan-corner-br"></div>
+              <div style="position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #38bdf8, #34d399, transparent); box-shadow: 0 0 8px #38bdf8; animation: scanLaser 2s linear infinite;"></div>
+            </div>
+
+            <div id="scan-permission-overlay" style="display: none; position: absolute; inset: 0; background: rgba(11, 15, 25, 0.95); flex-direction: column; justify-content: center; align-items: center; padding: 24px; color: var(--text-secondary); font-size: 13px; text-align: center;">
+              <span class="material-symbols-outlined" style="font-size: 40px; color: #f87171; margin-bottom: 12px;">videocam_off</span>
+              <div id="scan-permission-msg">无法启动摄像头，请允许浏览器访问相机或直接点击下方从相册选择。</div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div id="scan-status-text" style="font-size: 13px; color: var(--text-secondary); text-align: left; display: flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 16px; color: #34d399;">center_focus_strong</span>
+              <span data-i18n="airdrop_scan_hint">将镜头对准另一台设备的房间二维码</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <label class="btn" style="padding: 6px 12px; font-size: 12px; background: var(--surface-high); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border-light);">
+                <span class="material-symbols-outlined" style="font-size: 16px;">photo_library</span>
+                <span data-i18n="airdrop_scan_album">从相册选择</span>
+                <input type="file" id="airdrop-scan-file-input" accept="image/*" style="display: none;">
+              </label>
+              <button class="btn" id="airdrop-switch-cam-btn" style="padding: 6px 10px; font-size: 12px; background: var(--surface-high); border: 1px solid var(--border-light);" title="切换前后摄像头">
+                <span class="material-symbols-outlined" style="font-size: 16px;">cameraswitch</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      modal.querySelector('#close-scan-modal').addEventListener('click', () => this.closeScanModal());
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) this.closeScanModal();
+      });
+
+      const fileInput = modal.querySelector('#airdrop-scan-file-input');
+      if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+          if (e.target.files && e.target.files[0]) {
+            this.handleScanFile(e.target.files[0]);
+          }
+        });
+      }
+
+      const switchBtn = modal.querySelector('#airdrop-switch-cam-btn');
+      if (switchBtn) {
+        switchBtn.addEventListener('click', () => {
+          this.scanFacingMode = this.scanFacingMode === 'environment' ? 'user' : 'environment';
+          this.startScanCamera();
+        });
+      }
+    }
+
+    if (typeof I18nController !== 'undefined') {
+      I18nController.applyLanguage(I18nController.currentLang);
+    }
+
+    this.scanDetected = false;
+    modal.classList.add('active');
+    this.startScanCamera();
+  },
+
+  closeScanModal() {
+    const modal = document.getElementById('airdrop-scan-modal');
+    if (modal) modal.classList.remove('active');
+    if (this.scanAnimId) {
+      cancelAnimationFrame(this.scanAnimId);
+      this.scanAnimId = null;
+    }
+    if (this.scanStream) {
+      this.scanStream.getTracks().forEach(t => t.stop());
+      this.scanStream = null;
+    }
+  },
+
+  startScanCamera() {
+    const video = document.getElementById('airdrop-scan-video');
+    const permOverlay = document.getElementById('scan-permission-overlay');
+    if (!video) return;
+
+    if (this.scanStream) {
+      this.scanStream.getTracks().forEach(t => t.stop());
+      this.scanStream = null;
+    }
+    if (this.scanAnimId) {
+      cancelAnimationFrame(this.scanAnimId);
+      this.scanAnimId = null;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      if (permOverlay) permOverlay.style.display = 'flex';
+      return;
+    }
+
+    if (permOverlay) permOverlay.style.display = 'none';
+
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: this.scanFacingMode }, width: { ideal: 1280 }, height: { ideal: 720 } }
+    }).then(stream => {
+      this.scanStream = stream;
+      video.srcObject = stream;
+      video.setAttribute('playsinline', 'true');
+      video.play().catch(() => {});
+      this.startScanDetection(video);
+    }).catch(err => {
+      console.warn('getUserMedia error:', err);
+      if (permOverlay) permOverlay.style.display = 'flex';
+    });
+  },
+
+  startScanDetection(video) {
+    const canvas = document.getElementById('airdrop-scan-canvas');
+    const detect = async () => {
+      const modal = document.getElementById('airdrop-scan-modal');
+      if (!modal || !modal.classList.contains('active')) return;
+
+      if (video.readyState >= video.HAVE_CURRENT_DATA) {
+        try {
+          let codeFound = null;
+
+          // 1. 优先使用浏览器原生硬件加速 BarcodeDetector API (Android Chrome / Chromium 原生支持，零下载开销)
+          if ('BarcodeDetector' in window) {
+            if (!this.barcodeDetector) {
+              this.barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+            }
+            const barcodes = await this.barcodeDetector.detect(video);
+            if (barcodes && barcodes.length > 0) {
+              codeFound = barcodes[0].rawValue;
+            }
+          } else {
+            // 2. 降级方案：动态拉取纯前端离线 jsQR 进行 Canvas 图像解码
+            if (typeof jsQR === 'undefined') {
+              await this.loadJsQrLibrary();
+            }
+            if (typeof jsQR !== 'undefined' && canvas) {
+              const ctx = canvas.getContext('2d', { willReadFrequently: true });
+              canvas.width = video.videoWidth || 320;
+              canvas.height = video.videoHeight || 320;
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const qr = jsQR(imgData.data, canvas.width, canvas.height, {
+                inversionAttempts: 'dontInvert'
+              });
+              if (qr && qr.data) {
+                codeFound = qr.data;
+              }
+            }
+          }
+
+          if (codeFound) {
+            const roomCode = this.extractRoomCode(codeFound);
+            if (roomCode) {
+              this.handleSuccessfulScan(roomCode);
+              return;
+            }
+          }
+        } catch (err) {
+          // 忽略单帧扫描中的暂时异常
+        }
+      }
+
+      this.scanAnimId = requestAnimationFrame(detect);
+    };
+
+    this.scanAnimId = requestAnimationFrame(detect);
+  },
+
+  loadJsQrLibrary() {
+    if (window._jsQrPromise) return window._jsQrPromise;
+    window._jsQrPromise = new Promise((resolve, reject) => {
+      if (typeof jsQR !== 'undefined') return resolve();
+      const s = document.createElement('script');
+      s.src = 'js/jsqr.min.js';
+      s.onload = resolve;
+      s.onerror = reject;
+      document.body.appendChild(s);
+    });
+    return window._jsQrPromise;
+  },
+
+  handleScanFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = async () => {
+        let codeFound = null;
+        try {
+          if ('BarcodeDetector' in window) {
+            if (!this.barcodeDetector) this.barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+            const barcodes = await this.barcodeDetector.detect(img);
+            if (barcodes && barcodes.length > 0) codeFound = barcodes[0].rawValue;
+          }
+          if (!codeFound) {
+            if (typeof jsQR === 'undefined') await this.loadJsQrLibrary();
+            if (typeof jsQR !== 'undefined') {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0);
+              const imgData = ctx.getImageData(0, 0, img.width, img.height);
+              const qr = jsQR(imgData.data, img.width, img.height);
+              if (qr && qr.data) codeFound = qr.data;
+            }
+          }
+          if (codeFound) {
+            const room = this.extractRoomCode(codeFound);
+            if (room) {
+              this.handleSuccessfulScan(room);
+            } else {
+              const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+              if (typeof Toast !== 'undefined') Toast.warning(isEn ? 'No valid AirDrop room code found in QR code' : '二维码内容非有效的隔空快传房间码');
+            }
+          } else {
+            const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+            if (typeof Toast !== 'undefined') Toast.warning(isEn ? 'No QR code detected in this photo' : '照片中未检测到清晰的二维码，请重试');
+          }
+        } catch (err) {
+          console.error('File scan error:', err);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  },
+
+  extractRoomCode(rawText) {
+    if (!rawText) return null;
+    const text = rawText.trim();
+    try {
+      if (text.startsWith('http://') || text.startsWith('https://')) {
+        const url = new URL(text);
+        if (url.searchParams.get('room')) return url.searchParams.get('room').toUpperCase();
+        if (url.hash && url.hash.includes('drop=')) {
+          return url.hash.split('drop=')[1].split('&')[0].toUpperCase();
+        }
+      }
+    } catch (e) {}
+
+    const clean = text.replace(/^#/, '').trim().toUpperCase();
+    if (/^[A-Z0-9]{4,10}$/.test(clean)) {
+      return clean;
+    }
+    return null;
+  },
+
+  handleSuccessfulScan(roomCode) {
+    if (this.scanDetected) return;
+    this.scanDetected = true;
+
+    if (navigator.vibrate) {
+      try { navigator.vibrate([60, 40, 80]); } catch (e) {}
+    }
+
+    this.closeScanModal();
+    this.joinRoom(roomCode);
+
+    const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+    const msg = isEn ? `🎯 QR Code Scanned! Successfully joined Room #${roomCode}` : `🎯 扫码成功！已自动连接加入房间 #${roomCode}`;
+    if (typeof Toast !== 'undefined') {
+      Toast.success(msg);
+    }
+    this.appendSystemNotice(msg);
   },
 
   joinRoom(roomId) {
