@@ -257,6 +257,7 @@ const AirDropController = {
 
     this.scanDetected = false;
     modal.classList.add('active');
+    this.loadJsQrLibrary().catch(() => {});
     this.startScanCamera();
   },
 
@@ -303,55 +304,61 @@ const AirDropController = {
       video.play().catch(() => {});
       this.startScanDetection(video);
     }).catch(err => {
-      console.warn('getUserMedia error:', err);
-      if (permOverlay) permOverlay.style.display = 'flex';
+      console.warn('getUserMedia ideal error, trying fallback:', err);
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: this.scanFacingMode } }).then(stream => {
+        this.scanStream = stream;
+        video.srcObject = stream;
+        video.setAttribute('playsinline', 'true');
+        video.play().catch(() => {});
+        this.startScanDetection(video);
+      }).catch(fallbackErr => {
+        console.warn('getUserMedia fallback error:', fallbackErr);
+        if (permOverlay) permOverlay.style.display = 'flex';
+      });
     });
   },
 
   startScanDetection(video) {
     const canvas = document.getElementById('airdrop-scan-canvas');
-    const detect = async () => {
+    let lastScanTime = 0;
+
+    const detect = async (now) => {
       const modal = document.getElementById('airdrop-scan-modal');
       if (!modal || !modal.classList.contains('active')) return;
 
-      if (video.readyState >= video.HAVE_CURRENT_DATA) {
+      // 节流：每隔 120ms 解码一帧，既流畅敏捷，又极大降低 CPU 压力，防止手机发热卡顿
+      if (video.readyState >= video.HAVE_CURRENT_DATA && (now - lastScanTime > 120)) {
+        lastScanTime = now;
         try {
-          let codeFound = null;
-
-          // 1. 优先使用浏览器原生硬件加速 BarcodeDetector API (Android Chrome / Chromium 原生支持，零下载开销)
-          if ('BarcodeDetector' in window) {
-            if (!this.barcodeDetector) {
-              this.barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
-            }
-            const barcodes = await this.barcodeDetector.detect(video);
-            if (barcodes && barcodes.length > 0) {
-              codeFound = barcodes[0].rawValue;
-            }
-          } else {
-            // 2. 降级方案：动态拉取纯前端离线 jsQR 进行 Canvas 图像解码
-            if (typeof jsQR === 'undefined') {
-              await this.loadJsQrLibrary();
-            }
-            if (typeof jsQR !== 'undefined' && canvas) {
-              const ctx = canvas.getContext('2d', { willReadFrequently: true });
-              canvas.width = video.videoWidth || 320;
-              canvas.height = video.videoHeight || 320;
-              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-              const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-              const qr = jsQR(imgData.data, canvas.width, canvas.height, {
-                inversionAttempts: 'dontInvert'
-              });
-              if (qr && qr.data) {
-                codeFound = qr.data;
-              }
-            }
+          if (typeof jsQR === 'undefined') {
+            await this.loadJsQrLibrary();
           }
 
-          if (codeFound) {
-            const roomCode = this.extractRoomCode(codeFound);
-            if (roomCode) {
-              this.handleSuccessfulScan(roomCode);
-              return;
+          if (typeof jsQR !== 'undefined' && canvas) {
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            // 限制输入分辨率以实现毫秒级快速解码（最大宽高 480px，识别率高且极快）
+            const maxDim = 480;
+            let w = video.videoWidth || 320;
+            let h = video.videoHeight || 320;
+            if (w > maxDim || h > maxDim) {
+              const scale = maxDim / Math.max(w, h);
+              w = Math.round(w * scale);
+              h = Math.round(h * scale);
+            }
+            canvas.width = w;
+            canvas.height = h;
+            ctx.drawImage(video, 0, 0, w, h);
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const qr = jsQR(imgData.data, w, h, {
+              inversionAttempts: 'dontInvert'
+            });
+
+            if (qr && qr.data) {
+              const roomCode = this.extractRoomCode(qr.data);
+              if (roomCode) {
+                this.handleSuccessfulScan(roomCode);
+                return;
+              }
             }
           }
         } catch (err) {
@@ -384,38 +391,38 @@ const AirDropController = {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = async () => {
-        let codeFound = null;
         try {
-          if ('BarcodeDetector' in window) {
-            if (!this.barcodeDetector) this.barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
-            const barcodes = await this.barcodeDetector.detect(img);
-            if (barcodes && barcodes.length > 0) codeFound = barcodes[0].rawValue;
-          }
-          if (!codeFound) {
-            if (typeof jsQR === 'undefined') await this.loadJsQrLibrary();
-            if (typeof jsQR !== 'undefined') {
-              const canvas = document.createElement('canvas');
-              canvas.width = img.width;
-              canvas.height = img.height;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0);
-              const imgData = ctx.getImageData(0, 0, img.width, img.height);
-              const qr = jsQR(imgData.data, img.width, img.height);
-              if (qr && qr.data) codeFound = qr.data;
+          if (typeof jsQR === 'undefined') await this.loadJsQrLibrary();
+          if (typeof jsQR !== 'undefined') {
+            const canvas = document.createElement('canvas');
+            const maxDim = 960;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              const scale = maxDim / Math.max(w, h);
+              w = Math.round(w * scale);
+              h = Math.round(h * scale);
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(img, 0, 0, w, h);
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const qr = jsQR(imgData.data, w, h, { inversionAttempts: 'dontInvert' });
+            if (qr && qr.data) {
+              const room = this.extractRoomCode(qr.data);
+              if (room) {
+                this.handleSuccessfulScan(room);
+                return;
+              } else {
+                const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+                if (typeof Toast !== 'undefined') Toast.warning(isEn ? 'No valid AirDrop room code found in QR code' : '二维码内容非有效的隔空快传房间码');
+                return;
+              }
             }
           }
-          if (codeFound) {
-            const room = this.extractRoomCode(codeFound);
-            if (room) {
-              this.handleSuccessfulScan(room);
-            } else {
-              const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
-              if (typeof Toast !== 'undefined') Toast.warning(isEn ? 'No valid AirDrop room code found in QR code' : '二维码内容非有效的隔空快传房间码');
-            }
-          } else {
-            const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
-            if (typeof Toast !== 'undefined') Toast.warning(isEn ? 'No QR code detected in this photo' : '照片中未检测到清晰的二维码，请重试');
-          }
+          const isEn = typeof I18nController !== 'undefined' && I18nController.currentLang === 'en-US';
+          if (typeof Toast !== 'undefined') Toast.warning(isEn ? 'No QR code detected in this photo' : '照片中未检测到清晰的二维码，请重试');
         } catch (err) {
           console.error('File scan error:', err);
         }
