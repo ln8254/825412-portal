@@ -215,9 +215,12 @@ const AirDropController = {
         <span class="material-symbols-outlined" style="font-size: 18px; color: #10b981; animation: pulse 1.5s infinite;">touch_app</span>
         <span>${isEn ? "Long-press the image to save directly to Photos" : "手机端长按上方图片，在弹出菜单中点击「保存图片」"}</span>
       </div>
-      <div style="display: flex; gap: 10px; margin-top: 10px; justify-content: center;">
-        <button class="btn btn-primary" id="airdrop-lightbox-dl-btn" style="padding: 8px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">download</span> ${isEn ? "Direct Download" : "尝试浏览器直接下载"}
+      <div style="display: flex; gap: 10px; margin-top: 10px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-primary" id="airdrop-lightbox-open-btn" style="padding: 8px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+          <span class="material-symbols-outlined" style="font-size: 16px;">open_in_new</span> ${isEn ? "Open in New Window" : "新窗口全屏打开"}
+        </button>
+        <button class="btn" id="airdrop-lightbox-dl-btn" style="padding: 8px 14px; font-size: 12px; background: var(--surface-high); border: 1px solid var(--border-light); display: inline-flex; align-items: center; gap: 4px;">
+          <span class="material-symbols-outlined" style="font-size: 16px;">download</span> ${isEn ? "Direct Download" : "尝试常规下载"}
         </button>
       </div>
     `;
@@ -226,6 +229,22 @@ const AirDropController = {
     overlay.querySelector('#airdrop-lightbox-close').addEventListener('click', () => {
       overlay.style.display = 'none';
     });
+    const openBtn = overlay.querySelector('#airdrop-lightbox-open-btn');
+    if (openBtn) {
+      openBtn.addEventListener('click', () => {
+        try {
+          const w = window.open();
+          if (w) {
+            w.document.write(`<title>${fileName}</title><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;}img{max-width:100%;max-height:100%;object-fit:contain;}</style><img src="${src}" alt="${fileName}">`);
+            w.document.close();
+          } else {
+            window.location.href = src;
+          }
+        } catch(e) {
+          window.open(src, '_blank');
+        }
+      });
+    }
     overlay.querySelector('#airdrop-lightbox-dl-btn').addEventListener('click', () => {
       if (dlAction) dlAction();
     });
@@ -1254,13 +1273,24 @@ const AirDropController = {
 
     const reader = new FileReader();
     reader.onload = (e) => {
+      let detectedType = file.type;
+      if (!detectedType) {
+        const ext = (file.name || '').split('.').pop().toLowerCase();
+        const mimeMap = {
+          'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png',
+          'webp': 'image/webp', 'gif': 'image/gif', 'bmp': 'image/bmp',
+          'svg': 'image/svg+xml', 'ico': 'image/x-icon', 'avif': 'image/avif'
+        };
+        detectedType = mimeMap[ext] || 'application/octet-stream';
+      }
+
       const payload = {
         type: 'file',
         sender: this.deviceId,
         senderName: this.deviceName,
         fileName: file.name,
         fileSize: sizeStr,
-        fileType: file.type || 'application/octet-stream',
+        fileType: detectedType,
         dataUrl: e.target.result,
         timestamp: Date.now()
       };
@@ -1290,8 +1320,14 @@ const AirDropController = {
 
     const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
     const isFile = payload.type === 'file';
-    const isImage = isFile && payload.fileType && payload.fileType.startsWith('image/');
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // 三重智能图片识别 (MIME / DataUrl / 扩展名)，杜绝由于发送端 MIME 丢失导致图片判定失败
+    const fileExt = (payload.fileName || '').split('.').pop().toLowerCase();
+    const isImageByExt = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico', 'heic', 'avif'].includes(fileExt);
+    const isImageByMime = Boolean((payload.fileType && payload.fileType.startsWith('image/')) ||
+                                  (payload.dataUrl && payload.dataUrl.startsWith('data:image/')));
+    const isImage = isFile && (isImageByMime || isImageByExt);
 
     // 1. 针对文件类型：通过 Blob + URL.createObjectURL 根除 Android TransactionTooLargeException 闪退
     let blobUrl = '';
@@ -1324,7 +1360,7 @@ const AirDropController = {
 
     if (isFile) {
       const btnLabel = isImage 
-        ? (isMobile ? (isEn ? "View & Save Image" : "查看大图与保存") : (isEn ? "Save File" : "保存/下载文件"))
+        ? (isMobile ? (isEn ? "View & Save Image" : "查看大图与保存") : (isEn ? "Save Image" : "保存/下载图片"))
         : (isEn ? "Save File" : "保存/下载文件");
 
       item.innerHTML = `
@@ -1335,12 +1371,12 @@ const AirDropController = {
           </div>
           <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 6px;">📄 ${payload.fileName} (${payload.fileSize})</div>
           ${isImage ? `
-            <div class="airdrop-preview-img-wrap" id="img-wrap-${payload.timestamp}">
-              <img src="${imageDisplaySrc}" alt="${payload.fileName}" />
+            <div class="airdrop-preview-img-wrap" id="img-wrap-${payload.timestamp}" style="text-align: center; margin: 8px 0; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 6px; cursor: pointer;">
+              <img src="${imageDisplaySrc}" alt="${payload.fileName}" style="max-height: 220px; max-width: 100%; border-radius: 6px; display: inline-block; object-fit: contain; -webkit-touch-callout: default !important; user-select: auto !important;" />
             </div>
-            <div style="font-size: 11px; color: #10b981; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
+            <div style="font-size: 11px; color: #10b981; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(16, 185, 129, 0.1); padding: 5px 8px; border-radius: 4px;">
               <span class="material-symbols-outlined" style="font-size: 15px;">touch_app</span>
-              <span>${isEn ? "Tip: Long-press image or tap button to save to Photos" : "手机端提示：长按上方图片或点击按钮即可保存到相册"}</span>
+              <span>${isEn ? "Tip: Long-press image to save directly to Photos" : "手机端技巧：长按上方图片 1 秒，选择「保存图片」直存系统相册"}</span>
             </div>
           ` : ''}
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -1353,6 +1389,23 @@ const AirDropController = {
       `;
 
       const doDownload = () => {
+        // 手机端对于图片：直接新窗口全屏打开，规避系统 DownloadManager blob 队列卡死 Bug
+        if (isMobile && isImage) {
+          try {
+            const w = window.open();
+            if (w) {
+              w.document.write(`<title>${payload.fileName}</title><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;}img{max-width:100%;max-height:100%;object-fit:contain;}</style><img src="${imageDisplaySrc}" alt="${payload.fileName}">`);
+              w.document.close();
+            } else {
+              window.open(imageDisplaySrc, '_blank');
+            }
+          } catch(e) {
+            window.open(imageDisplaySrc, '_blank');
+          }
+          if (typeof Toast !== "undefined") Toast.success(isEn ? "Image opened. Long-press to save to Photos." : "已打开原图，请长按图片保存至相册。");
+          return;
+        }
+
         const dlLink = document.createElement('a');
         dlLink.href = blobUrl;
         dlLink.download = payload.fileName || 'downloaded-file';
