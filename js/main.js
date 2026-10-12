@@ -207,7 +207,7 @@ function loadAirdropScripts() {
 
     loadScript('js/peerjs.min.js')
       .then(() => loadScript('js/qrcode.min.js'))
-      .then(() => loadScript('js/airdrop.js?v=2.5.2'))
+      .then(() => loadScript('js/airdrop.js?v=2.5.3'))
       .then(() => {
         if (typeof AirDropController !== 'undefined' && !AirDropController.peer) {
           AirDropController.init();
