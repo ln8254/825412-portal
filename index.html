@@ -1865,9 +1865,22 @@
       <!-- 实时文件传输 HUD 进度与测速看板 (活跃传输时自动动态展开) -->
       <div id="airdrop-transfer-hud" class="airdrop-transfer-hud" style="display: none;"></div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <!-- 移动端视图切换选项卡 (窄屏自适应显示) -->
+      <div class="airdrop-mobile-tabs" id="airdrop-mobile-tabs">
+        <button class="airdrop-tab-btn active" id="airdrop-tab-recv-btn" data-tab="recv">
+          <span class="material-symbols-outlined" style="font-size: 16px;">inbox</span>
+          <span data-i18n="airdrop_tab_recv">📥 接收传输流</span>
+          <span class="airdrop-unread-badge" id="airdrop-unread-badge" style="display: none;">0</span>
+        </button>
+        <button class="airdrop-tab-btn" id="airdrop-tab-send-btn" data-tab="send">
+          <span class="material-symbols-outlined" style="font-size: 16px;">upload</span>
+          <span data-i18n="airdrop_tab_send">📤 投送文件与文本</span>
+        </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px;">
         <!-- 发送面板 -->
-        <div class="glass-card">
+        <div class="glass-card airdrop-panel-col" id="airdrop-send-panel">
           <h3 style="font-weight: 700; color: var(--color-primary); margin-bottom: 16px;" data-i18n="airdrop_send_title">📤 投送文件与文本</h3>
           
           <!-- 拖拽上传区域 -->
@@ -1888,8 +1901,8 @@
           </button>
         </div>
 
-        <!-- 接收动态面板 -->
-        <div class="glass-card" style="display: flex; flex-direction: column;">
+        <!-- 接收动态面板 (移动端默认优先高亮展示) -->
+        <div class="glass-card airdrop-panel-col active" id="airdrop-recv-panel">
           <h3 style="font-weight: 700; color: #10b981; margin-bottom: 16px;" data-i18n="airdrop_recv_title">📥 实时接收传输流</h3>
           <div id="airdrop-messages-list" style="flex-grow: 1; max-height: 480px; overflow-y: auto;">
             <!-- 动态消息流将在此渲染 -->

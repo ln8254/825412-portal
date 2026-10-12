@@ -23,6 +23,7 @@ const AirDropController = {
 
   init() {
     this.initDeviceIdentity();
+    this.initMobileTabs();
     this.initRoomConnection();
     this.initSendActions();
     this.initFileDrop();
@@ -49,6 +50,161 @@ const AirDropController = {
 
     const nameEl = document.getElementById('airdrop-my-name');
     if (nameEl) nameEl.textContent = this.deviceName;
+  },
+
+  // 1.1 移动端视图切换与即时感知控制
+  initMobileTabs() {
+    const recvBtn = document.getElementById('airdrop-tab-recv-btn');
+    const sendBtn = document.getElementById('airdrop-tab-send-btn');
+    const recvPanel = document.getElementById('airdrop-recv-panel');
+    const sendPanel = document.getElementById('airdrop-send-panel');
+    const unreadBadge = document.getElementById('airdrop-unread-badge');
+
+    if (!recvBtn || !sendBtn) return;
+
+    this.currentMobileTab = 'recv';
+
+    const switchTab = (tab) => {
+      this.currentMobileTab = tab;
+      if (tab === 'recv') {
+        recvBtn.classList.add('active');
+        sendBtn.classList.remove('active');
+        if (recvPanel) recvPanel.classList.add('active');
+        if (sendPanel) sendPanel.classList.remove('active');
+        if (unreadBadge) {
+          unreadBadge.style.display = 'none';
+          unreadBadge.textContent = '0';
+        }
+      } else {
+        sendBtn.classList.add('active');
+        recvBtn.classList.remove('active');
+        if (sendPanel) sendPanel.classList.add('active');
+        if (recvPanel) recvPanel.classList.remove('active');
+      }
+    };
+
+    recvBtn.addEventListener('click', () => switchTab('recv'));
+    sendBtn.addEventListener('click', () => switchTab('send'));
+    this.switchMobileTab = switchTab;
+  },
+
+  // 1.2 顶部吸顶悬浮即时通知 (手机端即使未聚焦接收列表也能秒级获知)
+  showIncomingBanner(title, desc, actionText, onAction) {
+    let banner = document.getElementById('airdrop-incoming-banner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'airdrop-incoming-banner';
+      banner.className = 'airdrop-incoming-banner';
+      document.body.appendChild(banner);
+    }
+    banner.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+        <span class="material-symbols-outlined" style="font-size: 26px; color: #10b981; flex-shrink: 0;">download_done</span>
+        <div style="min-width: 0;">
+          <div style="font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</div>
+          <div style="font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${desc}</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 6px; flex-shrink: 0;">
+        <button class="btn btn-primary" id="airdrop-banner-action-btn" style="padding: 5px 12px; font-size: 12px; font-weight: 600;">${actionText}</button>
+        <button class="btn" id="airdrop-banner-close-btn" style="padding: 4px 6px; font-size: 12px; background: transparent; border: none; color: var(--text-muted);">
+          <span class="material-symbols-outlined" style="font-size: 16px;">close</span>
+        </button>
+      </div>
+    `;
+    banner.style.display = 'flex';
+
+    const actionBtn = banner.querySelector('#airdrop-banner-action-btn');
+    if (actionBtn && onAction) {
+      actionBtn.addEventListener('click', () => {
+        onAction();
+        banner.style.display = 'none';
+      });
+    }
+
+    const closeBtn = banner.querySelector('#airdrop-banner-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        banner.style.display = 'none';
+      });
+    }
+
+    if (this._bannerTimer) clearTimeout(this._bannerTimer);
+    this._bannerTimer = setTimeout(() => {
+      banner.style.display = 'none';
+    }, 7000);
+  },
+
+  // 1.3 实时传输 HUD 看板控制器
+  showTransferHud(name, size, mode = 'send') {
+    const hud = document.getElementById('airdrop-transfer-hud');
+    if (!hud) return;
+    hud.style.display = 'flex';
+    const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+    const modeTitle = mode === 'send' 
+      ? (isEn ? `📤 Sending to peers...` : `📤 正在投送至对端设备...`)
+      : (isEn ? `📥 Receiving from peer...` : `📥 正在接收来自对端的文件...`);
+
+    hud.innerHTML = `
+      <div class="airdrop-transfer-card" id="airdrop-active-hud-card">
+        <div class="airdrop-transfer-header">
+          <div class="airdrop-transfer-file">
+            <span class="material-symbols-outlined airdrop-transfer-icon" style="animation: spin 2s linear infinite;">sync</span>
+            <div class="airdrop-transfer-meta">
+              <div class="airdrop-transfer-name">${name}</div>
+              <div class="airdrop-transfer-stats">${modeTitle} · ${size}</div>
+            </div>
+          </div>
+        </div>
+        <div class="airdrop-progress-track">
+          <div class="airdrop-progress-bar" style="width: 100%;"></div>
+        </div>
+      </div>
+    `;
+  },
+
+  completeTransferHud(name, isSuccess = true) {
+    const card = document.getElementById('airdrop-active-hud-card');
+    const hud = document.getElementById('airdrop-transfer-hud');
+    if (!card || !hud) return;
+
+    const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+    card.classList.add('complete');
+    const icon = card.querySelector('.airdrop-transfer-icon');
+    const stats = card.querySelector('.airdrop-transfer-stats');
+    if (icon) {
+      icon.textContent = isSuccess ? 'check_circle' : 'error';
+      icon.style.animation = 'none';
+      icon.style.color = isSuccess ? '#10b981' : '#f87171';
+    }
+    if (stats) {
+      stats.textContent = isSuccess 
+        ? (isEn ? "✅ Transfer Completed!" : "✅ 传输完成！已成功发送") 
+        : (isEn ? "❌ Transfer Failed" : "❌ 传输中断");
+    }
+
+    setTimeout(() => {
+      if (hud) hud.style.display = 'none';
+    }, 3500);
+  },
+
+  // 1.4 安全高性能 Base64 转 Blob 算法 (防止向 Binder IPC 传递巨大字符串导致崩溃)
+  b64toBlob(dataUrl) {
+    try {
+      const parts = dataUrl.split(';base64,');
+      if (parts.length < 2) return null;
+      const contentType = parts[0].replace('data:', '') || 'application/octet-stream';
+      const byteCharacters = atob(parts[1].trim());
+      const len = byteCharacters.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = byteCharacters.charCodeAt(i);
+      }
+      return new Blob([bytes], { type: contentType });
+    } catch (e) {
+      console.error('Base64 to Blob error:', e);
+      return null;
+    }
   },
 
   // 2. 初始化房间与 WebRTC 接入
@@ -928,7 +1084,20 @@ const AirDropController = {
     if (sendTextBtn && textInput) {
       sendTextBtn.addEventListener('click', () => {
         const text = textInput.value.trim();
-        if (!text) return;
+        const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+        if (!text) {
+          if (typeof Toast !== "undefined") Toast.warning(isEn ? "Please enter text before sending." : "请输入要投送的文本内容。");
+          return;
+        }
+
+        const peerCount = Object.keys(this.activeConnections).length;
+        if (peerCount === 0) {
+          if (typeof Toast !== "undefined") {
+            Toast.warning(isEn 
+              ? `⚠️ No peers connected in Room #${this.roomId}. Ready for broadcast, but waiting for devices to join.` 
+              : `⚠️ 频道 #${this.roomId} 暂无其他对端设备在线！请让另一台手机或电脑加入同频后再发送。`);
+          }
+        }
 
         const payload = {
           type: 'text',
@@ -940,6 +1109,12 @@ const AirDropController = {
 
         this.sendPayload(payload);
         textInput.value = '';
+
+        if (peerCount > 0) {
+          if (typeof Toast !== "undefined") {
+            Toast.success(isEn ? `✅ Sent text to ${peerCount} device(s)!` : `✅ 文本已成功投送至 ${peerCount} 台对端设备！`);
+          }
+        }
       });
     }
   },
@@ -969,23 +1144,64 @@ const AirDropController = {
       dropZone.style.background = 'var(--surface-low)';
 
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        this.processFileSend(e.dataTransfer.files[0]);
+        for (let i = 0; i < e.dataTransfer.files.length; i++) {
+          this.processFileSend(e.dataTransfer.files[i]);
+        }
       }
     });
 
     fileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files.length > 0) {
-        this.processFileSend(e.target.files[0]);
+        for (let i = 0; i < e.target.files.length; i++) {
+          this.processFileSend(e.target.files[i]);
+        }
+        fileInput.value = '';
+      }
+    });
+
+    // 监听粘贴板文件 (截屏后 Ctrl+V / ⌘V 快速秒传)
+    window.addEventListener('paste', (e) => {
+      if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
+        const activeTab = document.querySelector('.nav-tab.active, .bento-nav-link.active');
+        const isAirdropView = window.location.pathname.includes('airdrop') || 
+          (activeTab && activeTab.getAttribute('data-tab') === 'airdrop');
+        if (isAirdropView) {
+          for (let i = 0; i < e.clipboardData.files.length; i++) {
+            this.processFileSend(e.clipboardData.files[i]);
+          }
+        }
       }
     });
   },
 
   processFileSend(file) {
     this.requestWakeLock();
+    const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
     if (file.size > 50 * 1024 * 1024) {
-      const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
       if (typeof Toast !== "undefined") Toast.warning(isEn ? "Please keep individual file transfers under 50MB." : "P2P 直传单次文件请限制在 50MB 以内。");
       return;
+    }
+
+    const formatSize = (bytes) => {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    };
+    const sizeStr = formatSize(file.size);
+
+    // 立即激活实时传输 HUD 进度看板
+    this.showTransferHud(file.name, sizeStr, 'send');
+    if (typeof Toast !== "undefined") {
+      Toast.info(isEn ? `📤 Preparing & sending "${file.name}" (${sizeStr})...` : `📤 正在打包发送 "${file.name}" (${sizeStr})...`);
+    }
+
+    const peerCount = Object.keys(this.activeConnections).length;
+    if (peerCount === 0) {
+      if (typeof Toast !== "undefined") {
+        Toast.warning(isEn 
+          ? `⚠️ No peers online in Room #${this.roomId}. Ready for broadcast, but waiting for devices to join.` 
+          : `⚠️ 频道 #${this.roomId} 当前暂无其他对端设备在线！已就绪，但需另一端加入后方可接收。`);
+      }
     }
 
     const reader = new FileReader();
@@ -995,13 +1211,26 @@ const AirDropController = {
         sender: this.deviceId,
         senderName: this.deviceName,
         fileName: file.name,
-        fileSize: (file.size / 1024).toFixed(1) + ' KB',
-        fileType: file.type,
+        fileSize: sizeStr,
+        fileType: file.type || 'application/octet-stream',
         dataUrl: e.target.result,
         timestamp: Date.now()
       };
 
       this.sendPayload(payload);
+      this.completeTransferHud(file.name, true);
+
+      if (peerCount > 0) {
+        if (typeof Toast !== "undefined") {
+          Toast.success(isEn ? `🎉 "${file.name}" sent to ${peerCount} peer(s)!` : `🎉 "${file.name}" 已成功投送至 ${peerCount} 台对端设备！`);
+        }
+      }
+    };
+    reader.onerror = () => {
+      this.completeTransferHud(file.name, false);
+      if (typeof Toast !== "undefined") {
+        Toast.error(isEn ? `Failed to read file: ${file.name}` : `读取文件失败: ${file.name}`);
+      }
     };
     reader.readAsDataURL(file);
   },
@@ -1015,10 +1244,30 @@ const AirDropController = {
     const isFile = payload.type === 'file';
     const isImage = isFile && payload.fileType && payload.fileType.startsWith('image/');
 
+    // 1. 针对文件类型：通过 Blob + URL.createObjectURL 彻底根除 Android TransactionTooLargeException 闪退
+    let blobUrl = '';
+    if (isFile && payload.dataUrl) {
+      const blob = this.b64toBlob(payload.dataUrl);
+      if (blob) {
+        try {
+          blobUrl = URL.createObjectURL(blob);
+        } catch (e) {
+          console.warn('URL.createObjectURL failed, fallback to dataUrl:', e);
+        }
+      }
+      if (!blobUrl) blobUrl = payload.dataUrl;
+    }
+
+    // 2. 手机端触觉振动反馈 (Haptic feedback)
+    if (navigator.vibrate) {
+      try { navigator.vibrate([150, 80, 150]); } catch (e) {}
+    }
+
+    // 3. 构建接收卡片 (加入脉冲高亮动画 airdrop-item-highlight)
     const item = document.createElement('div');
-    item.className = 'history-item';
-    item.style.background = 'rgba(16, 185, 129, 0.1)';
-    item.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+    item.className = 'history-item airdrop-item-highlight';
+    item.style.background = 'rgba(16, 185, 129, 0.08)';
+    item.style.border = '1px solid rgba(16, 185, 129, 0.35)';
     item.style.marginBottom = '12px';
 
     if (isFile) {
@@ -1029,13 +1278,36 @@ const AirDropController = {
             <span style="font-size: 11px; color: var(--text-muted);">${new Date(payload.timestamp).toLocaleTimeString()}</span>
           </div>
           <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 6px;">📄 ${payload.fileName} (${payload.fileSize})</div>
-          ${isImage ? `<img src="${payload.dataUrl}" style="max-height: 140px; border-radius: 6px; margin-bottom: 8px; display: block;" />` : ''}
-          <a href="${payload.dataUrl}" download="${payload.fileName}" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-            <span class="material-symbols-outlined" style="font-size: 16px;">download</span> ${isEn ? "Download File" : "下载接收文件"}
-          </a>
+          ${isImage ? `<img src="${blobUrl}" style="max-height: 140px; border-radius: 6px; margin-bottom: 8px; display: block; object-fit: contain;" />` : ''}
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-primary airdrop-download-btn" style="padding: 6px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">download</span> ${isEn ? "Save File" : "保存/下载文件"}
+            </button>
+            <span style="font-size: 11px; color: var(--text-muted);">P2P 原生安全二进制流</span>
+          </div>
         </div>
       `;
-      if (typeof Toast !== "undefined") Toast.success(isEn ? `Received new file: ${payload.fileName}` : `收到新文件: ${payload.fileName}`);
+
+      // 绑定纯内存安全的下载点击事件 (彻底避免 Binder IPC 超限闪退)
+      const downloadBtn = item.querySelector('.airdrop-download-btn');
+      if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+          const dlLink = document.createElement('a');
+          dlLink.href = blobUrl;
+          dlLink.download = payload.fileName || 'downloaded-file';
+          dlLink.style.display = 'none';
+          document.body.appendChild(dlLink);
+          dlLink.click();
+          setTimeout(() => {
+            if (dlLink.parentNode) dlLink.parentNode.removeChild(dlLink);
+          }, 1500);
+          if (typeof Toast !== "undefined") {
+            Toast.success(isEn ? `Saved "${payload.fileName}"` : `已开始保存 "${payload.fileName}"`);
+          }
+        });
+      }
+
+      if (typeof Toast !== "undefined") Toast.success(isEn ? `📥 Received file: ${payload.fileName}` : `📥 收到新文件: ${payload.fileName}`);
     } else {
       item.innerHTML = `
         <div style="flex-grow: 1;">
@@ -1044,15 +1316,49 @@ const AirDropController = {
             <span style="font-size: 11px; color: var(--text-muted);">${new Date(payload.timestamp).toLocaleTimeString()}</span>
           </div>
           <div style="font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); white-space: pre-wrap; background: var(--surface-low); padding: 8px 12px; border-radius: 4px; margin-bottom: 6px;">${payload.content}</div>
-          <button class="btn" onclick="navigator.clipboard.writeText('${payload.content.replace(/'/g, "\\'")}').then(() => { if (typeof Toast !== 'undefined') Toast.success('已复制接收内容！'); })" style="background: var(--surface-high); font-size: 11px; padding: 4px 10px;">
+          <button class="btn airdrop-copy-text-btn" style="background: var(--surface-high); font-size: 11px; padding: 4px 10px;">
             <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">content_copy</span> ${isEn ? "Copy Text" : "复制文本"}
           </button>
         </div>
       `;
-      if (typeof Toast !== "undefined") Toast.info(isEn ? `Received text from ${payload.senderName}` : `收到来自 ${payload.senderName} 的文本`);
+
+      const copyBtn = item.querySelector('.airdrop-copy-text-btn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(payload.content).then(() => {
+            if (typeof Toast !== 'undefined') Toast.success(isEn ? "Text copied to clipboard!" : "已复制接收内容！");
+          });
+        });
+      }
+
+      if (typeof Toast !== "undefined") Toast.info(isEn ? `💬 Received text from ${payload.senderName}` : `💬 收到来自 ${payload.senderName} 的文本`);
     }
 
     list.prepend(item);
+
+    // 4. 移动端即时到达强感知增强 (Banner 置顶通告 + 选项卡红点 / 自动切至接收流)
+    const bannerTitle = isFile ? (isEn ? `📥 New File: ${payload.fileName}` : `📥 收到新文件: ${payload.fileName}`) : (isEn ? `💬 New Message from [${payload.senderName}]` : `💬 收到新消息: [${payload.senderName}]`);
+    const bannerDesc = isFile ? `${payload.fileSize} · ${isEn ? "Tap to view & save" : "点击立即查看与保存"}` : (payload.content.length > 25 ? payload.content.substring(0, 25) + '...' : payload.content);
+    const bannerAction = isEn ? "View Now" : "立即查看";
+
+    this.showIncomingBanner(bannerTitle, bannerDesc, bannerAction, () => {
+      if (this.switchMobileTab) this.switchMobileTab('recv');
+      item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    // 若当前在发送 Tab，自动未读红点递增，或直接自动切到接收面板以方便用户即刻感知
+    if (this.currentMobileTab !== 'recv') {
+      const unreadBadge = document.getElementById('airdrop-unread-badge');
+      if (unreadBadge) {
+        unreadBadge.style.display = 'inline-block';
+        const currentCount = parseInt(unreadBadge.textContent || '0', 10);
+        unreadBadge.textContent = String(currentCount + 1);
+      }
+      // 若是文件接收，直接平滑切到接收面板，彻底解决手机端“不能立马看到有文件传输过来”的问题
+      if (isFile && this.switchMobileTab) {
+        this.switchMobileTab('recv');
+      }
+    }
   },
 
   renderSentItem(payload) {
@@ -1063,25 +1369,34 @@ const AirDropController = {
     const item = document.createElement('div');
     item.className = 'history-item';
     item.style.marginBottom = '12px';
+    item.style.background = 'rgba(56, 189, 248, 0.06)';
+    item.style.border = '1px solid rgba(56, 189, 248, 0.25)';
+
+    const peerCount = Object.keys(this.activeConnections).length;
+    const peerStatus = peerCount > 0 
+      ? `<span style="color: #10b981; font-weight: 600; font-size: 11px;">✅ ${isEn ? `Sent to ${peerCount} peer(s)` : `已送达至 ${peerCount} 台对端设备`}</span>`
+      : `<span style="color: #fbbf24; font-weight: 600; font-size: 11px;">⚠️ ${isEn ? "Broadcasted locally (No peers connected)" : "仅本地广播 (当前频道暂无对端)"}</span>`;
 
     if (payload.type === 'file') {
       item.innerHTML = `
         <div style="flex-grow: 1;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="color: var(--color-secondary); font-weight: 700; font-size: 12px;">${isEn ? `📤 Sent File (${payload.fileSize})` : `📤 已投送文件 (${payload.fileSize})`}</span>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px; align-items: center;">
+            <span style="color: var(--color-primary); font-weight: 700; font-size: 12px;">${isEn ? `📤 Sent File (${payload.fileSize})` : `📤 已投送文件 (${payload.fileSize})`}</span>
             <span style="font-size: 11px; color: var(--text-muted);">${new Date(payload.timestamp).toLocaleTimeString()}</span>
           </div>
-          <div style="font-size: 14px; color: var(--text-primary);">📄 ${payload.fileName}</div>
+          <div style="font-size: 14px; color: var(--text-primary); margin-bottom: 4px;">📄 ${payload.fileName}</div>
+          <div>${peerStatus}</div>
         </div>
       `;
     } else {
       item.innerHTML = `
         <div style="flex-grow: 1;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span style="color: var(--color-secondary); font-weight: 700; font-size: 12px;">${isEn ? "📤 Sent Text" : "📤 已投送文本"}</span>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px; align-items: center;">
+            <span style="color: var(--color-primary); font-weight: 700; font-size: 12px;">${isEn ? "📤 Sent Text" : "📤 已投送文本"}</span>
             <span style="font-size: 11px; color: var(--text-muted);">${new Date(payload.timestamp).toLocaleTimeString()}</span>
           </div>
-          <div style="font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary); white-space: pre-wrap;">${payload.content}</div>
+          <div style="font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary); white-space: pre-wrap; margin-bottom: 4px;">${payload.content}</div>
+          <div>${peerStatus}</div>
         </div>
       `;
     }
