@@ -216,11 +216,11 @@ const AirDropController = {
         <span>${isEn ? "Long-press the image to save directly to Photos" : "手机端长按上方图片，在弹出菜单中点击「保存图片」"}</span>
       </div>
       <div style="display: flex; gap: 10px; margin-top: 10px; justify-content: center; flex-wrap: wrap;">
-        <button class="btn btn-primary" id="airdrop-lightbox-open-btn" style="padding: 8px 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">open_in_new</span> ${isEn ? "Open in New Window" : "新窗口全屏打开"}
+        <button class="btn btn-primary" id="airdrop-lightbox-dl-btn" style="padding: 8px 16px; font-size: 13px; font-weight: 700; background: #10b981; border-color: #10b981; display: inline-flex; align-items: center; gap: 6px;">
+          <span class="material-symbols-outlined" style="font-size: 18px;">share</span> ${isEn ? "Save to Photos / Files" : "📲 保存到相册 / 文件"}
         </button>
-        <button class="btn" id="airdrop-lightbox-dl-btn" style="padding: 8px 14px; font-size: 12px; background: var(--surface-high); border: 1px solid var(--border-light); display: inline-flex; align-items: center; gap: 4px;">
-          <span class="material-symbols-outlined" style="font-size: 16px;">download</span> ${isEn ? "Direct Download" : "尝试常规下载"}
+        <button class="btn" id="airdrop-lightbox-open-btn" style="padding: 8px 14px; font-size: 12px; background: var(--surface-high); border: 1px solid var(--border-light); display: inline-flex; align-items: center; gap: 4px;">
+          <span class="material-symbols-outlined" style="font-size: 16px;">open_in_new</span> ${isEn ? "Open in New Window" : "新窗口全屏打开"}
         </button>
       </div>
     `;
@@ -235,7 +235,7 @@ const AirDropController = {
         try {
           const w = window.open();
           if (w) {
-            w.document.write(`<title>${fileName}</title><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;}img{max-width:100%;max-height:100%;object-fit:contain;}</style><img src="${src}" alt="${fileName}">`);
+            w.document.write(`<title>${fileName}</title><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;}img{max-width:100%;max-height:100%;object-fit:contain;}</style><img src="${src}" alt="${fileName}">`);
             w.document.close();
           } else {
             window.location.href = src;
@@ -271,6 +271,70 @@ const AirDropController = {
     } catch (e) {
       console.error('Base64 to Blob error:', e);
       return null;
+    }
+  },
+
+  // 1.5 跨平台高兼容文件落地落盘引擎 (利用 Web Share API 彻底攻克 Android 下载管理器不支持 blob: 导致的“已加入队列/下载失败”难题)
+  async saveFileToDevice(blob, fileName, fileType, dataUrl) {
+    const isEn = typeof I18nController !== "undefined" && I18nController.currentLang === "en-US";
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // 1. 移动端优先：利用系统级 Web Share API 呼出原生系统保存/分享菜单 (100% 写入相册/文件，彻底规避 Android DownloadManager blob 失败缺陷)
+    if (isMobile && navigator.canShare && blob) {
+      try {
+        const file = new File([blob], fileName, { type: fileType || 'application/octet-stream' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: fileName,
+            text: isEn ? 'Save from AirDrop' : '隔空快传文件保存'
+          });
+          if (typeof Toast !== 'undefined') {
+            Toast.success(isEn ? 'Saved via system share!' : '已唤起系统保存，请在底栏选择保存至相册或文件！');
+          }
+          return;
+        }
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        console.warn('navigator.share failed, fallback:', err);
+      }
+    }
+
+    // 2. 移动端图片降级：在新标签页打开纯净原图供用户长按存入相册
+    const isImage = (fileType && fileType.startsWith('image/')) || 
+                    /\.(jpe?g|png|webp|gif|bmp|svg|avif)$/i.test(fileName);
+    if (isMobile && isImage) {
+      const src = dataUrl || (blob ? URL.createObjectURL(blob) : '');
+      if (src) {
+        try {
+          const w = window.open();
+          if (w) {
+            w.document.write(`<title>${fileName}</title><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;height:auto;display:block;}</style><img src="${src}" alt="${fileName}">`);
+            w.document.close();
+            if (typeof Toast !== 'undefined') Toast.success(isEn ? 'Opened image. Long-press to save to Photos.' : '已全屏打开原图，长按即可保存到相册！');
+            return;
+          }
+        } catch(e) {}
+        window.open(src, '_blank');
+        return;
+      }
+    }
+
+    // 3. PC 端或传统下载：触发 <a download>
+    const url = blob ? URL.createObjectURL(blob) : dataUrl;
+    if (url) {
+      const dlLink = document.createElement('a');
+      dlLink.href = url;
+      dlLink.download = fileName || 'downloaded-file';
+      dlLink.style.display = 'none';
+      document.body.appendChild(dlLink);
+      dlLink.click();
+      setTimeout(() => {
+        if (dlLink.parentNode) dlLink.parentNode.removeChild(dlLink);
+      }, 1500);
+      if (typeof Toast !== 'undefined') {
+        Toast.success(isEn ? `Download started for "${fileName}"` : `已开始保存 "${fileName}"`);
+      }
     }
   },
 
@@ -1360,8 +1424,8 @@ const AirDropController = {
 
     if (isFile) {
       const btnLabel = isImage 
-        ? (isMobile ? (isEn ? "View & Save Image" : "查看大图与保存") : (isEn ? "Save Image" : "保存/下载图片"))
-        : (isEn ? "Save File" : "保存/下载文件");
+        ? (isMobile ? (isEn ? "Save to Photos / Files" : "📲 保存到相册 / 文件") : (isEn ? "Save Image" : "保存图片"))
+        : (isMobile ? (isEn ? "Save to Files" : "📲 保存到文件") : (isEn ? "Save File" : "保存/下载文件"));
 
       item.innerHTML = `
         <div style="flex-grow: 1;">
@@ -1376,65 +1440,26 @@ const AirDropController = {
             </div>
             <div style="font-size: 11px; color: #10b981; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(16, 185, 129, 0.1); padding: 5px 8px; border-radius: 4px;">
               <span class="material-symbols-outlined" style="font-size: 15px;">touch_app</span>
-              <span>${isEn ? "Tip: Long-press image to save directly to Photos" : "手机端技巧：长按上方图片 1 秒，选择「保存图片」直存系统相册"}</span>
+              <span>${isEn ? "Tip: Tap green button or long-press image to save" : "手机端技巧：点击下方绿色按钮即可唤起相册保存，亦可长按图片保存"}</span>
             </div>
           ` : ''}
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <button class="btn btn-primary airdrop-download-btn" style="padding: 6px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-              <span class="material-symbols-outlined" style="font-size: 16px;">${isImage && isMobile ? 'visibility' : 'download'}</span> ${btnLabel}
+            <button class="btn btn-primary airdrop-download-btn" style="padding: 7px 16px; font-size: 12px; font-weight: 700; background: #10b981; border-color: #10b981; display: inline-flex; align-items: center; gap: 5px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">${isMobile ? 'share' : 'download'}</span> ${btnLabel}
             </button>
-            <span style="font-size: 11px; color: var(--text-muted);">P2P 原生安全二进制流</span>
+            <span style="font-size: 11px; color: var(--text-muted);">P2P 原生安全直传</span>
           </div>
         </div>
       `;
 
-      const doDownload = () => {
-        // 手机端对于图片：直接新窗口全屏打开，规避系统 DownloadManager blob 队列卡死 Bug
-        if (isMobile && isImage) {
-          try {
-            const w = window.open();
-            if (w) {
-              w.document.write(`<title>${payload.fileName}</title><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;}img{max-width:100%;max-height:100%;object-fit:contain;}</style><img src="${imageDisplaySrc}" alt="${payload.fileName}">`);
-              w.document.close();
-            } else {
-              window.open(imageDisplaySrc, '_blank');
-            }
-          } catch(e) {
-            window.open(imageDisplaySrc, '_blank');
-          }
-          if (typeof Toast !== "undefined") Toast.success(isEn ? "Image opened. Long-press to save to Photos." : "已打开原图，请长按图片保存至相册。");
-          return;
-        }
-
-        const dlLink = document.createElement('a');
-        dlLink.href = blobUrl;
-        dlLink.download = payload.fileName || 'downloaded-file';
-        dlLink.style.display = 'none';
-        document.body.appendChild(dlLink);
-        dlLink.click();
-        setTimeout(() => {
-          if (dlLink.parentNode) dlLink.parentNode.removeChild(dlLink);
-        }, 1500);
-        if (typeof Toast !== "undefined") {
-          Toast.success(isEn ? `Download started for "${payload.fileName}"` : `已开始保存 "${payload.fileName}"`);
-          if (isMobile && !isImage) {
-            setTimeout(() => {
-              Toast.info(isEn 
-                ? "Tip: If download shows 'queued', please open in Chrome browser." 
-                : "提示：如系统通知显示“排队中/已加入队列”，请使用 Chrome 浏览器打开本站。");
-            }, 1200);
-          }
-        }
+      const doSave = () => {
+        this.saveFileToDevice(blob, payload.fileName, payload.fileType, payload.dataUrl);
       };
 
       const downloadBtn = item.querySelector('.airdrop-download-btn');
       if (downloadBtn) {
         downloadBtn.addEventListener('click', () => {
-          if (isImage && isMobile) {
-            this.showImageLightbox(imageDisplaySrc, payload.fileName, payload.fileSize, doDownload);
-          } else {
-            doDownload();
-          }
+          doSave();
         });
       }
 
@@ -1442,7 +1467,7 @@ const AirDropController = {
         const imgWrap = item.querySelector(`#img-wrap-${payload.timestamp}`);
         if (imgWrap) {
           imgWrap.addEventListener('click', () => {
-            this.showImageLightbox(imageDisplaySrc, payload.fileName, payload.fileSize, doDownload);
+            this.showImageLightbox(imageDisplaySrc, payload.fileName, payload.fileSize, doSave);
           });
         }
       }
