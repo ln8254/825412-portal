@@ -28,8 +28,12 @@ const StorageController = {
     }
   },
 
-  // 获取语言设置 (默认根据浏览器自动判定 zh-CN 或 en-US)
+  // 获取语言设置 (默认根据浏览器自动判定 zh-CN 或 en-US，若在 /en/ 路径下默认返回 en-US)
   getLanguage() {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/en')) {
+      const saved = localStorage.getItem('app_language');
+      return saved && saved !== 'zh-CN' ? saved : 'en-US';
+    }
     const saved = localStorage.getItem('app_language');
     if (saved) return saved;
     const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
